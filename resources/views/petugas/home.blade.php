@@ -23,6 +23,7 @@
                     @endif
 
                     {{ __('You are logged in!') }}
+                    <p>Selamat Datang {{$user->name}}</p>
                 </div>
             </div>
         </div>

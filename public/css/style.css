@@ -163,3 +163,42 @@ span {
     background: #2dc997;
     border: 2px solid #2dc997;
   }
+
+/* ---------------------------------------------------
+    CONTENT STYLE
+----------------------------------------------------- */
+
+#content {
+  width: 100%;
+  padding: 20px;
+  min-height: 100vh;
+  transition: all 0.3s;
+}
+
+.page {
+  margin-bottom: 20px;
+}
+
+.page-item.active .page-link{
+background-color: #2dc997 !important;
+border-color: #2dc997 !important;
+}
+
+.page-link {
+  color: #2dc997;
+}
+
+.page-link:hover{
+  background: #2dc997;
+  border: 2px solid #2dc997;
+  color: #fff;
+}
+
+.page-footer{
+  background-color: #343A40;
+}
+
+.inner-content p{
+  text-align: center;
+  color: #fff;
+}
