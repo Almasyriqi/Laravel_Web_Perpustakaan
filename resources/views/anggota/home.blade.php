@@ -1,32 +1,20 @@
-@extends('layouts.master')
+@extends('adminlte::page')
 
-@section('title')
-    Home
-@endsection
+@section('title', 'Home Anggota')
 
-@section('navbar')
-    @include('layouts.navbar')
-@endsection
+@section('content_header')
+    <h1>Home Anggota</h1>
+@stop
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Dashboard') }}</div>
+    <p>Selamat datang di Polinema Library {{$user->name}}.</p>
+    @include('sweetalert::alert')
+@stop
 
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+@section('css')
+    <link rel="stylesheet" href="/css/admin_custom.css">
+@stop
 
-                    {{ __('You are logged in!') }}
-                    <p>Selamat Datang {{$user->name}}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
+@section('js')
+
+@stop
