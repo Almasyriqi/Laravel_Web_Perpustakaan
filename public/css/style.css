@@ -194,11 +194,11 @@ border-color: #2dc997 !important;
   color: #fff;
 }
 
-.page-footer{
-  background-color: #343A40;
-}
-
 .inner-content p{
   text-align: center;
   color: #fff;
+}
+
+.main-footer{
+  background-color: #343A40;
 }

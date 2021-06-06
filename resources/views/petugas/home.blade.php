@@ -12,9 +12,9 @@
 @stop
 
 @section('css')
-    <link rel="stylesheet" href="/css/admin_custom.css">
+    <link rel="stylesheet" href="/css/adminStyle.css">
 @stop
 
-@section('js')
-
-@stop
+@section('footer')
+    @include('layouts.footer')
+@endsection

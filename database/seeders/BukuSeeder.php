@@ -20,7 +20,8 @@ class BukuSeeder extends Seeder
             'penerbit' => 'PT. Elex Media',
             'penulis' => 'JK Rowling',
             'keterangan' => 'Novel ini bercerita tentang petualangan Harry Potter',
-            'stok' => 5
+            'stok' => 5,
+            'gambar' => '/images/harry_potter.jpg'
         ]);
     }
 }

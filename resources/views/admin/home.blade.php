@@ -16,7 +16,7 @@
             <!-- small card -->
             <div class="small-box bg-success">
                 <div class="inner">
-                    <h3>33</h3>
+                    <h3>{{$anggota}}</h3>
 
                     <p>Anggota</p>
                 </div>
@@ -33,7 +33,7 @@
             <!-- small card -->
             <div class="small-box bg-info">
                 <div class="inner">
-                    <h3>125</h3>
+                    <h3>{{$buku}}</h3>
 
                     <p>Buku</p>
                 </div>
@@ -50,7 +50,7 @@
             <!-- small card -->
             <div class="small-box bg-warning">
                 <div class="inner">
-                    <h3>7</h3>
+                    <h3>{{$kategori}}</h3>
 
                     <p>Kategori</p>
                 </div>
@@ -67,7 +67,7 @@
             <!-- small card -->
             <div class="small-box bg-danger">
                 <div class="inner">
-                    <h3>1</h3>
+                    <h3>{{$petugas}}</h3>
 
                     <p>Petugas</p>
                 </div>
@@ -150,10 +150,6 @@
     @include('sweetalert::alert')
 @stop
 
-@section('footer')
-    @include('layouts.footer')
-@endsection
-
 @section('js')
     <script src='fullcalendar/main.js'></script>
     <script>
@@ -183,7 +179,7 @@
             var areaChartData = {
                 labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
                 datasets: [{
-                        label: 'Digital Goods',
+                        label: 'Peminjaman',
                         backgroundColor: 'rgba(60,141,188,0.9)',
                         borderColor: 'rgba(60,141,188,0.8)',
                         pointRadius: false,
@@ -194,7 +190,7 @@
                         data: [28, 48, 40, 19, 86, 27, 90]
                     },
                     {
-                        label: 'Electronics',
+                        label: 'Anggota',
                         backgroundColor: 'rgba(210, 214, 222, 1)',
                         borderColor: 'rgba(210, 214, 222, 1)',
                         pointRadius: false,

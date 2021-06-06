@@ -22,6 +22,7 @@ class CreateBukusTable extends Migration
             $table->string("penulis");
             $table->text('keterangan');
             $table->integer('stok');
+            $table->string('gambar');
             $table->timestamps();
         });
     }

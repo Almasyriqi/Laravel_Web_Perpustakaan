@@ -28,15 +28,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
  
     Route::middleware(['admin'])->group(function () {
-        Route::get('admin', [AdminController::class, 'index']);
+        Route::get('admin', [AdminController::class, 'home']);
     });
  
     Route::middleware(['petugas'])->group(function () {
-        Route::get('petugas', [PetugasController::class, 'index']);
+        Route::get('petugas', [PetugasController::class, 'home']);
     });
 
     Route::middleware(['anggota'])->group(function () {
-        Route::get('anggota', [AnggotaController::class, 'index']);
+        Route::get('anggota', [AnggotaController::class, 'home']);
     });
  
     Route::get('/logout', function() {

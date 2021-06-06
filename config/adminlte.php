@@ -292,6 +292,12 @@ return [
             'can' => 'admin-only',
         ],
         [
+            'text' => 'Cetak Laporan',
+            'url'  => '#',
+            'icon' => 'fas fa-file-pdf',
+            'can' => 'admin-only',
+        ],
+        [
             'text' => 'Data Kategori',
             'url'  => '#',
             'icon' => 'fas fa-book-open',
@@ -310,15 +316,24 @@ return [
             'can' => 'petugas-only',
         ],
         [
-            'text' => 'Entri Peminjaman',
-            'url'  => '#',
-            'icon' => 'fas fa-share',
+            'text'    => 'Transaksi',
+            'icon'    => 'fas fa-share',
+            'submenu' => [
+                [
+                    'text' => 'Entri Peminjaman',
+                    'url'  => '#',
+                ],
+                [
+                    'text' => 'Entri Pengembalian',
+                    'url'  => '#',
+                ],
+            ],
             'can' => 'petugas-only',
         ],
         [
-            'text' => 'Entri Pengembalian',
+            'text' => 'Cetak Laporan',
             'url'  => '#',
-            'icon' => 'fas fa-share',
+            'icon' => 'fas fa-file-pdf',
             'can' => 'petugas-only',
         ],
         [

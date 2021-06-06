@@ -28,6 +28,7 @@ class BukuFactory extends Factory
             'penulis' => $this->faker->name(),
             'keterangan' => $this->faker->text(100),
             'stok' => $this->faker->numberBetween(1,100),
+            'gambar' => $this->faker->imageUrl(640, 480, 'Buku', true),
         ];
     }
 }

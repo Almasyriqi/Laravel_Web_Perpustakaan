@@ -10,3 +10,7 @@
     @yield('content-admin')
     @include('sweetalert::alert')
 @stop
+
+@section('footer')
+    @include('layouts.footer')
+@endsection
