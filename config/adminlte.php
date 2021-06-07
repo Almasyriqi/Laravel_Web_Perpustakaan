@@ -268,7 +268,7 @@ return [
                 ],
                 [
                     'text' => 'Data Anggota',
-                    'url'  => '#',
+                    'url'  => '/admin/anggota',
                 ],
             ],
             'can' => 'admin-only',

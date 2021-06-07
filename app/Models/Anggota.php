@@ -20,6 +20,11 @@ class Anggota extends Model
         'alamat'
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    
     public function buku()
     {
         return $this->belongsToMany(Buku::class, 'peminjaman', 'buku_id', 'anggota_id')->withPivot('jumlah', 'tgl_pinjam', 'tgl_kembali', 'lama_pinjam', 'status', 'denda');
