@@ -30,7 +30,7 @@
         </div>
     @endif
 
-    <table class="table table-bordered">
+    <table class="table table-bordered" id="example">
         <thead>
             <tr>
                 <th>Nim</th>
@@ -146,4 +146,17 @@
         });
 
     </script>
+    <script>
+        $(function () {
+          $('#example').DataTable({
+            "paging": false,
+            "lengthChange": false,
+            "searching": false,
+            "ordering": true,
+            "info": false,
+            "autoWidth": false,
+            "responsive": true,
+          });
+        });
+      </script>
 @stop

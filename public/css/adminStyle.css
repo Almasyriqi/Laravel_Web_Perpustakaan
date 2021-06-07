@@ -31,3 +31,7 @@ a:focus {
 .main-footer{
     background-color: #343A40;
 }
+
+.page {
+    margin-top: 20px;
+}
