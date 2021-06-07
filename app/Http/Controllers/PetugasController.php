@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Petugas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,7 +16,9 @@ class PetugasController extends Controller
      */
     public function index()
     {
-        //
+        $petugas = Petugas::with('user')->get();
+        $paginate = Petugas::orderBy('id', 'desc')->paginate(10);
+        return view('admin.petugasAdmin.index', ['petugas' => $petugas, 'paginate' => $paginate]);
     }
 
     /**
@@ -24,7 +28,7 @@ class PetugasController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.petugasAdmin.create');
     }
 
     /**
@@ -35,7 +39,36 @@ class PetugasController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'username' => 'required', 'string', 'max:20', 'unique:users',
+            'password' => 'required', 'string', 'min:8',
+            'nama' => 'required',
+            'tgl_lahir' => 'required|date',
+            'no_hp' => 'required',
+            'email' => 'required|email',
+        ]);
+        //TODO : Implementasikan Proses Simpan Ke Database
+        $petugas = new Petugas();
+        $petugas->id = $request->get('id');
+        $petugas->tgl_lahir = $request->get('tgl_lahir');
+        $petugas->no_hp = $request->get('no_hp');
+        $petugas->alamat = $request->get('alamat');
+        $petugas->save();
+
+        $user = new User();
+        $user->username = $request->get('username');
+        $user->password = $request->get('password');
+        $user->name = $request->get('nama');
+        $user->email = $request->get('email');
+        $user->role = 'petugas';
+        $user->save();
+
+        // fungsi eloquent untuk menambah data dengan relasi belongsTo
+        $petugas->user()->associate($user);
+        $petugas->save();
+
+        //jika data berhasil ditambahkan, akan kembali ke halaman utama
+        return redirect()->route('petugas.index')->with('success', 'Petugas Berhasil Ditambahkan');
     }
 
     /**
@@ -46,7 +79,8 @@ class PetugasController extends Controller
      */
     public function show($id)
     {
-        //
+        $petugas = Petugas::with('user')->where('id', $id)->first();
+        return view('admin.petugasAdmin.show', compact('petugas'));
     }
 
     /**
@@ -57,7 +91,8 @@ class PetugasController extends Controller
      */
     public function edit($id)
     {
-        //
+        $petugas = Petugas::with('user')->where('id', $id)->first();
+        return view('admin.petugasAdmin.edit', compact('petugas'));
     }
 
     /**
@@ -69,7 +104,36 @@ class PetugasController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'username' => 'required', 'string', 'max:20', 'unique:users',
+            'id' => 'required',
+            'nama' => 'required',
+            'tgl_lahir' => 'required|date',
+            'no_hp' => 'required',
+            'email' => 'required|email',
+        ]);
+        //TODO : Implementasikan Proses Simpan Ke Database
+        $petugas = Petugas::find($id);
+        $user_id = $petugas->user_id;
+        $petugas->id = $request->get('id');
+        $petugas->tgl_lahir = $request->get('tgl_lahir');
+        $petugas->no_hp = $request->get('no_hp');
+        $petugas->alamat = $request->get('alamat');
+        $petugas->save();
+
+        $user = User::find($user_id);
+        $user->username = $request->get('username');
+        $user->name = $request->get('nama');
+        $user->email = $request->get('email');
+        $user->role = 'petugas';
+        $user->save();
+
+        // fungsi eloquent untuk menambah data dengan relasi belongsTo
+        $petugas->user()->associate($user);
+        $petugas->save();
+
+        //jika data berhasil ditambahkan, akan kembali ke halaman utama
+        return redirect()->route('petugas.index')->with('success', 'Petugas Berhasil Diedit');
     }
 
     /**
@@ -80,7 +144,29 @@ class PetugasController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $petugas = Petugas::find($id);
+        $user_id = $petugas->user_id;
+        $user = User::find($user_id);
+        $petugas->delete();
+        $user->delete();
+        return redirect()->route('petugas.index')
+            ->with('success', 'Petugas Berhasil Dihapus');
+    }
+
+    public function delete($id)
+    {
+        $petugas = Petugas::find($id);
+        return view('admin.petugasAdmin.delete', compact('petugas'));
+    }
+
+    public function search(Request $request)
+    {
+        $paginate = Petugas::join('users', 'petugas.user_id', '=', 'users.id')->when($request->keyword, function ($query) use ($request) {
+            $query->where('name', 'like', "%{$request->keyword}%")
+                ->orWhere('email', 'like', "%{$request->keyword}%");
+        })->paginate(10);
+        $paginate->appends($request->only('keyword'));
+        return view('admin.petugasAdmin.index', compact('paginate'));
     }
 
     public function home()

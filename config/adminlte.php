@@ -264,7 +264,7 @@ return [
                 ],
                 [
                     'text' => 'Data Petugas',
-                    'url'  => '#',
+                    'url'  => '/admin/petugas',
                 ],
                 [
                     'text' => 'Data Anggota',

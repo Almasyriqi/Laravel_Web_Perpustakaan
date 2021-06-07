@@ -36,6 +36,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/admin/delete/{id}', [AdminController::class, 'delete']);
             Route::get('/admin/cari', [AdminController::class, 'search']);
             Route::resource('/admin', AdminController::class);
+            Route::get('/petugas/delete/{id}', [PetugasController::class, 'delete']);
+            Route::get('/petugas/cari', [PetugasController::class, 'search']);
+            Route::resource('/petugas', PetugasController::class);
         });
     });
  
