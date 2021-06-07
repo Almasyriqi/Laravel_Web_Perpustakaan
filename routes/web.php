@@ -33,6 +33,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
             Route::get('/anggota/cari', [AnggotaController::class, 'search']);
             Route::resource('/anggota', AnggotaController::class);
+            Route::get('/admin/delete/{id}', [AdminController::class, 'delete']);
+            Route::get('/admin/cari', [AdminController::class, 'search']);
+            Route::resource('/admin', AdminController::class);
         });
     });
  

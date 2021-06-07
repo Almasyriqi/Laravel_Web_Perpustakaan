@@ -260,7 +260,7 @@ return [
             'submenu' => [
                 [
                     'text' => 'Data Admin',
-                    'url'  => '#',
+                    'url'  => '/admin/admin',
                 ],
                 [
                     'text' => 'Data Petugas',

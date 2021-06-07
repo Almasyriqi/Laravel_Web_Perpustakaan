@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Anggota;
+use App\Models\Admin;
 use App\Models\Buku;
 use App\Models\Kategori;
 use App\Models\Petugas;
@@ -17,7 +19,9 @@ class AdminController extends Controller
      */
     public function index()
     {
-        //
+        $admin = Admin::with('user')->get();
+        $paginate = Admin::orderBy('id', 'desc')->paginate(10);
+        return view('admin.adminAdmin.index', ['admin' => $admin, 'paginate' => $paginate]);
     }
 
     /**
@@ -27,7 +31,7 @@ class AdminController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.adminAdmin.create');
     }
 
     /**
@@ -38,7 +42,34 @@ class AdminController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'username' => 'required', 'string', 'max:20', 'unique:users',
+            'password' => 'required', 'string', 'min:8',
+            'nama' => 'required',
+            'no_hp' => 'required',
+            'email' => 'required|email',
+        ]);
+        //TODO : Implementasikan Proses Simpan Ke Database
+        $admin = new Admin();
+        $admin->id = $request->get('id');
+        $admin->no_hp = $request->get('no_hp');
+        $admin->alamat = $request->get('alamat');
+        $admin->save();
+
+        $user = new User();
+        $user->username = $request->get('username');
+        $user->password = $request->get('password');
+        $user->name = $request->get('nama');
+        $user->email = $request->get('email');
+        $user->role = 'admin';
+        $user->save();
+
+        // fungsi eloquent untuk menambah data dengan relasi belongsTo
+        $admin->user()->associate($user);
+        $admin->save();
+
+        //jika data berhasil ditambahkan, akan kembali ke halaman utama
+        return redirect()->route('admin.index')->with('success', 'Admin Berhasil Ditambahkan');
     }
 
     /**
@@ -49,7 +80,8 @@ class AdminController extends Controller
      */
     public function show($id)
     {
-        //
+        $admin = Admin::with('user')->where('id', $id)->first();
+        return view('admin.adminAdmin.show', compact('admin'));
     }
 
     /**
@@ -60,7 +92,8 @@ class AdminController extends Controller
      */
     public function edit($id)
     {
-        //
+        $admin = Admin::with('user')->where('id', $id)->first();
+        return view('admin.adminAdmin.edit', compact('admin'));
     }
 
     /**
@@ -72,7 +105,34 @@ class AdminController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'username' => 'required', 'string', 'max:20', 'unique:users',
+            'id' => 'required',
+            'nama' => 'required',
+            'no_hp' => 'required',
+            'email' => 'required|email',
+        ]);
+        //TODO : Implementasikan Proses Simpan Ke Database
+        $admin = Admin::find($id);
+        $user_id = $admin->user_id;
+        $admin->id = $request->get('id');
+        $admin->no_hp = $request->get('no_hp');
+        $admin->alamat = $request->get('alamat');
+        $admin->save();
+
+        $user = User::find($user_id);
+        $user->username = $request->get('username');
+        $user->name = $request->get('nama');
+        $user->email = $request->get('email');
+        $user->role = 'admin';
+        $user->save();
+
+        // fungsi eloquent untuk menambah data dengan relasi belongsTo
+        $admin->user()->associate($user);
+        $admin->save();
+
+        //jika data berhasil ditambahkan, akan kembali ke halaman utama
+        return redirect()->route('admin.index')->with('success', 'Admin Berhasil Diedit');
     }
 
     /**
@@ -83,7 +143,29 @@ class AdminController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $admin = Admin::find($id);
+        $user_id = $admin->user_id;
+        $user = User::find($user_id);
+        $admin->delete();
+        $user->delete();
+        return redirect()->route('admin.index')
+            ->with('success', 'Admin Berhasil Dihapus');
+    }
+
+    public function delete($id)
+    {
+        $admin = Admin::find($id);
+        return view('admin.adminAdmin.delete', compact('admin'));
+    }
+
+    public function search(Request $request)
+    {
+        $paginate = Admin::join('users', 'admin.user_id', '=', 'users.id')->when($request->keyword, function ($query) use ($request) {
+            $query->where('name', 'like', "%{$request->keyword}%")
+                ->orWhere('email', 'like', "%{$request->keyword}%");
+        })->paginate(10);
+        $paginate->appends($request->only('keyword'));
+        return view('admin.adminAdmin.index', compact('paginate'));
     }
 
     public function home()
