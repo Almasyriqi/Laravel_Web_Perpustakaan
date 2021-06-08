@@ -23,7 +23,7 @@
                 <div class="icon">
                     <i class="ion ion-person-add"></i>
                 </div>
-                <a href="#" class="small-box-footer">
+                <a href="/admin/anggota" class="small-box-footer">
                     More info <i class="fas fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -40,7 +40,7 @@
                 <div class="icon">
                     <i class="fas fa-book"></i>
                 </div>
-                <a href="#" class="small-box-footer">
+                <a href="/admin/buku" class="small-box-footer">
                     More info <i class="fas fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -57,7 +57,7 @@
                 <div class="icon">
                     <i class="fas fa-book-open"></i>
                 </div>
-                <a href="#" class="small-box-footer">
+                <a href="/admin/kategoriBuku" class="small-box-footer">
                     More info <i class="fas fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -74,7 +74,7 @@
                 <div class="icon">
                     <i class="fas fa-user"></i>
                 </div>
-                <a href="#" class="small-box-footer">
+                <a href="/admin/petugas" class="small-box-footer">
                     More info <i class="fas fa-arrow-circle-right"></i>
                 </a>
             </div>
