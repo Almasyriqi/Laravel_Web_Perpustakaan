@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Petugas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class PetugasController extends Controller
 {
@@ -57,7 +58,7 @@ class PetugasController extends Controller
 
         $user = new User();
         $user->username = $request->get('username');
-        $user->password = $request->get('password');
+        $user->password = Hash::make($request->get('password'));
         $user->name = $request->get('nama');
         $user->email = $request->get('email');
         $user->role = 'petugas';
@@ -161,7 +162,7 @@ class PetugasController extends Controller
 
     public function search(Request $request)
     {
-        $paginate = Petugas::join('users', 'petugas.user_id', '=', 'users.id')->when($request->keyword, function ($query) use ($request) {
+        $paginate = Petugas::join('users', 'petugas.user_id', '=', 'users.id')->select('petugas.*', 'users.name', 'users.username', 'users.email')->when($request->keyword, function ($query) use ($request) {
             $query->where('name', 'like', "%{$request->keyword}%")
                 ->orWhere('email', 'like', "%{$request->keyword}%");
         })->paginate(10);

@@ -18,6 +18,7 @@ class PetugasMiddleware
     public function handle(Request $request, Closure $next)
     {
         if(Auth::user()->role != "petugas"){
+            alert()->error('Error',"You don't have Petugas access!");
             return redirect()->to('/');
         }
         return $next($request);

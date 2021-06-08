@@ -18,6 +18,7 @@ class AnggotaMiddleware
     public function handle(Request $request, Closure $next)
     {
         if(Auth::user()->role != "anggota"){
+            alert()->error('Error',"You don't have anggota access!");
             return redirect()->to('/');
         }
         return $next($request);

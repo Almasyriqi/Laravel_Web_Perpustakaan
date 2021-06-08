@@ -6,6 +6,7 @@ use App\Models\Anggota;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AnggotaController extends Controller
 {
@@ -61,7 +62,7 @@ class AnggotaController extends Controller
 
         $user = new User();
         $user->username = $request->get('username');
-        $user->password = $request->get('password');
+        $user->password = Hash::make($request->get('password'));
         $user->name = $request->get('nama');
         $user->email = $request->get('email');
         $user->role = 'anggota';

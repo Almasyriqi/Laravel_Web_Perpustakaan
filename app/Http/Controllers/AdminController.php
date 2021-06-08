@@ -9,6 +9,7 @@ use App\Models\Buku;
 use App\Models\Kategori;
 use App\Models\Petugas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
@@ -58,7 +59,7 @@ class AdminController extends Controller
 
         $user = new User();
         $user->username = $request->get('username');
-        $user->password = $request->get('password');
+        $user->password = Hash::make($request->get('password'));
         $user->name = $request->get('nama');
         $user->email = $request->get('email');
         $user->role = 'admin';
@@ -160,7 +161,7 @@ class AdminController extends Controller
 
     public function search(Request $request)
     {
-        $paginate = Admin::join('users', 'admin.user_id', '=', 'users.id')->when($request->keyword, function ($query) use ($request) {
+        $paginate = Admin::join('users', 'admin.user_id', '=', 'users.id')->select('admin.*', 'users.name', 'users.username', 'users.email')->when($request->keyword, function ($query) use ($request) {
             $query->where('name', 'like', "%{$request->keyword}%")
                 ->orWhere('email', 'like', "%{$request->keyword}%");
         })->paginate(10);

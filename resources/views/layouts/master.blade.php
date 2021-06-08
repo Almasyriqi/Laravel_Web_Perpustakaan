@@ -22,5 +22,4 @@
             </div>
         </div>
     </footer>
-    @include('sweetalert::alert')
 </body>

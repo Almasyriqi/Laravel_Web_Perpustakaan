@@ -18,6 +18,7 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next)
     {
         if(Auth::user()->role != "admin"){
+            alert()->error('Error',"You don't have admin access!");
             return redirect()->to('/');
         }
         return $next($request);
