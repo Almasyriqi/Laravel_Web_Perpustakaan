@@ -275,7 +275,7 @@ return [
         ],
         [
             'text' => 'Data Kategori Buku',
-            'url'  => '#',
+            'url'  => '/admin/kategori',
             'icon' => 'fas fa-book-open',
             'can' => 'admin-only',
         ],

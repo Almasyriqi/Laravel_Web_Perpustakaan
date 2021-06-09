@@ -57,7 +57,7 @@
                 <div class="icon">
                     <i class="fas fa-book-open"></i>
                 </div>
-                <a href="/admin/kategoriBuku" class="small-box-footer">
+                <a href="/admin/kategori" class="small-box-footer">
                     More info <i class="fas fa-arrow-circle-right"></i>
                 </a>
             </div>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\PetugasController;
+use App\Http\Controllers\KategoriController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +40,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/petugas/delete/{id}', [PetugasController::class, 'delete']);
             Route::get('/petugas/cari', [PetugasController::class, 'search']);
             Route::resource('/petugas', PetugasController::class);
+            Route::get('/kategori/delete/{id}', [KategoriController::class, 'delete']);
+            Route::resource('/kategori', KategoriController::class);
         });
     });
  
