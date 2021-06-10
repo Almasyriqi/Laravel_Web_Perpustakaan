@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.adminlte')
 
 @section('title', 'Tambah Anggota Admin')
 
@@ -6,11 +6,11 @@
     <h1>Tambah Anggota</h1>
 @stop
 
-@section('css-admin')
+@section('css-custom')
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 @endsection
 
-@section('content-admin')
+@section('content-custom')
     <div class="container mt-5">
 
         <div class="row justify-content-center align-items-center">

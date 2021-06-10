@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.adminlte')
 
 @section('title', 'Home Admin')
 
@@ -6,11 +6,11 @@
     <h1>Selamat Datang Admin</h1>
 @stop
 
-@section('css-admin')
+@section('css-custom')
     <link href='fullcalendar/main.css' rel='stylesheet' />
 @endsection
 
-@section('content-admin')
+@section('content-custom')
     <div class="row">
         <div class="col-lg-3 col-6">
             <!-- small card -->

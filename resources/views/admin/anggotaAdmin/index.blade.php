@@ -1,8 +1,8 @@
-@extends('layouts.admin')
+@extends('layouts.adminlte')
 
 @section('title', 'Data Anggota Admin')
 
-@section('content-admin')
+@section('content-custom')
     <div class="row">
         <div class="col-lg-12 margin-tb">
             <div class="pull-left mt-2">
