@@ -44,7 +44,7 @@ class AnggotaController extends Controller
         $request->validate([
             'username' => 'required', 'string', 'max:20', 'unique:users',
             'password' => 'required', 'string', 'min:8',
-            'nim' => 'required',
+            'nim' => 'required|numeric',
             'nama' => 'required',
             'jurusan' => 'required',
             'tgl_lahir' => 'required|date',
@@ -112,7 +112,7 @@ class AnggotaController extends Controller
         //melakukan validasi data
         $request->validate([
             'username' => 'required', 'string', 'max:20', 'unique:users',
-            'nim' => 'required',
+            'nim' => 'required|numeric',
             'nama' => 'required',
             'jurusan' => 'required',
             'tgl_lahir' => 'required|date',

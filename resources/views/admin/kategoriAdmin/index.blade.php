@@ -8,11 +8,11 @@
             <div class="pull-left mt-2">
                 <h2>Data Kategori Buku Perpustakaan</h2>
             </div>
-                </form>
-            </div>
-            <div class="float-right my-2">
-                <a class="btn btn-success" href="{{ route('kategori.create') }}"><i class="fas fa-arrow-circle-down"></i> Input Kategori Buku</a>
-            </div>
+            </form>
+        </div>
+        <div class="float-right my-2">
+            <a class="btn btn-success" href="{{ route('kategori.create') }}"><i class="fas fa-arrow-circle-down"></i>
+                Input Kategori Buku</a>
         </div>
     </div>
 
@@ -103,16 +103,17 @@
 
     </script>
     <script>
-        $(function () {
-          $('#example').DataTable({
-            "paging": true,
-            "lengthChange": false,
-            "searching": true,
-            "ordering": true,
-            "info": false,
-            "autoWidth": false,
-            "responsive": true,
-          });
+        $(function() {
+            $('#example').DataTable({
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "info": false,
+                "autoWidth": false,
+                "responsive": true,
+            });
         });
-      </script>
+
+    </script>
 @stop
