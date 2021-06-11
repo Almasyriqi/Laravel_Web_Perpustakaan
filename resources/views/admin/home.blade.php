@@ -3,7 +3,7 @@
 @section('title', 'Home Admin')
 
 @section('content_header')
-    <h1>Selamat Datang Admin</h1>
+    <h1>Selamat Datang Admin</h1><hr>
 @stop
 
 @section('css-custom')

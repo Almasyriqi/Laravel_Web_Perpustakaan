@@ -26,11 +26,10 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::middleware(['auth'])->group(function () {
- 
+
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::resource('/profile', UserController::class);
 
- 
     Route::middleware(['admin'])->group(function () {
         Route::prefix('admin')->group(function () {
             Route::get('/', [AdminController::class, 'home']);
@@ -55,7 +54,7 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('/kategori', KategoriController::class);
         });
     });
- 
+
     Route::middleware(['petugas'])->group(function () {
         Route::get('petugas', [PetugasController::class, 'home']);
     });
@@ -63,10 +62,9 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['anggota'])->group(function () {
         Route::get('anggota', [AnggotaController::class, 'home']);
     });
- 
-    Route::get('/logout', function() {
+
+    Route::get('/logout', function () {
         Auth::logout();
         redirect('/');
     });
- 
 });

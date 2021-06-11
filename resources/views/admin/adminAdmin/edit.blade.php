@@ -59,8 +59,8 @@
                         </div>
                         <div class="form-group">
                             <label for="alamat">Alamat</label>
-                            <input type="alamat" name="alamat" class="form-control" id="alamat" aria-describedby="alamat"
-                                value="{{ $admin->alamat }}">
+                            <textarea type="alamat" name="alamat" class="form-control" id="alamat" aria-describedby="alamat"
+                                value="{{ $admin->alamat }}">{{ $admin->alamat }}</textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
