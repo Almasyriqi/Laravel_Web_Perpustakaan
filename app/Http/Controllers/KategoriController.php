@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Kategori;
+use Illuminate\Support\Facades\Auth;
 
 class KategoriController extends Controller
 {
@@ -48,7 +49,12 @@ class KategoriController extends Controller
         $kategori->save();
 
         //jika data berhasil ditambahkan, akan kembali ke halaman utama
-        return redirect()->route('kategori.index')->with('success', 'Kategori Buku Berhasil Ditambahkan');
+        if (Auth::user()->role == 'admin') {
+            return redirect()->to('/admin/kategori')->with('success', 'Kategori Berhasil Ditambah');
+        }
+        else {
+            return redirect()->to('/petugas/kategori')->with('success', 'Kategori Berhasil Ditambah');
+        }
     }
 
     /**
@@ -94,7 +100,12 @@ class KategoriController extends Controller
         $kategori->keterangan = $request->get('keterangan');
         $kategori->save();
 
-        return redirect()->route('kategori.index')->with('success', 'Kategori Buku Berhasil Diedit');
+        if (Auth::user()->role == 'admin') {
+            return redirect()->to('/admin/kategori')->with('success', 'Kategori Berhasil Diupdate');
+        }
+        else {
+            return redirect()->to('/petugas/kategori')->with('success', 'Kategori Berhasil Diupdate');
+        }
     }
 
     /**
@@ -107,8 +118,12 @@ class KategoriController extends Controller
     {
         $kategori = kategori::find($id);
         $kategori->delete();
-        return redirect()->route('kategori.index')
-            ->with('success', 'Kategori Buku Berhasil Dihapus');
+        if (Auth::user()->role == 'admin') {
+            return redirect()->to('/admin/kategori')->with('success', 'Kategori Berhasil Dihapus');
+        }
+        else {
+            return redirect()->to('/petugas/kategori')->with('success', 'Kategori Berhasil Dihapus');
+        }
     }
     public function delete($id)
     {

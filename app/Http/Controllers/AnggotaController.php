@@ -73,7 +73,12 @@ class AnggotaController extends Controller
         $anggota->save();
 
         //jika data berhasil ditambahkan, akan kembali ke halaman utama
-        return redirect()->route('anggota.index')->with('success', 'anggota Berhasil Ditambahkan');
+        if (Auth::user()->role == 'admin') {
+            return redirect()->to('/admin/anggota')->with('success', 'Anggota Berhasil Ditambah');
+        }
+        else {
+            return redirect()->to('/petugas/anggota')->with('success', 'Anggota Berhasil Ditambah');
+        }
     }
 
     /**
@@ -141,7 +146,12 @@ class AnggotaController extends Controller
         $anggota->save();
 
         //jika data berhasil ditambahkan, akan kembali ke halaman utama
-        return redirect()->route('anggota.index')->with('success', 'anggota Berhasil Diedit');
+        if (Auth::user()->role == 'admin') {
+            return redirect()->to('/admin/anggota')->with('success', 'Anggota Berhasil Diupdate');
+        }
+        else {
+            return redirect()->to('/petugas/anggota')->with('success', 'Anggota Berhasil Diupdate');
+        }
     }
 
     /**
@@ -157,8 +167,12 @@ class AnggotaController extends Controller
         $user = User::find($user_id);
         $anggota->delete();
         $user->delete();
-        return redirect()->route('anggota.index')
-            ->with('success', 'anggota Berhasil Dihapus');
+        if (Auth::user()->role == 'admin') {
+            return redirect()->to('/admin/anggota')->with('success', 'Anggota Berhasil Dihapus');
+        }
+        else {
+            return redirect()->to('/petugas/anggota')->with('success', 'Anggota Berhasil Dihapus');
+        }
     }
 
     public function delete($id)

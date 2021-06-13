@@ -294,7 +294,7 @@ return [
         ],
         [
             'text' => 'Data Buku',
-            'url'  => '#',
+            'url'  => '/admin/buku',
             'icon' => 'fas fa-book',
             'can' => 'admin-only',
         ],

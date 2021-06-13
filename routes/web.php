@@ -5,6 +5,7 @@ use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\BukuController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +53,10 @@ Route::middleware(['auth'])->group(function () {
             // CRUD Kategori
             Route::get('/kategori/delete/{id}', [KategoriController::class, 'delete']);
             Route::resource('/kategori', KategoriController::class);
+
+            // CRUD Buku
+            Route::get('/buku/delete/{id}', [BukuController::class, 'delete']);
+            Route::resource('/buku', BukuController::class);
         });
     });
 
@@ -67,6 +72,10 @@ Route::middleware(['auth'])->group(function () {
             // CRUD Kategori
             Route::get('/kategori/delete/{id}', [KategoriController::class, 'delete']);
             Route::resource('/kategori', KategoriController::class);
+
+            // CRUD Buku
+            Route::get('/buku/delete/{id}', [BukuController::class, 'delete']);
+            Route::resource('/buku', BukuController::class);
         });
     });
 
