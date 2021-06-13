@@ -20,8 +20,11 @@
                     <li class="list-group-item"><b>Keterangan: </b>{{ $kategori->keterangan }}</li>
                 </ul>
             </div>
-            <a class="btn btn-success mt-3" href="{{ route('kategori.index') }}">Kembali</a>
-
+            @if (Auth::user()->role == 'admin')
+            <a class="btn btn-success mt-3" href="/admin/kategori">Kembali</a>
+            @else
+            <a class="btn btn-success mt-3" href="/petugas/kategori">Kembali</a>
+            @endif
         </div>
     </div>
 </div>

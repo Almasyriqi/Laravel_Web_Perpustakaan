@@ -29,7 +29,11 @@
                             </ul>
                         </div>
                     @endif
-                    <form method="post" action="{{ route('kategori.update', $kategori->id) }}" id="myForm">
+                    @if (Auth::user()->role == 'admin')
+                    <form method="post" action="/admin/kategori/{{ $kategori->id }}" id="myForm">
+                    @else
+                    <form method="post" action="/petugas/kategori/{{ $kategori->id }}" id="myForm">
+                    @endif  
                         @csrf
                         @method('PUT')
                         <div class="form-group">

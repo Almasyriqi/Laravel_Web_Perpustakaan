@@ -241,6 +241,19 @@ return [
             'text' => 'Home',
             'url'  => 'admin',
             'icon' => 'fas fa-home',
+            'can' => 'admin-only',
+        ],
+        [
+            'text' => 'Home',
+            'url'  => 'petugas',
+            'icon' => 'fas fa-home',
+            'can' => 'petugas-only',
+        ],
+        [
+            'text' => 'Home',
+            'url'  => 'anggota',
+            'icon' => 'fas fa-home',
+            'can' => 'anggota-only',
         ],
         ['header' => 'Account Setting'],
         [
@@ -299,7 +312,7 @@ return [
         ],
         [
             'text' => 'Data Kategori',
-            'url'  => '#',
+            'url'  => '/petugas/kategori',
             'icon' => 'fas fa-book-open',
             'can' => 'petugas-only',
         ],
@@ -311,7 +324,7 @@ return [
         ],
         [
             'text' => 'Data Anggota',
-            'url'  => '#',
+            'url'  => '/petugas/anggota',
             'icon' => 'fas fa-users',
             'can' => 'petugas-only',
         ],

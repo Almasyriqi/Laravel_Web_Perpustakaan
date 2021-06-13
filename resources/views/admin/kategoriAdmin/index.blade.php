@@ -11,8 +11,14 @@
             </form>
         </div>
         <div class="float-right my-2">
-            <a class="btn btn-success" href="{{ route('kategori.create') }}"><i class="fas fa-arrow-circle-down"></i>
+            @if (Auth::user()->role == 'admin')
+            <a class="btn btn-success" href="/admin/kategori/create"><i class="fas fa-arrow-circle-down"></i>
                 Input Kategori Buku</a>
+            @else
+            <a class="btn btn-success" href="/petugas/kategori/create"><i class="fas fa-arrow-circle-down"></i>
+                Input Kategori Buku</a>
+            @endif
+            
         </div>
     </div>
 
@@ -38,16 +44,29 @@
                     <td>{{ $kategori->nama }}</td>
                     <td>{{ $kategori->keterangan }}</td>
                     <td>
-                        <a class="btn btn-info" href="{{ route('kategori.show', $kategori->id) }}">
+                        @if (Auth::user()->role == 'admin')
+                        <a class="btn btn-info" href="/admin/kategori/{{ $kategori->id }}">
                             <i class="fas fa-eye"></i> Show</a>
 
-                        <a class="btn btn-primary" href="{{ route('kategori.edit', $kategori->id) }}">
+                        <a class="btn btn-primary" href="/admin/kategori/{{ $kategori->id }}/edit">
                             <i class="fas fa-pencil-alt"></i> Edit</a>
 
                         <a class="btn btn-danger" href="" data-toggle="modal" id="smallButton" data-target="#smallModal"
                             data-attr="/admin/kategori/delete/{{ $kategori->id }}" title="Delete Kategori Buku">
                             <i class="fas fa-trash"></i> Delete
                         </a>
+                        @else
+                        <a class="btn btn-info" href="/petugas/kategori/{{ $kategori->id }}">
+                            <i class="fas fa-eye"></i> Show</a>
+
+                        <a class="btn btn-primary" href="/petugas/kategori/{{ $kategori->id }}/edit">
+                            <i class="fas fa-pencil-alt"></i> Edit</a>
+
+                        <a class="btn btn-danger" href="" data-toggle="modal" id="smallButton" data-target="#smallModal"
+                            data-attr="/petugas/kategori/delete/{{ $kategori->id }}" title="Delete Kategori Buku">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                        @endif
                     </td>
                 </tr>
             @endforeach

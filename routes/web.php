@@ -56,7 +56,18 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['petugas'])->group(function () {
-        Route::get('petugas', [PetugasController::class, 'home']);
+        Route::prefix('petugas')->group(function () {
+            Route::get('/', [PetugasController::class, 'home']); 
+
+            // CRUD Anggota
+            Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
+            Route::get('/anggota/cari', [AnggotaController::class, 'search']);
+            Route::resource('/anggota', AnggotaController::class);
+
+            // CRUD Kategori
+            Route::get('/kategori/delete/{id}', [KategoriController::class, 'delete']);
+            Route::resource('/kategori', KategoriController::class);
+        });
     });
 
     Route::middleware(['anggota'])->group(function () {

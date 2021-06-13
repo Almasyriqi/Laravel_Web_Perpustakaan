@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Anggota;
+use App\Models\Buku;
+use App\Models\Kategori;
 use App\Models\User;
 use App\Models\Petugas;
 use Illuminate\Http\Request;
@@ -172,7 +175,12 @@ class PetugasController extends Controller
 
     public function home()
     {
-        $user = Auth::user();
-        return view('petugas.home', compact('user'));
+        $a = Anggota::all();
+        $b = Buku::all();
+        $k = Kategori::all();
+        $anggota = count($a);
+        $buku = count($b);
+        $kategori = count($k);
+        return view('petugas.home', compact('anggota', 'buku', 'kategori'));
     }
 }

@@ -1,6 +1,6 @@
 @extends('layouts.adminlte')
 
-@section('title', 'Detail Anggota Admin')
+@section('title', 'Detail Anggota')
 
 @section('content_header')
     <h1>Detail Anggota</h1>
@@ -25,7 +25,11 @@
                     <li class="list-group-item"><b>Alamat: </b>{{ $anggota->alamat }}</li>
                 </ul>
             </div>
-            <a class="btn btn-success mt-3" href="{{ route('anggota.index') }}">Kembali</a>
+            @if (Auth::user()->role == 'admin')
+            <a class="btn btn-success mt-3" href="/admin/anggota">Kembali</a>
+            @else
+            <a class="btn btn-success mt-3" href="/petugas/anggota">Kembali</a>
+            @endif
 
         </div>
     </div>

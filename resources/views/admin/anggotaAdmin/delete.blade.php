@@ -1,5 +1,10 @@
 {{-- !-- Delete Warning Modal -->  --}}
-<form action="{{ route('anggota.destroy', $anggota->nim) }}" method="post">
+@if (Auth::user()->role == 'admin')
+<form action="/admin/anggota/{{ $anggota->nim }}" method="post">
+@else
+<form action="/petugas/anggota/{{ $anggota->nim }}" method="post">
+@endif
+
     <div class="modal-body">
         @csrf
         @method('DELETE')

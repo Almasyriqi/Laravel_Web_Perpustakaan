@@ -3,7 +3,7 @@
 @section('title', 'Edit Anggota Admin')
 
 @section('content_header')
-    <h1>Edit Anggota</h1>
+<h1>Edit Anggota</h1>
 @stop
 
 @section('css-custom')
@@ -11,31 +11,36 @@
 @endsection
 
 @section('content-custom')
-    <div class="container mt-5">
+<div class="container mt-5">
 
-        <div class="row justify-content-center align-items-center">
-            <div class="card" style="width: 24rem;">
-                <div class="card-header">
-                    Edit Anggota
+    <div class="row justify-content-center align-items-center">
+        <div class="card" style="width: 24rem;">
+            <div class="card-header">
+                Edit Anggota
+            </div>
+            <div class="card-body">
+                @if ($errors->any())
+                <div class="alert alert-danger">
+                    <strong>Whoops!</strong> There were some problems with your input.<br><br>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
-                <div class="card-body">
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <strong>Whoops!</strong> There were some problems with your input.<br><br>
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                    <form method="post" action="{{ route('anggota.update', $anggota->nim) }}" id="myForm">
+                @endif
+                @if (Auth::user()->role == 'admin')
+                <form method="post" action="/admin/anggota/{{$anggota->nim }}" id="myForm">
+                @else
+                    <form method="post" action="/petugas/anggota/{{$anggota->nim }}" id="myForm">
+                @endif
+
                         @csrf
                         @method('PUT')
                         <div class="form-group">
                             <label for="username">Username</label>
-                            <input type="username" name="username" class="form-control" id="username" aria-describedby="username"
-                                value="{{ $anggota->user->username }}">
+                            <input type="username" name="username" class="form-control" id="username"
+                                aria-describedby="username" value="{{ $anggota->user->username }}">
                         </div>
                         <div class="form-group">
                             <label for="nim">Nim</label>
@@ -50,12 +55,13 @@
                         <div class="form-group">
                             <label for="jurusan">Jurusan</label>
                             @php
-                                $jurusan = ['Teknologi Informasi', 'Teknik Elektro', 'Teknik Mesin',
-                                'Teknik Sipil', 'Teknik Kimia', 'Akuntansi', 'Administrasi Niaga'];
+                            $jurusan = ['Teknologi Informasi', 'Teknik Elektro', 'Teknik Mesin',
+                            'Teknik Sipil', 'Teknik Kimia', 'Akuntansi', 'Administrasi Niaga'];
                             @endphp
                             <select name="jurusan" class="form-control" id="jurusan">
                                 @foreach ($jurusan as $item)
-                                <option value="{{$item}}" {{$anggota->jurusan == $item ? 'selected' : ''}}>{{$item}}</option>
+                                <option value="{{$item}}" {{$anggota->jurusan == $item ? 'selected' : ''}}>{{$item}}
+                                </option>
                                 @endforeach
                             </select>
                         </div>
@@ -67,8 +73,8 @@
                         </div>
                         <div class="form-group">
                             <label for="no_hp">No Handphone</label>
-                            <input type="no_hp" name="no_hp" class="form-control" id="no_hp"
-                                aria-describedby="no_hp" value="{{ $anggota->no_hp }}">
+                            <input type="no_hp" name="no_hp" class="form-control" id="no_hp" aria-describedby="no_hp"
+                                value="{{ $anggota->no_hp }}">
                         </div>
                         <div class="form-group">
                             <label for="email">Email</label>
@@ -77,15 +83,16 @@
                         </div>
                         <div class="form-group">
                             <label for="alamat">Alamat</label>
-                            <textarea type="alamat" name="alamat" class="form-control" id="alamat" aria-describedby="alamat"
+                            <textarea type="alamat" name="alamat" class="form-control" id="alamat"
+                                aria-describedby="alamat"
                                 value="{{ $anggota->alamat }}">{{ $anggota->alamat }}</textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
-                </div>
             </div>
         </div>
     </div>
+</div>
 @endsection
 
 @section('js')

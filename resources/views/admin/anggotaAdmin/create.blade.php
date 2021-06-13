@@ -29,7 +29,11 @@
                             </ul>
                         </div>
                     @endif
-                    <form method="post" action="{{ route('anggota.store') }}" id="myForm">
+                    @if (Auth::user()->role == 'admin')
+                    <form method="post" action="/admin/anggota" id="myForm">
+                    @else
+                    <form method="post" action="/petugas/anggota" id="myForm">
+                    @endif 
                         @csrf
                         <div class="form-group">
                             <label for="username">Username</label>

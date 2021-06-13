@@ -1,5 +1,10 @@
 {{-- !-- Delete Warning Modal -->  --}}
-<form action="{{ route('kategori.destroy', $kategori->id) }}" method="post">
+@if (Auth::user()->role == 'admin')
+<form action="/admin/kategori/{{  $kategori->id }}" method="post">    
+@else
+<form action="/petugas/kategori/{{  $kategori->id }}" method="post"> 
+@endif
+
     <div class="modal-body">
         @csrf
         @method('DELETE')
