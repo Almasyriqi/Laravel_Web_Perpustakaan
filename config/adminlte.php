@@ -263,7 +263,7 @@ return [
         ],
         [
             'text' => 'change_password',
-            'url'  => 'admin/settings',
+            'route'  => 'user.password.edit',
             'icon' => 'fas fa-fw fa-lock',
         ],
         ['header' => 'Menu'],

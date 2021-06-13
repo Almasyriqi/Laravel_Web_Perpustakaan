@@ -66,6 +66,7 @@ class AnggotaController extends Controller
         $user->name = $request->get('nama');
         $user->email = $request->get('email');
         $user->role = 'anggota';
+        $user->email_verified_at = now();
         $user->save();
 
         // fungsi eloquent untuk menambah data dengan relasi belongsTo

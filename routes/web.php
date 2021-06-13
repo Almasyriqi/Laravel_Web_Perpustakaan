@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnggotaController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\UserController;
@@ -24,11 +25,16 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+Auth::routes(['verify' => true]);
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+    Route::get('password', [PasswordController::class, 'edit'])->name('user.password.edit');
+
+    Route::patch('password', [PasswordController::class, 'update'])->name('user.password.update');
+
     Route::resource('/profile', UserController::class);
 
     Route::middleware(['admin'])->group(function () {

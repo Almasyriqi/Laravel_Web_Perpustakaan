@@ -6,7 +6,7 @@
     <div class="row">
         <div class="col-lg-12 margin-tb">
             <div class="pull-left mt-2">
-                <h2>Data Buku Perpustakaan</h2>
+                <h2>Data Buku Perpustakaan</h2><hr>
             </div>
             <div class="float-right my-2">
                 @if (Auth::user()->role == 'admin')

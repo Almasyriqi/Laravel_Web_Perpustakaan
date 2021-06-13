@@ -65,6 +65,7 @@ class PetugasController extends Controller
         $user->name = $request->get('nama');
         $user->email = $request->get('email');
         $user->role = 'petugas';
+        $user->email_verified_at = now();
         $user->save();
 
         // fungsi eloquent untuk menambah data dengan relasi belongsTo

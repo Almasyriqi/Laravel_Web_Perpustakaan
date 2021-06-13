@@ -28,6 +28,7 @@ class UserSeeder extends Seeder
                 'email'=> $email[$i],
                 'password'=>Hash::make($password[$i]),
                 'role' => $role[$i],
+                'email_verified_at' => now()
             ]);
         }
     }
