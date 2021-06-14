@@ -29,7 +29,7 @@
         <thead>
             <tr>
                 <th>Id</th>
-                <th>Kategori_Id</th>
+                <th>Kategori</th>
                 <th>Judul</th>
                 <th>Penerbit</th>
                 <th>Penulis</th>
@@ -43,7 +43,7 @@
             @foreach ($paginate as $buku)
                 <tr>
                     <td>{{ $buku->id }}</td>
-                    <td>{{ $buku->kategori_id }}</td>
+                    <td>{{ $buku->kategori->nama }}</td>
                     <td>{{ $buku->judul }}</td>
                     <td>{{ $buku->penerbit }}</td>
                     <td>{{ $buku->penulis }}</td>

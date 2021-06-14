@@ -16,7 +16,7 @@
             <div class="card-body">
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><b>Id: </b>{{ $buku->id }}</li>
-                    <li class="list-group-item"><b>Kategori Id: </b>{{ $buku->kategori->id }}</li>
+                    <li class="list-group-item"><b>Kategori: </b>{{ $buku->kategori->nama }}</li>
                     <li class="list-group-item"><b>Judul: </b>{{ $buku->judul }}</li>
                     <li class="list-group-item"><b>Penerbit: </b>{{$buku->penerbit }}</li>
                     <li class="list-group-item"><b>Penulis: </b>{{ $buku->penulis }}</li>
