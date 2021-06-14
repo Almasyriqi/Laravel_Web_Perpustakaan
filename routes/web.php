@@ -7,6 +7,7 @@ use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\BukuAnggotaController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -87,6 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware(['anggota'])->group(function () {
         Route::get('anggota', [AnggotaController::class, 'home']);
+        Route::resource('/anggota/buku', BukuAnggotaController::class);
     });
 
     Route::get('/logout', function () {

@@ -351,7 +351,7 @@ return [
         ],
         [
             'text' => 'Data Buku',
-            'url'  => '#',
+            'url'  => '/anggota/buku',
             'icon' => 'fas fa-book',
             'can' => 'anggota-only',
         ],
