@@ -18,7 +18,7 @@
                     <li class="list-group-item"><b>Id: </b>{{ $petugas->id }}</li>
                     <li class="list-group-item"><b>Username: </b>{{ $petugas->user->username }}</li>
                     <li class="list-group-item"><b>Nama: </b>{{ $petugas->user->name }}</li>
-                    <li class="list-group-item"><b>Tanggal Lahir: </b>{{date('d-m-Y', strtotime($petugas->tgl_lahir))}}</li>
+                    <li class="list-group-item"><b>Tanggal Lahir: </b>{{isset($petugas->tgl_lahir) ? \Carbon\Carbon::parse($petugas->tgl_lahir)->toFormattedDateString() : ''}}</li>
                     <li class="list-group-item"><b>No_Handphone: </b>{{ $petugas->no_hp }}</li>
                     <li class="list-group-item"><b>Email: </b>{{ $petugas->user->email }}</li>
                     <li class="list-group-item"><b>Alamat: </b>{{ $petugas->alamat }}</li>

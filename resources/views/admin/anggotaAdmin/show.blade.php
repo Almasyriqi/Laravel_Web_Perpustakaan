@@ -19,7 +19,7 @@
                     <li class="list-group-item"><b>Username: </b>{{ $anggota->user->username }}</li>
                     <li class="list-group-item"><b>Nama: </b>{{ $anggota->user->name }}</li>
                     <li class="list-group-item"><b>Jurusan: </b>{{ $anggota->jurusan }}</li>
-                    <li class="list-group-item"><b>Tanggal Lahir: </b>{{date('d-m-Y', strtotime($anggota->tgl_lahir))}}</li>
+                    <li class="list-group-item"><b>Tanggal Lahir: </b>{{isset($anggota->tgl_lahir) ? \Carbon\Carbon::parse($anggota->tgl_lahir)->toFormattedDateString() : ''}}</li>
                     <li class="list-group-item"><b>No_Handphone: </b>{{ $anggota->no_hp }}</li>
                     <li class="list-group-item"><b>Email: </b>{{ $anggota->user->email }}</li>
                     <li class="list-group-item"><b>Alamat: </b>{{ $anggota->alamat }}</li>

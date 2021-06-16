@@ -60,7 +60,7 @@
             <td>{{ $anggota->nim }}</td>
             <td>{{ $anggota->user->name }}</td>
             <td>{{ $anggota->jurusan }}</td>
-            <td>{{ date('d-m-Y', strtotime($anggota->tgl_lahir)) }}</td>
+            <td>{{isset($anggota->tgl_lahir) ? \Carbon\Carbon::parse($anggota->tgl_lahir)->toFormattedDateString() :''}}</td>
             <td>{{ $anggota->no_hp }}</td>
             <td>{{ $anggota->user->email }}</td>
             <td>
