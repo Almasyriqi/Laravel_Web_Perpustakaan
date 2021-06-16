@@ -82,10 +82,10 @@
                     @for ($i = 1; $i <= $paginate->lastPage(); $i++)
                         @if ($i == $paginate->currentPage())
                             <li class="page-item active"><a class="page-link"
-                                    href="/admin/anggota?page={{ $i }}">{{ $i }}</a></li>
+                                    href="/admin/petugas?page={{ $i }}">{{ $i }}</a></li>
                         @else
                             <li class="page-item"><a class="page-link"
-                                    href="/admin/anggota?page={{ $i }}">{{ $i }}</a></li>
+                                    href="/admin/petugas?page={{ $i }}">{{ $i }}</a></li>
                         @endif
                     @endfor
                     <li class="page-item">

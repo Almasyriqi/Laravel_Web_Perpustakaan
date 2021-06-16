@@ -8,6 +8,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\BukuAnggotaController;
+use App\Http\Controllers\PeminjamanController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -64,6 +65,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // CRUD Buku
             Route::get('/buku/delete/{id}', [BukuController::class, 'delete']);
             Route::resource('/buku', BukuController::class);
+
+            // CRUD Peminjaman
+            Route::get('/peminjaman/delete/{id}', [PeminjamanController::class, 'delete']);
+            Route::resource('/peminjaman', PeminjamanController::class);
         });
     });
 

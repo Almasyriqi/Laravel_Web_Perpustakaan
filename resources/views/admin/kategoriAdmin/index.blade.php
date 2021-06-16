@@ -6,19 +6,17 @@
     <div class="row">
         <div class="col-lg-12 margin-tb">
             <div class="pull-left mt-2">
-                <h2>Data Kategori Buku Perpustakaan</h2>
+                <h2>Data Kategori Buku Perpustakaan</h2><hr>
             </div>
-            </form>
-        </div>
-        <div class="float-right my-2">
-            @if (Auth::user()->role == 'admin')
-            <a class="btn btn-success" href="/admin/kategori/create"><i class="fas fa-arrow-circle-down"></i>
-                Input Kategori Buku</a>
-            @else
-            <a class="btn btn-success" href="/petugas/kategori/create"><i class="fas fa-arrow-circle-down"></i>
-                Input Kategori Buku</a>
-            @endif
-            
+            <div class="float-right my-2">
+                @if (Auth::user()->role == 'admin')
+                <a class="btn btn-success" href="/admin/kategori/create"><i class="fas fa-arrow-circle-down"></i>
+                    Input Kategori Buku</a>
+                @else
+                <a class="btn btn-success" href="/petugas/kategori/create"><i class="fas fa-arrow-circle-down"></i>
+                    Input Kategori Buku</a>
+                @endif
+            </div>
         </div>
     </div>
 

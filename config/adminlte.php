@@ -300,7 +300,7 @@ return [
         ],
         [
             'text' => 'Data Peminjaman',
-            'url'  => '#',
+            'url'  => '/admin/peminjaman',
             'icon' => 'fas fa-file',
             'can' => 'admin-only',
         ],
@@ -318,7 +318,7 @@ return [
         ],
         [
             'text' => 'Data Buku',
-            'url'  => '#',
+            'url'  => '/petugas/buku',
             'icon' => 'fas fa-book',
             'can' => 'petugas-only',
         ],

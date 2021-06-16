@@ -28,7 +28,7 @@
                 <th>Keterangan</th>
                 <th>Stok</th>
                 <th>Gambar</th>
-                <th width="320px">Action</th>
+                <th width="200px">Action</th>
             </tr>
         </thead>
         <tbody>

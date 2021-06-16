@@ -110,10 +110,10 @@
                 @for ($i = 1; $i <= $paginate->lastPage(); $i++)
                     @if (Auth::user()->role == 'admin')
                         @if ($i == $paginate->currentPage())
-                            <li class="page-item active"><a class="page-link" href="/petugas/anggota?page={{ $i }}">{{ $i }}</a>
+                            <li class="page-item active"><a class="page-link" href="/admin/anggota?page={{ $i }}">{{ $i }}</a>
                             </li>
                         @else
-                            <li class="page-item"><a class="page-link" href="/petugas/anggota?page={{ $i }}">{{ $i }}</a></li>
+                            <li class="page-item"><a class="page-link" href="/admin/anggota?page={{ $i }}">{{ $i }}</a></li>
                         @endif
                     @else
                         @if ($i == $paginate->currentPage())

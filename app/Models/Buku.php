@@ -25,8 +25,8 @@ class Buku extends Model
         return $this->belongsTo(Kategori::class);
     }
 
-    public function anggota()
+    public function peminjaman()
     {
-        return $this->belongsToMany(Anggota::class, 'peminjaman', 'anggota_id', 'buku_id')->withPivot('jumlah', 'tgl_pinjam', 'tgl_kembali', 'lama_pinjam', 'status', 'denda');
+        return $this->hasMany(Peminjaman::class);
     }
 }
