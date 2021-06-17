@@ -46,7 +46,7 @@
                 <tr>
                     <td>{{ $petugas->id }}</td>
                     <td>{{ $petugas->user->name }}</td>
-                    <td>{{ date('d-m-Y', strtotime($petugas->tgl_lahir)) }}</td>
+                    <td>{{isset($petugas->tgl_lahir) ? \Carbon\Carbon::parse($petugas->tgl_lahir)->toFormattedDateString() :''}}</td>
                     <td>{{ $petugas->no_hp }}</td>
                     <td>{{ $petugas->user->email }}</td>
                     <td>

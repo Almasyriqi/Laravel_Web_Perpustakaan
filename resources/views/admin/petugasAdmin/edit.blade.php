@@ -49,9 +49,8 @@
                         </div>
                         <div class="form-group">
                             <label for="tgl_lahir">Tanggal Lahir</label>
-                            <input type="tgl_lahir" name="tgl_lahir" class="form-control datepicker" id="tgl_lahir"
-                                aria-describedby="tgl_lahir" placeholder="Year-Month-Day" autocomplete="off"
-                                value="{{ $petugas->tgl_lahir }}">
+                            <input type="date" name="tgl_lahir" class="form-control" id="tgl_lahir" aria-describedby="tgl_lahir"
+                            value="{{\Carbon\Carbon::parse($petugas->tgl_lahir)->toDateString()}}"> 
                         </div>
                         <div class="form-group">
                             <label for="no_hp">No Handphone</label>
@@ -74,17 +73,4 @@
             </div>
         </div>
     </div>
-@endsection
-
-@section('js')
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<script>
-    $( function() {
-        $( ".datepicker" ).datepicker({
-            dateFormat: 'yy-mm-dd',
-            changeMonth: true,
-            changeYear: true
-        });
-    });
-</script>
 @endsection
