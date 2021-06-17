@@ -49,7 +49,10 @@ class PeminjamanController extends Controller
      */
     public function show($id)
     {
-        //
+        $pinjam = Peminjaman::with('buku')->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
+        ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.id', '=', $id)
+        ->select(['peminjaman.*', 'anggota.*', 'users.name'])->first();
+        return view('admin.peminjaman.show', compact('pinjam'));
     }
 
     /**
