@@ -29,4 +29,9 @@ class Buku extends Model
     {
         return $this->hasMany(Peminjaman::class);
     }
+
+    public static function getByJudul($judul)
+    {
+        return Buku::where('judul', 'like', "%{$judul}%")->first();
+    }
 }

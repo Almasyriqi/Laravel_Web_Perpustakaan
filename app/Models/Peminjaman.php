@@ -10,6 +10,7 @@ class Peminjaman extends Model
     use HasFactory;
 
     protected $table = "peminjaman";
+    public $timestamps = false;
     protected $fillable = [
         'id',
         'anggota_id',
