@@ -329,18 +329,15 @@ return [
             'can' => 'petugas-only',
         ],
         [
-            'text'    => 'Transaksi',
-            'icon'    => 'fas fa-share',
-            'submenu' => [
-                [
-                    'text' => 'Entri Peminjaman',
-                    'url'  => '#',
-                ],
-                [
-                    'text' => 'Entri Pengembalian',
-                    'url'  => '#',
-                ],
-            ],
+            'text'    => 'Data Peminjaman',
+            'icon'    => 'fas fa-database',
+            'url' => '/petugas/transaksi',
+            'can' => 'petugas-only',
+        ],
+        [
+            'text'    => 'Konfirmasi Peminjaman',
+            'icon'    => 'fas fa-check-circle',
+            'url' => '/petugas/transaksi/konfirmasi',
             'can' => 'petugas-only',
         ],
         [
@@ -356,8 +353,8 @@ return [
             'can' => 'anggota-only',
         ],
         [
-            'text' => 'Entri Peminjaman',
-            'url'  => '#',
+            'text' => 'Data Peminjaman',
+            'url'  => '/anggota/peminjaman',
             'icon' => 'fas fa-share',
             'can' => 'anggota-only',
         ],

@@ -32,4 +32,11 @@ class Peminjaman extends Model
     {
         return $this->belongsTo(Buku::class);
     }
+
+    public static function getStatusConfirm()
+    {
+        return Peminjaman::where([
+            'status' => 'konfirmasi'
+        ])->get();
+    }
 }
