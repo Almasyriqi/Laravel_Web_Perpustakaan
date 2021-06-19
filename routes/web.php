@@ -7,6 +7,7 @@ use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\BukuAnggotaController;
 use App\Http\Controllers\PeminjamanController;
 use Illuminate\Support\Facades\Auth;
@@ -69,6 +70,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // CRUD Peminjaman
             Route::get('/peminjaman/delete/{id}', [PeminjamanController::class, 'delete']);
             Route::resource('/peminjaman', PeminjamanController::class);
+
+            // Laporan
+            Route::resource('/laporan', LaporanController::class);
+            Route::get('/laporan/cetak_pdf', [LaporanController::class, 'cetak_pdf'])->name('admin.cetak_pdf');
         });
     });
 

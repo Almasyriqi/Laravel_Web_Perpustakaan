@@ -306,7 +306,7 @@ return [
         ],
         [
             'text' => 'Cetak Laporan',
-            'url'  => '#',
+            'url'  => '/admin/laporan',
             'icon' => 'fas fa-file-pdf',
             'can' => 'admin-only',
         ],
