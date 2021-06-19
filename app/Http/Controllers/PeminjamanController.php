@@ -29,7 +29,7 @@ class PeminjamanController extends Controller
     public function create()
     {
         $anggota = Anggota::with('user')->get();
-        $buku = Buku::all();
+        $buku = Buku::where('stok', '>', 0)->get();
         return view('admin.peminjaman.create', ['anggota' => $anggota, 'buku' => $buku]);
     }
 
@@ -41,23 +41,31 @@ class PeminjamanController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'anggota' => 'required', 
-            'judul' => 'required',
-            'jumlah' => 'required|integer',
-            'tgl_pinjam' => 'required|date',
-            'status' => 'required',
-        ]);
+        
         //TODO : Implementasikan Proses Simpan Ke Database
         $pinjam = new Peminjaman();
         $pinjam->anggota_id = $request->get('anggota');
-        $pinjam->buku_id = $request->get('judul');
-        $pinjam->jumlah = $request->get('jumlah');
+        $buku = $request->get('judul');
+        $pinjam->buku_id = $buku;
+        $jumlah = $request->get('jumlah');
+        $pinjam->jumlah = $jumlah;
         $pinjam->tgl_pinjam = $request->get('tgl_pinjam');
         $pinjam->status = $request->get('status');
+        $pinjam->denda = 0;
         $pinjam->perpanjang = 0;
+        
+        $updateBuku = Buku::find($buku);
+        
+        $request->validate([
+            'anggota' => 'required', 
+            'judul' => 'required',
+            'jumlah' => 'required|integer|max:'. $updateBuku->stok,
+            'tgl_pinjam' => 'required|date',
+            'status' => 'required',
+        ]);
+        $updateBuku->stok -= $pinjam->jumlah;
         $pinjam->save();
-
+        $updateBuku->save();
         //jika data berhasil ditambahkan, akan kembali ke halaman utama
         return redirect()->route('peminjaman.index')->with('success', 'Peminjaman Berhasil Ditambahkan');
     }
@@ -84,10 +92,10 @@ class PeminjamanController extends Controller
      */
     public function edit($id)
     {
-        $anggota = Anggota::with('user')->get();
-        $buku = Buku::all();
-        $pinjam = Peminjaman::find($id);
-        return view('admin.peminjaman.edit', ['anggota' => $anggota, 'buku' => $buku, 'pinjam' => $pinjam]);
+        $pinjam = Peminjaman::with('buku')->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
+            ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.id', '=', $id)
+            ->select(['peminjaman.*', 'anggota.*', 'users.name'])->first();
+        return view('admin.peminjaman.edit', ['pinjam' => $pinjam]);
     }
 
     /**
@@ -99,19 +107,32 @@ class PeminjamanController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'anggota' => 'required', 
-            'judul' => 'required',
-            'jumlah' => 'required|integer',
-            'tgl_pinjam' => 'required|date',
-            'status' => 'required',
-        ]);
         //TODO : Implementasikan Proses Simpan Ke Database
         $pinjam = Peminjaman::find($id);
         $status = $request->get('status');
-        $pinjam->anggota_id = $request->get('anggota');
-        $pinjam->buku_id = $request->get('judul');
-        $pinjam->jumlah = $request->get('jumlah');
+        $buku = $pinjam->buku_id;
+        $jumlah = $request->get('jumlah');
+
+        $updateBuku = Buku::find($buku);
+        $stok = $updateBuku->stok;
+
+        $request->validate([
+            'jumlah' => 'required|integer|max:'.$stok,
+            'tgl_pinjam' => 'required|date',
+            'status' => 'required',
+        ]);
+
+        if($pinjam->jumlah > $jumlah){
+            $jumlahBuku = $pinjam->jumlah - $jumlah;
+            $stok += $jumlahBuku;
+            $updateBuku->stok = $stok;
+        } else{
+            $jumlahBuku =  $jumlah - $pinjam->jumlah;
+            $stok -= $jumlahBuku;
+            $updateBuku->stok = $stok;
+        }
+
+        $pinjam->jumlah = $jumlah;
         $pinjam->tgl_pinjam = $request->get('tgl_pinjam');
         $pinjam->status = $status;
         $pinjam->perpanjang = $request->get('perpanjang');
@@ -120,8 +141,10 @@ class PeminjamanController extends Controller
             $pinjam->tgl_kembali = $request->get('tgl_kembali');
             $pinjam->lama_pinjam = $request->get('lama_pinjam');
             $pinjam->denda = $request->get('denda');
+            $updateBuku->stok += $jumlah;
         }
         $pinjam->save();
+        $updateBuku->save();
 
         //jika data berhasil diupdate, akan kembali ke halaman utama
         return redirect()->route('peminjaman.index')->with('success', 'Peminjaman Berhasil Diupdate');

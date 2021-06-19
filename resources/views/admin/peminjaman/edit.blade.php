@@ -30,21 +30,13 @@
                     @method('PUT')
                     <div class="form-group">
                         <label for="anggota">anggota</label>
-                        <select name="anggota" class="form-control select" id="anggota">
-                            @foreach ($anggota as $item)
-                            <option value="{{$item->nim}}" {{$pinjam->anggota_id == $item->nim ? 'selected' : ''}}>
-                                {{$item->user->name}}</option>
-                            @endforeach
-                        </select>
+                        <input type="anggota" name="anggota" class="form-control" id="anggota" aria-describedby="anggota" readonly
+                            value="{{$pinjam->name}}">
                     </div>
                     <div class="form-group">
                         <label for="judul">Judul</label>
-                        <select name="judul" class="form-control select" id="judul">
-                            @foreach ($buku as $item)
-                            <option value="{{$item->id}}" {{$pinjam->buku_id == $item->id ? 'selected' : ''}}>
-                                {{$item->judul}}</option>
-                            @endforeach
-                        </select>
+                        <input type="judul" name="judul" class="form-control" id="judul" aria-describedby="judul" readonly
+                            value="{{$pinjam->buku->judul}}">
                     </div>
                     <div class="form-group">
                         <label for="jumlah">Jumlah</label>
