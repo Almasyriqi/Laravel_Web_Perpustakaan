@@ -7,56 +7,99 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+## TIM
+|NIM	    |Nama				                |Username Github|
+|-----------|-----------------------------------|---------------|
+|1941720057 |[Muhammad Syifa’ul Ikrom Almasyriqi](https://github.com/Almasyriqi) |Almasyriqi |
+|1941720171 |[Muhammad Fauzan](https://github.com/fauzanmuh) |fauzanmuh |
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Screenshot Program
+- Halaman Awal
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/awal.PNG)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Halaman Login
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/login.PNG)
+Untuk login, terdapat 3 user yaitu Admin, Petugas, Peminjam
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Halaman Register Pengguna baru
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/register.PNG)
+Jika sudah registrasi maka diharuskan verifikasi email
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/verifRegis.PNG)
 
-## Learning Laravel
+Admin
+- Home Admin
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/homeAdmin.PNG)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- Halaman Profile Admin
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/profileAdmin.PNG)
+Pengguna Admin dapat memperbarui datanya sendiri.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- Halaman Change Password Admin
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/pwAdmin.PNG)
+Pengguna admin dapat memperbarui passwordnya.
 
-## Laravel Sponsors
+- Halaman CRUD user Admin
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudAdmin.PNG)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+- Halaman CRUD user Petugas
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudPetugas.PNG)
 
-### Premium Partners
+- Halaman CRUD user Anggota
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudAnggota.PNG)
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
+- Halaman CRUD Kategori Buku
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudKategori.PNG)
 
-## Contributing
+- Halaman CRUD Buku
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudBuku.PNG)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- Halaman CRUD Peminjam
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudPeminjaman.PNG)
 
-## Code of Conduct
+- Halaman Cetak Laporan
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Petugas
+- Home Petugas
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/homePetugas.PNG)
 
-## Security Vulnerabilities
+- Halaman Profile Petugas
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/profilePetugas.PNG)
+Pengguna Petugas dapat memperbarui datanya sendiri.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- Halaman Change Password Petugas
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/pwPetugas.PNG)
+Pengguna Petugas dapat memperbarui passwordnya.
 
-## License
+- Halaman CRUD user Anggota
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudAnggotaP.PNG)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Halaman CRUD Kategori Buku
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudKategoriP.PNG)
+
+- Halaman CRUD Buku
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudBukuP.PNG)
+
+- Halaman CRUD Peminjam
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/PeminjamanPetugas.PNG)
+
+- Halaman Konfirmasi Peminjaman
+
+- Halaman Cetak Laporan
+
+Anggota
+- Home Anggota
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/homeAnggota.PNG)
+
+- Halaman Profile Anggota
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/profileAnggota.PNG)
+Pengguna Anggota dapat memperbarui datanya sendiri.
+
+- Halaman Change Password Anggota
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/pwAnggota.PNG)
+Pengguna Anggota dapat memperbarui passwordnya.
+
+- Halaman daftar Buku
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/bukuAnggota1.PNG)
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/bukuAnggota2.PNG)
+
+- Halaman Peminjaman
