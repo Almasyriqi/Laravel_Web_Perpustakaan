@@ -17,6 +17,11 @@
     <p>{{ $message }}</p>
 </div>
 @endif
+@if (Auth::user()->role == 'admin')
+                    <form method="post" action="/admin/laporan" id="myForm" enctype="multipart/form-data">
+                    @else
+                    <form method="post" action="/petugas/laporan" id="myForm" enctype="multipart/form-data">
+                    @endif
 
     <table class="table table-bordered">
 
@@ -29,13 +34,17 @@
             <th>Jumlah</th>
             <th>Tanggal Pinjam</th>
             <th>Status</th>
-            <th width="320px">Action</th>
         </tr>
     </thead>
     <tbody>
-        @foreach ($laporan as $lp)
 
-        <a href="{{ route('admin.cetak_pdf') }}" class="btn btn-warning">Cetak Laporan</a>
+        @if (Auth::user()->role == 'admin')
+        <a href="{{ route('admin.cetak_pdf') }}" class="btn btn-warning"><i class="fas fa-print"> Cetak Laporan</a></i>
+        @else
+        <a href="{{ route('petugas.cetak_pdf') }}" class="btn btn-warning"><i class="fas fa-print"> Cetak Laporan</a></i>
+        @endif
+
+        @foreach ($laporan as $lp)
         <tr>
             <td>{{ $lp->id }}</td>
             <td>{{ $lp->name }}</td>
@@ -49,6 +58,94 @@
         @endforeach
     </tbody>
 </table>
+
+<div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Select Month</h3>
+        </div>
+        <div class="card-body">
+          <ul class="pagination pagination-month justify-content-center">
+            <li class="page-item"><a class="page-link" href="#">«</a></li>
+            <li class="page-item">
+                <a class="page-link" href="#">
+                    <p class="page-month">Jan</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item active">
+                <a class="page-link" href="#">
+                    <p class="page-month">Feb</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">
+                    <p class="page-month">Mar</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">
+                    <p class="page-month">Apr</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">
+                    <p class="page-month">May</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">
+                    <p class="page-month">Jun</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">
+                    <p class="page-month">Jul</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">
+                    <p class="page-month">Aug</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">
+                    <p class="page-month">Sep</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">
+                    <p class="page-month">Oct</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">
+                    <p class="page-month">Nov</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">
+                    <p class="page-month">Dec</p>
+                    <p class="page-year">2021</p>
+                </a>
+            </li>
+            <li class="page-item"><a class="page-link" href="#">»</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <div class="modal fade" id="smallModal" tabindex="-1" role="dialog" aria-labelledby="smallModalLabel"
     aria-hidden="true">

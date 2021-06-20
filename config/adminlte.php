@@ -342,7 +342,7 @@ return [
         ],
         [
             'text' => 'Cetak Laporan',
-            'url'  => '#',
+            'url'  => '/petugas/laporan',
             'icon' => 'fas fa-file-pdf',
             'can' => 'petugas-only',
         ],

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Peminjaman;
+use Illuminate\Support\Facades\Auth;
 use PDF;
 
 class LaporanController extends Controller
@@ -88,12 +89,17 @@ class LaporanController extends Controller
         //
     }
 
-    public function cetak_pdf($id){
+    public function cetak_pdf(){
         $laporan = Peminjaman::with('buku')->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
-            ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.id', '=', $id)
-            ->select(['peminjaman.*', 'anggota.*', 'users.name'])->first();
+            ->join('users', 'anggota.user_id', '=', 'users.id')
+            ->get(['peminjaman.*', 'anggota.*', 'users.name']);
 
-        $pdf = PDF::loadview('admin.laporan.laporan_pdf', compact('laporan'));
-        return $pdf->stream();
+        if (Auth::user()->role == 'admin') {
+            $pdf = PDF::loadview('admin.laporan.laporan_pdf', compact('laporan'));
+            return $pdf->stream();
+        } else {
+            $pdf = PDF::loadview('petugas.laporan.laporan_pdf', compact('laporan'));
+            return $pdf->stream();
+        }
     }
 }
