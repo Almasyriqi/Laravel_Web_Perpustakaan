@@ -30,13 +30,13 @@
                     @method('PUT')
                     <div class="form-group">
                         <label for="anggota">anggota</label>
-                        <input type="anggota" name="anggota" class="form-control" id="anggota" aria-describedby="anggota" readonly
-                            value="{{$pinjam->name}}">
+                        <input type="anggota" name="anggota" class="form-control" id="anggota"
+                            aria-describedby="anggota" readonly value="{{$pinjam->name}}">
                     </div>
                     <div class="form-group">
                         <label for="judul">Judul</label>
-                        <input type="judul" name="judul" class="form-control" id="judul" aria-describedby="judul" readonly
-                            value="{{$pinjam->buku->judul}}">
+                        <input type="judul" name="judul" class="form-control" id="judul" aria-describedby="judul"
+                            readonly value="{{$pinjam->buku->judul}}">
                     </div>
                     <div class="form-group">
                         <label for="jumlah">Jumlah</label>
@@ -77,11 +77,12 @@
                     <div class="form-group">
                         <label for="perpanjang">Perpanjang</label>
                         @php
-                            $perpanjang = [['key' => 'Iya', 'value' => 1], ['key' => 'Tidak', 'value' => 0]];
+                        $perpanjang = [['key' => 'Iya', 'value' => 1], ['key' => 'Tidak', 'value' => 0]];
                         @endphp
                         <select name="perpanjang" class="form-control" id="perpanjang">
                             @foreach ($perpanjang as $item)
-                            <option value="{{$item['value']}}" {{$pinjam->perpanjang == $item['value'] ? 'selected' : ''}}>{{$item['key']}}</option>
+                            <option value="{{$item['value']}}"
+                                {{$pinjam->perpanjang == $item['value'] ? 'selected' : ''}}>{{$item['key']}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -101,12 +102,15 @@
 </script>
 <script>
     $(document).ready(function(){
-        $("#tgl_kembali").hide();
-        $("#lama_pinjam").hide();
-        $("#denda").hide();
-        $("#label_kembali").hide();
-        $("#label_lama").hide();
-        $("#label_denda").hide();
+        var status = $("#status").val();
+        if (status != 'kembali') {
+            $("#tgl_kembali").hide();
+            $("#lama_pinjam").hide();
+            $("#denda").hide();
+            $("#label_kembali").hide();
+            $("#label_lama").hide();
+            $("#label_denda").hide();   
+        }
             $("#status").change(function(){
                 $(this).find("option:selected").each(function(){
                     var optionValue = $(this).attr("value");

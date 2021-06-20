@@ -68,7 +68,7 @@
         <div class="col-lg-7">
             <div class="card card-primary">
                 <div class="card-header">
-                    <h3 class="card-title">Chart</h3>
+                    <h3 class="card-title">Aturan Peminjaman</h3>
 
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -80,19 +80,16 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="chart">
-                        <div class="chartjs-size-monitor">
-                            <div class="chartjs-size-monitor-expand">
-                                <div class=""></div>
-                            </div>
-                            <div class="chartjs-size-monitor-shrink">
-                                <div class=""></div>
-                            </div>
-                        </div>
-                        <canvas id="areaChart"
-                            style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%; display: block; width: 419px;"
-                            width="523" height="312" class="chartjs-render-monitor"></canvas>
-                    </div>
+                    <div class="alert alert-info alert-dismissible" style="margin-top: 20px">
+                        <h5><i class="icon fas fa-info"></i> Informasi Aturan Peminjaman</h5>
+                        <ol>
+                            <li>Waktu Peminjaman maksimal 7 hari</li>
+                            <li>Peminjaman dapat diperpanjang maksimal 1 kali (total lama pinjam 14 hari)</li>
+                            <li>Jika mengembalikan lebih dari waktu yang ditentukan akan dikenakan denda setiap judul Rp 2.000 / hari</li>
+                            <li>Jika telah memilih buku dan klik pinjam, silahkan ke petugas untuk melakukan konfirmasi</li>
+                            <li>Jika terlambat mengembalikan buku dan mendapat denda, wajib langsung bayar denda ke petugas saat mengembalikan buku</li>
+                        </ol>
+                      </div>
                 </div>
                 <!-- /.card-body -->
             </div>
@@ -142,76 +139,6 @@
             });
             calendar.render();
         });
-
-    </script>
-    <script>
-        $(function() {
-            /* ChartJS
-             * -------
-             * Here we will create a few charts using ChartJS
-             */
-
-            //--------------
-            //- AREA CHART -
-            //--------------
-
-            // Get context with jQuery - using jQuery's .get() method.
-            var areaChartCanvas = $('#areaChart').get(0).getContext('2d')
-
-            var areaChartData = {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                datasets: [{
-                        label: 'Peminjaman',
-                        backgroundColor: 'rgba(60,141,188,0.9)',
-                        borderColor: 'rgba(60,141,188,0.8)',
-                        pointRadius: false,
-                        pointColor: '#3b8bba',
-                        pointStrokeColor: 'rgba(60,141,188,1)',
-                        pointHighlightFill: '#fff',
-                        pointHighlightStroke: 'rgba(60,141,188,1)',
-                        data: [28, 48, 40, 19, 86, 27, 90]
-                    },
-                    {
-                        label: 'Anggota',
-                        backgroundColor: 'rgba(210, 214, 222, 1)',
-                        borderColor: 'rgba(210, 214, 222, 1)',
-                        pointRadius: false,
-                        pointColor: 'rgba(210, 214, 222, 1)',
-                        pointStrokeColor: '#c1c7d1',
-                        pointHighlightFill: '#fff',
-                        pointHighlightStroke: 'rgba(220,220,220,1)',
-                        data: [65, 59, 80, 81, 56, 55, 40]
-                    },
-                ]
-            }
-
-            var areaChartOptions = {
-                maintainAspectRatio: false,
-                responsive: true,
-                legend: {
-                    display: false
-                },
-                scales: {
-                    xAxes: [{
-                        gridLines: {
-                            display: false,
-                        }
-                    }],
-                    yAxes: [{
-                        gridLines: {
-                            display: false,
-                        }
-                    }]
-                }
-            }
-
-            // This will get the first returned node in the jQuery collection.
-            new Chart(areaChartCanvas, {
-                type: 'line',
-                data: areaChartData,
-                options: areaChartOptions
-            })
-        })
 
     </script>
 @stop

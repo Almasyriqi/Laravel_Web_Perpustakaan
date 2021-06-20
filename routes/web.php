@@ -97,6 +97,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             // Transaksi
             Route::get('/transaksi/delete/{id}', [TransaksiPetugasController::class, 'delete']);
+            Route::get('/transaksi/konfirmasi', [TransaksiPetugasController::class, 'konfirmasiPeminjaman']);
+            Route::get('/transaksi/confirm/{id}', [TransaksiPetugasController::class, 'confirm']);
+            Route::put('/transaksi/konfirmasi/{id}', [TransaksiPetugasController::class, 'konfirmasi']);
+            Route::get('/transaksi/perpanjang/{id}', [TransaksiPetugasController::class, 'modalPerpanjang']);
+            Route::put('/transaksi/perpanjang/{id}', [TransaksiPetugasController::class, 'perpanjang']);
+            Route::get('/transaksi/kembali/{id}', [TransaksiPetugasController::class, 'kembali']);
             Route::resource('/transaksi', TransaksiPetugasController::class);
         });
     });
