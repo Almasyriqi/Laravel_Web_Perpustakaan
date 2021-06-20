@@ -40,8 +40,6 @@
             <td>{{ $peminjaman->jurusan }}</td>
             <td>{{$peminjaman->email}}</td>
             <td>
-                <a class="btn btn-warning" href="/petugas/transaksi/{{  $peminjaman->nim }}/edit">
-                    <i class="fas fa-check-circle"></i> Confirm</a>
                 <a class="btn btn-info" href="/petugas/transaksi/{{  $peminjaman->nim }}/edit">
                     <i class="fas fa-eye"></i> View</a>
             </td>

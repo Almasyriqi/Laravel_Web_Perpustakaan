@@ -35,3 +35,24 @@ a:focus {
 .page {
     margin-top: 20px;
 }
+
+.back {
+    font-family: "Poppins", sans-serif;
+    text-transform: uppercase;
+    font-weight: 500;
+    font-size: 40px;
+    letter-spacing: 1px;
+    display: inline-block;
+    padding: 0px 10px;
+    border-radius: 5px;
+    transition: 0.5s;
+    margin: 10px;
+    border: 2px solid rgb(0, 0, 0);
+    color: rgb(0, 0, 0);
+}
+
+.back:hover{
+    background: #2dc997;
+    border: 2px solid #2dc997;
+    color: #fff;
+}

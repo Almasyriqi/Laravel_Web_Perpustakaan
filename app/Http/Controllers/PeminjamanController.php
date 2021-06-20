@@ -50,7 +50,8 @@ class PeminjamanController extends Controller
         $jumlah = $request->get('jumlah');
         $pinjam->jumlah = $jumlah;
         $pinjam->tgl_pinjam = $request->get('tgl_pinjam');
-        $pinjam->status = $request->get('status');
+        $status = $request->get('status');
+        $pinjam->status = $status;
         $pinjam->denda = 0;
         $pinjam->perpanjang = 0;
         
@@ -63,7 +64,10 @@ class PeminjamanController extends Controller
             'tgl_pinjam' => 'required|date',
             'status' => 'required',
         ]);
-        $updateBuku->stok -= $pinjam->jumlah;
+
+        if($status == 'dipinjam'){
+            $updateBuku->stok -= $pinjam->jumlah;
+        }
         $pinjam->save();
         $updateBuku->save();
         //jika data berhasil ditambahkan, akan kembali ke halaman utama
@@ -159,6 +163,12 @@ class PeminjamanController extends Controller
     public function destroy($id)
     {
         $peminjaman = Peminjaman::find($id);
+        if($peminjaman->status == 'dipinjam' || $peminjaman->status == 'perpanjang'){
+            $buku_id = $peminjaman->buku_id;
+            $buku = Buku::find($buku_id);
+            $buku->stok += $peminjaman->jumlah;
+            $buku->save();
+        }
         $peminjaman->delete();
         return redirect()->to('/admin/peminjaman')->with('success', 'Peminjaman Berhasil Dihapus');
     }
