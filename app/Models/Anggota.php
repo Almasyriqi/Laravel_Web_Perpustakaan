@@ -29,4 +29,11 @@ class Anggota extends Model
     {
         return $this->hasMany(Peminjaman::class);
     }
+
+    public static function getByUser($user_id)
+    {
+        return Anggota::where([
+            'user_id' => $user_id
+        ])->first();
+    }
 }

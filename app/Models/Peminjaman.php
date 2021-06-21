@@ -19,6 +19,7 @@ class Peminjaman extends Model
         'tgl_pinjam',
         'tgl_kembali',
         'lama_pinjam',
+        'perpanjang',
         'status',
         'denda'
     ];
@@ -31,12 +32,5 @@ class Peminjaman extends Model
     public function buku()
     {
         return $this->belongsTo(Buku::class);
-    }
-
-    public static function getStatusConfirm()
-    {
-        return Peminjaman::where([
-            'status' => 'konfirmasi'
-        ])->get();
     }
 }

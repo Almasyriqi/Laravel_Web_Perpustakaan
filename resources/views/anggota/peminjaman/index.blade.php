@@ -1,14 +1,26 @@
 @extends('layouts.adminlte')
 
-@section('title', 'Konfirmasi Peminjaman')
+@section('title', 'Data Peminjaman')
 
 @section('content-custom')
 <div class="row">
     <div class="col-lg-12 margin-tb">
         <div class="pull-left mt-2">
-            <h2>Konfirmasi Peminjaman</h2>
-            <hr>
+            <h2>Data Peminjaman</h2> <hr>
         </div>
+    </div>
+    <div class="col-lg-12">
+        <div class="float-right my-2">
+            <br><br>
+            <a class="btn btn-success" href="/anggota/buku"><i class="fas fa-arrow-circle-down"></i> Pinjam Buku</a>
+        </div>
+        <h5>
+            <b>Nama :</b> {{ $anggota->user->name }} <br>
+            <b>NIM :</b> {{ $anggota->nim }} <br>
+            <b>Jurusan :</b> {{ $anggota->jurusan }} <br><br>
+        </h5>
+        <hr>
+
     </div>
 </div>
 
@@ -21,33 +33,67 @@
 <table class="table table-bordered" id="example">
     <thead>
         <tr>
-            <th>NIM</th>
-            <th>Nama</th>
             <th>Judul Buku</th>
+            <th>Jumlah</th>
             <th>Tanggal Pinjam</th>
-            <th width="220px">Action</th>
+            <th>Denda</th>
+            <th>Status</th>
+            <th width="320px">Action</th>
         </tr>
     </thead>
     <tbody>
         @foreach ($pinjam as $peminjaman)
         <tr>
-            <td>{{ $peminjaman->nim }}</td>
-            <td>{{ $peminjaman->name }}</td>
             <td>{{ $peminjaman->judul }}</td>
-            <td>{{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam))}}</td>
+            <td>{{$peminjaman->jumlah}}</td>
+            <td>{{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam)) }}</td>
+            <td>Rp {{ $peminjaman->denda }}</td>
+            <td>{{ $peminjaman->status }}</td>
             <td>
-                <a class="btn btn-warning" href="" data-toggle="modal" id="Button" title="Konfirmasi Peminjaman"
-                    data-target="#defaultModal" data-attr="/petugas/transaksi/confirm/{{  $peminjaman->id }}">
-                    <i class="fas fa-check-circle"></i> Konfirmasi</a>
-                <a class="btn btn-danger" href="" data-toggle="modal" id="smallButton" data-target="#smallModal"
-                    data-attr="/petugas/transaksi/delete/{{ $peminjaman->id }}" title="Batal peminjaman">
-                    <i class="fas fa-times-circle"></i> Batal
-                </a>
+                <a class="btn btn-info" href="/anggota/pinjam/{{  $peminjaman->id }}">
+                    <i class="fas fa-eye"></i> Show</a>
+
+                @php
+                $tgl1 = new DateTime($peminjaman->tgl_pinjam);
+                $tgl2 = new DateTime(now());
+                $d = $tgl2->diff($tgl1)->days;
+                @endphp
+                @if ($peminjaman->status == 'dipinjam')
+                    @if ($d <= 7) 
+                        <a class="btn btn-warning" href="" data-toggle="modal" id="Button"
+                        title="Perpanjang Peminjaman" data-target="#defaultModal"
+                        data-attr="/anggota/pinjam/perpanjang/{{  $peminjaman->id }}">
+                        <i class="fas fa-edit"></i> Perpanjang</a>
+                    @endif
+                @endif
+                @if ($peminjaman->status == 'konfirmasi')
+                    <a class="btn btn-danger" href="" data-toggle="modal" id="smallButton" data-target="#smallModal"
+                        data-attr="/anggota/pinjam/delete/{{ $peminjaman->id }}" title="Batal Pinjam Buku">
+                        <i class="fas fa-times"></i> Batal
+                    </a>
+                @endif
             </td>
         </tr>
         @endforeach
     </tbody>
 </table>
+
+<div class="modal fade" id="defaultModal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="defaultBody">
+                <div>
+                    <!-- the result to be displayed apply here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="smallModal" tabindex="-1" role="dialog" aria-labelledby="smallModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">
@@ -58,23 +104,6 @@
                 </button>
             </div>
             <div class="modal-body" id="smallBody">
-                <div>
-                    <!-- the result to be displayed apply here -->
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="defaultModal" role="dialog"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="defaultBody">
                 <div>
                     <!-- the result to be displayed apply here -->
                 </div>
@@ -112,8 +141,8 @@
             })
         });
 
-        // display default modal
-        $(document).on('click', '#Button', function(event) {
+// display default modal
+$(document).on('click', '#Button', function(event) {
             event.preventDefault();
             let href = $(this).attr('data-attr');
             $.ajax({
@@ -138,7 +167,6 @@
             })
         });
 </script>
-
 <script>
     $(function () {
           $('#example').DataTable({
@@ -146,10 +174,10 @@
             "lengthChange": false,
             "searching": true,
             "ordering": true,
+            "order": [[4, 'desc']],
             "info": false,
             "autoWidth": false,
             "responsive": true,
-            aaSorting: [[3, 'desc']],
           });
         });
 </script>

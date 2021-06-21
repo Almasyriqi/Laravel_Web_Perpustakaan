@@ -354,7 +354,7 @@ return [
         ],
         [
             'text' => 'Data Peminjaman',
-            'url'  => '/anggota/peminjaman',
+            'url'  => '/anggota/pinjam',
             'icon' => 'fas fa-share',
             'can' => 'anggota-only',
         ],

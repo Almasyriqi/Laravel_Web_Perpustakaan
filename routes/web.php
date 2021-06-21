@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\BukuAnggotaController;
+use App\Http\Controllers\PeminjamanAnggotaController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\TransaksiPetugasController;
 use Illuminate\Support\Facades\Auth;
@@ -112,8 +113,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::middleware(['anggota'])->group(function () {
-        Route::get('anggota', [AnggotaController::class, 'home']);
-        Route::resource('/anggota/buku', BukuAnggotaController::class);
+        Route::prefix('anggota')->group(function () {
+            Route::get('/', [AnggotaController::class, 'home']);
+            Route::resource('/buku', BukuAnggotaController::class);
+    
+            Route::get('/pinjam/delete/{id}', [PeminjamanAnggotaController::class, 'delete']);
+            Route::get('/pinjam/perpanjang/{id}', [PeminjamanAnggotaController::class, 'modalPerpanjang']);
+            Route::put('/perpanjang/{id}', [PeminjamanAnggotaController::class, 'perpanjang']);
+            Route::get('/modal/pinjam/{id}', [PeminjamanAnggotaController::class, 'pinjam']);
+            Route::post('/peminjaman/{id}', [PeminjamanAnggotaController::class, 'peminjaman']);
+            Route::resource('/pinjam', PeminjamanAnggotaController::class); 
+        });
     });
 
     Route::get('/logout', function () {

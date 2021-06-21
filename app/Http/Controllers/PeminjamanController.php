@@ -140,6 +140,10 @@ class PeminjamanController extends Controller
         $pinjam->tgl_pinjam = $request->get('tgl_pinjam');
         $pinjam->status = $status;
         $pinjam->perpanjang = $request->get('perpanjang');
+
+        if($status == 'dipinjam'){
+            $updateBuku->stok -= $jumlah;
+        }
         
         if($status == 'kembali'){
             $pinjam->tgl_kembali = $request->get('tgl_kembali');
