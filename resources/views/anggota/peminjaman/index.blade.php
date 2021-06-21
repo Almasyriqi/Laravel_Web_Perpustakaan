@@ -47,7 +47,7 @@
             <td>{{ $peminjaman->judul }}</td>
             <td>{{$peminjaman->jumlah}}</td>
             <td>{{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam)) }}</td>
-            <td>Rp {{ $peminjaman->denda }}</td>
+            <td>@currency($peminjaman->denda)</td>
             <td>{{ $peminjaman->status }}</td>
             <td>
                 <a class="btn btn-info" href="/anggota/pinjam/{{  $peminjaman->id }}">
@@ -174,7 +174,7 @@ $(document).on('click', '#Button', function(event) {
             "lengthChange": false,
             "searching": true,
             "ordering": true,
-            "order": [[4, 'desc']],
+            "order": [[5, 'desc']],
             "info": false,
             "autoWidth": false,
             "responsive": true,

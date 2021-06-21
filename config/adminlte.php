@@ -306,7 +306,7 @@ return [
         ],
         [
             'text' => 'Cetak Laporan',
-            'url'  => '/admin/laporan',
+            'url'  => '/admin/laporan/'.date('m'),
             'icon' => 'fas fa-file-pdf',
             'can' => 'admin-only',
         ],
@@ -342,7 +342,7 @@ return [
         ],
         [
             'text' => 'Cetak Laporan',
-            'url'  => '/petugas/laporan',
+            'url'  => '/petugas/laporan/'.date('m'),
             'icon' => 'fas fa-file-pdf',
             'can' => 'petugas-only',
         ],

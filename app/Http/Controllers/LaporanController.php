@@ -18,9 +18,7 @@ class LaporanController extends Controller
      */
     public function index()
     {
-        $laporan = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
-            ->join('users', 'anggota.user_id', '=', 'users.id')->get(['peminjaman.*', 'anggota.*', 'users.name', 'buku.judul']);
-        return view('admin.laporan.index', compact('laporan'));
+        
     }
 
     /**
@@ -52,7 +50,11 @@ class LaporanController extends Controller
      */
     public function show($id)
     {
-        //
+        $laporan = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
+            ->join('users', 'anggota.user_id', '=', 'users.id')->whereMonth('peminjaman.tgl_pinjam', '=', $id)
+            ->get(['peminjaman.*', 'anggota.*', 'users.name', 'buku.judul']);
+        $sekarang = $id;
+        return view('admin.laporan.index', compact('laporan', 'sekarang'));
     }
 
     /**
@@ -89,16 +91,17 @@ class LaporanController extends Controller
         //
     }
 
-    public function cetak_pdf(){
+    public function cetak_pdf($id){
         $laporan = Peminjaman::with('buku')->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
-            ->join('users', 'anggota.user_id', '=', 'users.id')
+            ->join('users', 'anggota.user_id', '=', 'users.id')->whereMonth('peminjaman.tgl_pinjam', '=', $id)
             ->get(['peminjaman.*', 'anggota.*', 'users.name']);
+        $sekarang = (integer) $id - 1;
 
         if (Auth::user()->role == 'admin') {
-            $pdf = PDF::loadview('admin.laporan.laporan_pdf', compact('laporan'));
+            $pdf = PDF::loadview('admin.laporan.laporan_pdf', compact('laporan', 'sekarang'));
             return $pdf->stream();
         } else {
-            $pdf = PDF::loadview('petugas.laporan.laporan_pdf', compact('laporan'));
+            $pdf = PDF::loadview('petugas.laporan.laporan_pdf', compact('laporan', 'sekarang'));
             return $pdf->stream();
         }
     }

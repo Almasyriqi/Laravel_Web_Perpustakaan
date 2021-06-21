@@ -7,10 +7,6 @@
 <hr>
 @stop
 
-@section('css-custom')
-<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-@endsection
-
 @section('content-custom')
 <div class="container">
     <div class="row justify-content-center align-items-center">
@@ -66,16 +62,16 @@
                         </div>
                         <div class="form-group">
                             <label for="tgl_lahir">Tanggal Lahir</label>
-                            <input type="tgl_lahir" name="tgl_lahir" class="form-control datepicker" id="tgl_lahir"
-                                aria-describedby="tgl_lahir" placeholder="Year-Month-Day" autocomplete="off"
+                            <input type="date" name="tgl_lahir" class="form-control datepicker" id="tgl_lahir"
+                                aria-describedby="tgl_lahir"
                                 value="{{ $user->tgl_lahir }}">
                         </div>
                         @endif
                         @if (Auth::user()->role == 'petugas')
                         <div class="form-group">
                             <label for="tgl_lahir">Tanggal Lahir</label>
-                            <input type="tgl_lahir" name="tgl_lahir" class="form-control datepicker" id="tgl_lahir"
-                                aria-describedby="tgl_lahir" placeholder="Year-Month-Day" autocomplete="off"
+                            <input type="date" name="tgl_lahir" class="form-control datepicker" id="tgl_lahir"
+                                aria-describedby="tgl_lahir"
                                 value="{{ $user->tgl_lahir }}">
                         </div>
                         @endif
@@ -117,17 +113,4 @@
         </div>
     </div>
 </div>
-@endsection
-
-@section('js')
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<script>
-    $( function() {
-        $( ".datepicker" ).datepicker({
-            dateFormat: 'yy-mm-dd',
-            changeMonth: true,
-            changeYear: true
-        });
-    });
-</script>
 @endsection

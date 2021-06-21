@@ -74,7 +74,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('/peminjaman', PeminjamanController::class);
 
             // Laporan
-            Route::get('/laporan/cetak_pdf', [LaporanController::class, 'cetak_pdf'])->name('admin.cetak_pdf');
+            Route::get('/laporan/cetak_pdf/{id}', [LaporanController::class, 'cetak_pdf'])->name('admin.cetak_pdf');
             Route::resource('/laporan', LaporanController::class);
         });
     });
@@ -107,7 +107,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('/transaksi', TransaksiPetugasController::class);
 
             // Laporan
-            Route::get('/laporan/cetak_pdf', [LaporanController::class, 'cetak_pdf'])->name('petugas.cetak_pdf');
+            Route::get('/laporan/cetak_pdf/{id}', [LaporanController::class, 'cetak_pdf'])->name('petugas.cetak_pdf');
             Route::resource('/laporan', LaporanController::class);
         });
     });

@@ -14,8 +14,13 @@
 </head>
 
 <body>
+    @php
+    $bulan = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI',
+    'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'];
+    @endphp
     <div class="text-center card-header">
         <h3>LAPORAN PERPUSTAKAAN POLINEMA</h3>
+        <h3>BULAN {{$bulan[$sekarang]}}</h3>
     </div>
     <table class="table table-bordered">
         <tr>
@@ -44,7 +49,7 @@
             <td>{{ date('d-m-Y', strtotime($lp->tgl_kembali)) }}</td>
             <td>{{ $lp->lama_pinjam }}</td>
             <td>{{ $lp->status }}</td>
-            <td>Rp. {{ $lp->denda }}</td>
+            <td>@currency($lp->denda)</td>
             @endif
             
         </tr>

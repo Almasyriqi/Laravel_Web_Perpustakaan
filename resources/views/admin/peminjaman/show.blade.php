@@ -24,7 +24,7 @@
                     @if ($pinjam->status == 'kembali')
                     <li class="list-group-item"><b>Tanggal Kembali: </b>{{  date('d-m-Y', strtotime($pinjam->tgl_kembali)) }}</li>
                     <li class="list-group-item"><b>Lama Pinjam: </b>{{ $pinjam->lama_pinjam }} Hari</li>
-                    <li class="list-group-item"><b>Denda: </b>Rp {{ $pinjam->denda }}</li>
+                    <li class="list-group-item"><b>Denda: </b>@currency($pinjam->denda)</li>
                     @endif
                     <li class="list-group-item"><b>Status: </b>{{ $pinjam->status }}</li>
                 </ul>

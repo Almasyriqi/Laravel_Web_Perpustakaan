@@ -17,12 +17,6 @@
     <p>{{ $message }}</p>
 </div>
 @endif
-@if (Auth::user()->role == 'admin')
-<form method="post" action="/admin/laporan" id="myForm" enctype="multipart/form-data">
-    @else
-    <form method="post" action="/petugas/laporan" id="myForm" enctype="multipart/form-data">
-        @endif
-
         <table class="table table-bordered">
 
             <table class="table table-bordered" id="example">
@@ -39,10 +33,10 @@
                 <tbody>
 
                     @if (Auth::user()->role == 'admin')
-                    <a href="{{ route('admin.cetak_pdf') }}" class="btn btn-warning"><i class="fas fa-print"> Cetak
+                    <a href="{{ route('admin.cetak_pdf', $sekarang) }}" class="btn btn-warning"><i class="fas fa-print"> Cetak
                             Laporan</a></i>
                     @else
-                    <a href="{{ route('petugas.cetak_pdf') }}" class="btn btn-warning"><i class="fas fa-print"> Cetak
+                    <a href="{{ route('petugas.cetak_pdf', $sekarang) }}" class="btn btn-warning"><i class="fas fa-print"> Cetak
                             Laporan</a></i>
                     @endif
 
@@ -59,6 +53,12 @@
                 </tbody>
             </table>
 
+            @php
+                $bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                $tahun = now()->format('Y');
+                $i = 1;
+            @endphp
             <div class="row">
                 <div class="col-12">
                     <div class="card">
@@ -67,137 +67,46 @@
                         </div>
                         <div class="card-body">
                             <ul class="pagination pagination-month justify-content-center">
-                                <li class="page-item"><a class="page-link" href="#">«</a></li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">Jan</p>
-                                        <p class="page-year">2021</p>
-                                    </a>
-                                </li>
+                                @foreach ($bulan as $item)
+                                @if ($i == $sekarang)
                                 <li class="page-item active">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">Feb</p>
-                                        <p class="page-year">2021</p>
+                                    @if (Auth::user()->role == 'admin')
+                                    <a class="page-link" href="/admin/laporan/{{$i}}">
+                                    @else
+                                    <a class="page-link" href="/petugas/laporan/{{$i}}">
+                                    @endif
+                                        <p class="page-month">{{$item}}</p>
+                                        <p class="page-year">{{$tahun}}</p>
                                     </a>
                                 </li>
+                                @else
                                 <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">Mar</p>
-                                        <p class="page-year">2021</p>
+                                    @if (Auth::user()->role == 'admin')
+                                    <a class="page-link" href="/admin/laporan/{{$i}}">
+                                    @else
+                                    <a class="page-link" href="/petugas/laporan/{{$i}}">
+                                    @endif
+                                        <p class="page-month">{{$item}}</p>
+                                        <p class="page-year">{{$tahun}}</p>
                                     </a>
                                 </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">Apr</p>
-                                        <p class="page-year">2021</p>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">May</p>
-                                        <p class="page-year">2021</p>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">Jun</p>
-                                        <p class="page-year">2021</p>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">Jul</p>
-                                        <p class="page-year">2021</p>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">Aug</p>
-                                        <p class="page-year">2021</p>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">Sep</p>
-                                        <p class="page-year">2021</p>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">Oct</p>
-                                        <p class="page-year">2021</p>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">Nov</p>
-                                        <p class="page-year">2021</p>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <p class="page-month">Dec</p>
-                                        <p class="page-year">2021</p>
-                                    </a>
-                                </li>
-                                <li class="page-item"><a class="page-link" href="#">»</a></li>
+                                @endif
+                                @php
+                                    $i++;
+                                @endphp
+                                @endforeach
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="modal fade" id="smallModal" tabindex="-1" role="dialog" aria-labelledby="smallModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-sm" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body" id="smallBody">
-                            <div>
-                                <!-- the result to be displayed apply here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @endsection
+@endsection
 
 @section('js')
 <script>
-// display a modal (small modal)
-$(document).on('click', '#smallButton', function(event) {
-    event.preventDefault();
-    let href = $(this).attr('data-attr');
-    $.ajax({
-        url: href,
-        beforeSend: function() {
-            $('#loader').show();
-        },
-    // return the result
-    success: function(result) {
-        $('#smallModal').modal("show");
-        $('#smallBody').html(result).show();
-    },
-    complete: function() {
-        $('#loader').hide();
-    },
-    error: function(jqXHR, testStatus, error) {
-        console.log(error);
-        alert("Page " + href + " cannot open. Error:" + error);
-         $('#loader').hide();
-    },
-    timeout: 8000
-    })
-});
-</script>
-<script>
 $(function () {
     $('#example').DataTable({
-        "paging": true,
+        "paging": false,
         "lengthChange": false,
         "searching": true,
         "ordering": true,

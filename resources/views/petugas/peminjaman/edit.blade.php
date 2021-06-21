@@ -43,7 +43,7 @@
             <td>{{ $peminjaman->judul }}</td>
             <td>{{$peminjaman->jumlah}}</td>
             <td>{{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam)) }}</td>
-            <td>Rp {{ $peminjaman->denda }}</td>
+            <td>@currency($peminjaman->denda)</td>
             <td>{{ $peminjaman->status }}</td>
             <td>
                 <a class="btn btn-info" href="/petugas/transaksi/{{  $peminjaman->id }}">
