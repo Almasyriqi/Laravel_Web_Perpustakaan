@@ -164,13 +164,10 @@ Done 😉, to run this project enter the command below:
 Then open the browser, and enter the url:
   ```http://127.0.0.1:8000```
   
-or if you want to run on another port, use the command:
-  ```$ php artisan serve --port: 627 // e.g. the port is "627"```
-  
 Thank you, Good Luck ... 😁
 
 
 ## The Accounts on seeder :
 Admin Account - Username: admin, Password: 12345678
 
-Petugas Account - Username: teacpetugasher, Password: 12345678
+Petugas Account - Username: petugas, Password: 12345678
