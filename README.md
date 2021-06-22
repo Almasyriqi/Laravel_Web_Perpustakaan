@@ -121,7 +121,7 @@ Create account in mailtrap
 
 Create a Database Table in phpMyAdmin
 
-Extract the SMKLearn Source Code that has been downloaded to a folder anywhere.
+Extract the project Source Code that has been downloaded to a folder anywhere.
 
 Open Code Editor → Terminal.
   
