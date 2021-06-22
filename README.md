@@ -53,10 +53,12 @@ Pengguna admin dapat memperbarui passwordnya.
 - Halaman CRUD Buku
 ![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudBuku.PNG)
 
-- Halaman CRUD Peminjam
+- Halaman CRUD Peminjaman
 ![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudPeminjaman.PNG)
 
 - Halaman Cetak Laporan
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/laporanAdmin.PNG)
+Cetak laporan berdasarkan bulan.
 
 Petugas
 - Home Petugas
@@ -79,12 +81,17 @@ Pengguna Petugas dapat memperbarui passwordnya.
 - Halaman CRUD Buku
 ![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/crudBukuP.PNG)
 
-- Halaman CRUD Peminjam
+- Halaman Peminjaman Petugas
 ![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/PeminjamanPetugas.PNG)
+Petugas bisa memperpanjang dan mengembalikan buku yang telah dipinjam oleh anggota.
 
 - Halaman Konfirmasi Peminjaman
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/konfPetugas.PNG)
+Petugas melakukan Konfirmasi peminjaman.
 
 - Halaman Cetak Laporan
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/laporanAdmin.PNG)
+Cetak laporan berdasarkan bulan.
 
 Anggota
 - Home Anggota
@@ -103,3 +110,67 @@ Pengguna Anggota dapat memperbarui passwordnya.
 ![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/bukuAnggota2.PNG)
 
 - Halaman Peminjaman
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/pinjamAnggota.PNG)
+
+![](https://github.com/Almasyriqi/Tugas_Besar_Web_Perpustakaan/raw/master/screenshot/hasilPinjamAnggota.PNG)
+Anggota dapat membatalkan peminjaman jika status masih "konfirmasi".
+
+## Installation
+
+Create account in mailtrap
+
+Create a Database Table in phpMyAdmin
+
+Extract the SMKLearn Source Code that has been downloaded to a folder anywhere.
+
+Open Code Editor → Terminal.
+  
+Enter these commands one by one (without the $ sign),
+  ```$ composer update
+  $ composer install
+  $ cp .env.example .env
+  $ php artisan key:generate
+  ```
+  
+Edit the .env file like this,
+  ```DB_CONNECTION = mysql
+  DB_HOST = 127.0.0.1 // change to Host your database
+  DB_PORT = 3306
+  DB_DATABASE = pwl_perpus // change to the name of the database table that you created
+  DB_USERNAME = root // change to be your database username, default root
+  DB_PASSWORD = ... // change to your databse password, null default 
+  ```
+  For mailtrap, 
+  ```MAIL_MAILER=smtp
+  MAIL_HOST=smtp.mailtrap.io
+  MAIL_PORT=2525  // change to your mailtrap port
+  MAIL_USERNAME=  // change to your mailtrap username
+  MAIL_PASSWORD=  // change to your mailtrap password
+  MAIL_ENCRYPTION=tls
+  MAIL_FROM_ADDRESS=d49ae484c1-539aab@inbox.mailtrap.io  // change to your mailtrap address
+  MAIL_FROM_NAME="${APP_NAME}"
+  ```
+
+  For more details check the link below :
+  [](https://ilmucoding.com/laravel-kirim-email-mailtrap/)
+  
+Run this command for Migrate & Seed :
+  ```$ php artisan migrate```
+  ```$ php artisan db:seed```
+  
+Done 😉, to run this project enter the command below:
+  ```$ php artisan serve```
+  
+Then open the browser, and enter the url:
+  ```http://127.0.0.1:8000```
+  
+or if you want to run on another port, use the command:
+  ```$ php artisan serve --port: 627 // e.g. the port is "627"```
+  
+Thank you, Good Luck ... 😁
+
+
+## The Accounts on seeder :
+Admin Account - Username: admin, Password: 12345678
+
+Petugas Account - Username: teacpetugasher, Password: 12345678
