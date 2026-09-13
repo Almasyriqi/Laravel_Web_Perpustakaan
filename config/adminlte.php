@@ -1,5 +1,13 @@
 <?php
 
+use JeroenNoten\LaravelAdminLte\Menu\Filters\ActiveFilter;
+use JeroenNoten\LaravelAdminLte\Menu\Filters\ClassesFilter;
+use JeroenNoten\LaravelAdminLte\Menu\Filters\DataFilter;
+use JeroenNoten\LaravelAdminLte\Menu\Filters\GateFilter;
+use JeroenNoten\LaravelAdminLte\Menu\Filters\HrefFilter;
+use JeroenNoten\LaravelAdminLte\Menu\Filters\LangFilter;
+use JeroenNoten\LaravelAdminLte\Menu\Filters\SearchFilter;
+
 return [
 
     /*
@@ -35,6 +43,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Google Fonts
+    |--------------------------------------------------------------------------
+    |
+    | Here you can allow or not the use of external google fonts. Disabling the
+    | google fonts may be useful if your admin panel internet access is
+    | restricted somehow.
+    |
+    | For detailed instructions you can look the google fonts section here:
+    | https://github.com/jeroennoten/Laravel-AdminLTE/wiki/Basic-Configuration
+    |
+    */
+
+    'google_fonts' => [
+        'allowed' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Logo
     |--------------------------------------------------------------------------
     |
@@ -51,6 +77,57 @@ return [
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
     'logo_img_alt' => 'AdminLTE',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication Logo
+    |--------------------------------------------------------------------------
+    |
+    | Here you can setup an alternative logo to use on your login and register
+    | screens. When disabled, the admin panel logo will be used instead.
+    |
+    | For detailed instructions you can look the auth logo section here:
+    | https://github.com/jeroennoten/Laravel-AdminLTE/wiki/Basic-Configuration
+    |
+    */
+
+    'auth_logo' => [
+        'enabled' => false,
+        'img' => [
+            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+            'alt' => 'Auth Logo',
+            'class' => '',
+            'width' => 50,
+            'height' => 50,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Preloader Animation
+    |--------------------------------------------------------------------------
+    |
+    | Here you can change the preloader animation configuration. Currently, two
+    | modes are supported: 'fullscreen' for a fullscreen preloader animation
+    | and 'cwrapper' to attach the preloader animation into the content-wrapper
+    | element and avoid overlapping it with the sidebars and the top navbar.
+    |
+    | For detailed instructions you can look the preloader section here:
+    | https://github.com/jeroennoten/Laravel-AdminLTE/wiki/Basic-Configuration
+    |
+    */
+
+    'preloader' => [
+        'enabled' => true,
+        'mode' => 'fullscreen',
+        'img' => [
+            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+            'alt' => 'AdminLTE Preloader Image',
+            'effect' => 'animation__shake',
+            'width' => 60,
+            'height' => 60,
+        ],
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -195,22 +272,27 @@ return [
     'password_reset_url' => 'password/reset',
     'password_email_url' => 'password/email',
     'profile_url' => false,
+    'disable_darkmode_routes' => false,
 
     /*
     |--------------------------------------------------------------------------
-    | Laravel Mix
+    | Laravel Asset Bundling
     |--------------------------------------------------------------------------
     |
-    | Here we can enable the Laravel Mix option for the admin panel.
+    | Here we can enable the Laravel Asset Bundling option for the admin panel.
+    | Currently, the next modes are supported: 'mix', 'vite' and 'vite_js_only'.
+    | When using 'vite_js_only', it's expected that your CSS is imported using
+    | JavaScript. Typically, in your application's 'resources/js/app.js' file.
+    | If you are not using any of these, leave it as 'false'.
     |
-    | For detailed instructions you can look the laravel mix section here:
+    | For detailed instructions you can look the asset bundling section here:
     | https://github.com/jeroennoten/Laravel-AdminLTE/wiki/Other-Configuration
     |
     */
 
-    'enabled_laravel_mix' => false,
-    'laravel_mix_css_path' => 'css/app.css',
-    'laravel_mix_js_path' => 'js/app.js',
+    'laravel_asset_bundling' => false,
+    'laravel_css_path' => 'css/app.css',
+    'laravel_js_path' => 'js/app.js',
 
     /*
     |--------------------------------------------------------------------------
@@ -227,134 +309,134 @@ return [
     'menu' => [
         // Navbar items:
         [
-            'type'         => 'navbar-search',
-            'text'         => 'search',
+            'type' => 'navbar-search',
+            'text' => 'search',
             'topnav_right' => false,
         ],
         [
-            'type'         => 'fullscreen-widget',
+            'type' => 'fullscreen-widget',
             'topnav_right' => true,
         ],
 
         // Sidebar items:
         [
             'text' => 'Home',
-            'url'  => 'admin',
+            'url' => 'admin',
             'icon' => 'fas fa-home',
             'can' => 'admin-only',
         ],
         [
             'text' => 'Home',
-            'url'  => 'petugas',
+            'url' => 'petugas',
             'icon' => 'fas fa-home',
             'can' => 'petugas-only',
         ],
         [
             'text' => 'Home',
-            'url'  => 'anggota',
+            'url' => 'anggota',
             'icon' => 'fas fa-home',
             'can' => 'anggota-only',
         ],
         ['header' => 'Account Setting'],
         [
             'text' => 'profile',
-            'url'  => '/profile',
+            'url' => '/profile',
             'icon' => 'fas fa-fw fa-user',
         ],
         [
             'text' => 'change_password',
-            'route'  => 'user.password.edit',
+            'route' => 'user.password.edit',
             'icon' => 'fas fa-fw fa-lock',
         ],
         ['header' => 'Menu'],
         [
-            'text'    => 'Data Pengguna',
-            'icon'    => 'fas fa-users',
+            'text' => 'Data Pengguna',
+            'icon' => 'fas fa-users',
             'submenu' => [
                 [
                     'text' => 'Data Admin',
-                    'url'  => '/admin/admin',
+                    'url' => '/admin/admin',
                 ],
                 [
                     'text' => 'Data Petugas',
-                    'url'  => '/admin/petugas',
+                    'url' => '/admin/petugas',
                 ],
                 [
                     'text' => 'Data Anggota',
-                    'url'  => '/admin/anggota',
+                    'url' => '/admin/anggota',
                 ],
             ],
             'can' => 'admin-only',
         ],
         [
             'text' => 'Data Kategori Buku',
-            'url'  => '/admin/kategori',
+            'url' => '/admin/kategori',
             'icon' => 'fas fa-book-open',
             'can' => 'admin-only',
         ],
         [
             'text' => 'Data Buku',
-            'url'  => '/admin/buku',
+            'url' => '/admin/buku',
             'icon' => 'fas fa-book',
             'can' => 'admin-only',
         ],
         [
             'text' => 'Data Peminjaman',
-            'url'  => '/admin/peminjaman',
+            'url' => '/admin/peminjaman',
             'icon' => 'fas fa-file',
             'can' => 'admin-only',
         ],
         [
             'text' => 'Cetak Laporan',
-            'url'  => '/admin/laporan/'.date('m'),
+            'url' => '/admin/laporan/'.date('m'),
             'icon' => 'fas fa-file-pdf',
             'can' => 'admin-only',
         ],
         [
             'text' => 'Data Kategori',
-            'url'  => '/petugas/kategori',
+            'url' => '/petugas/kategori',
             'icon' => 'fas fa-book-open',
             'can' => 'petugas-only',
         ],
         [
             'text' => 'Data Buku',
-            'url'  => '/petugas/buku',
+            'url' => '/petugas/buku',
             'icon' => 'fas fa-book',
             'can' => 'petugas-only',
         ],
         [
             'text' => 'Data Anggota',
-            'url'  => '/petugas/anggota',
+            'url' => '/petugas/anggota',
             'icon' => 'fas fa-users',
             'can' => 'petugas-only',
         ],
         [
-            'text'    => 'Data Peminjaman',
-            'icon'    => 'fas fa-database',
+            'text' => 'Data Peminjaman',
+            'icon' => 'fas fa-database',
             'url' => '/petugas/transaksi',
             'can' => 'petugas-only',
         ],
         [
-            'text'    => 'Konfirmasi Peminjaman',
-            'icon'    => 'fas fa-check-circle',
+            'text' => 'Konfirmasi Peminjaman',
+            'icon' => 'fas fa-check-circle',
             'url' => '/petugas/transaksi/konfirmasi',
             'can' => 'petugas-only',
         ],
         [
             'text' => 'Cetak Laporan',
-            'url'  => '/petugas/laporan/'.date('m'),
+            'url' => '/petugas/laporan/'.date('m'),
             'icon' => 'fas fa-file-pdf',
             'can' => 'petugas-only',
         ],
         [
             'text' => 'Data Buku',
-            'url'  => '/anggota/buku',
+            'url' => '/anggota/buku',
             'icon' => 'fas fa-book',
             'can' => 'anggota-only',
         ],
         [
             'text' => 'Data Peminjaman',
-            'url'  => '/anggota/pinjam',
+            'url' => '/anggota/pinjam',
             'icon' => 'fas fa-share',
             'can' => 'anggota-only',
         ],
@@ -373,13 +455,13 @@ return [
     */
 
     'filters' => [
-        JeroenNoten\LaravelAdminLte\Menu\Filters\GateFilter::class,
-        JeroenNoten\LaravelAdminLte\Menu\Filters\HrefFilter::class,
-        JeroenNoten\LaravelAdminLte\Menu\Filters\SearchFilter::class,
-        JeroenNoten\LaravelAdminLte\Menu\Filters\ActiveFilter::class,
-        JeroenNoten\LaravelAdminLte\Menu\Filters\ClassesFilter::class,
-        JeroenNoten\LaravelAdminLte\Menu\Filters\LangFilter::class,
-        JeroenNoten\LaravelAdminLte\Menu\Filters\DataFilter::class,
+        GateFilter::class,
+        HrefFilter::class,
+        SearchFilter::class,
+        ActiveFilter::class,
+        ClassesFilter::class,
+        LangFilter::class,
+        DataFilter::class,
     ],
 
     /*
@@ -464,6 +546,39 @@ return [
                     'location' => '//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js',
                 ],
             ],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | IFrame
+    |--------------------------------------------------------------------------
+    |
+    | Here we change the IFrame mode configuration. Note these changes will
+    | only apply to the view that extends and enable the IFrame mode.
+    |
+    | For detailed instructions you can look the iframe mode section here:
+    | https://github.com/jeroennoten/Laravel-AdminLTE/wiki/IFrame-Mode-Configuration
+    |
+    */
+
+    'iframe' => [
+        'default_tab' => [
+            'url' => null,
+            'title' => null,
+        ],
+        'buttons' => [
+            'close' => true,
+            'close_all' => true,
+            'close_all_other' => true,
+            'scroll_left' => true,
+            'scroll_right' => true,
+            'fullscreen' => true,
+        ],
+        'options' => [
+            'loading_screen' => 1000,
+            'auto_show_new_tab' => true,
+            'use_navbar_items' => true,
         ],
     ],
 

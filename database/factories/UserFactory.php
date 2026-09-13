@@ -4,47 +4,56 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
+/**
+ * @extends Factory<User>
+ */
 class UserFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = User::class;
 
     /**
-     * Define the model's default state.
-     *
-     * @return array
+     * Password bersama untuk seluruh user hasil factory (di-hash sekali saja).
      */
-    public function definition()
+    protected static ?string $password;
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
         return [
-            'username' => $this->faker->unique()->lastName,
-            'name' => $this->faker->name(),
-            'email' => $this->faker->unique()->safeEmail(),
+            // kolom users.username adalah string(20)
+            'username' => Str::limit(fake()->unique()->userName(), 20, ''),
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => Hash::make('12345678'), // password
+            'password' => static::$password ??= bcrypt('12345678'),
             'role' => 'anggota',
             'remember_token' => Str::random(10),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
-     */
-    public function unverified()
+    public function unverified(): static
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'email_verified_at' => null,
-            ];
-        });
+        return $this->state(fn (array $attributes) => [
+            'email_verified_at' => null,
+        ]);
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => 'admin']);
+    }
+
+    public function petugas(): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => 'petugas']);
+    }
+
+    public function anggota(): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => 'anggota']);
     }
 }

@@ -15,11 +15,11 @@ class CreateBukusTable extends Migration
     {
         Schema::create('buku', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('kategori_id')->nullable(); 
-            $table->foreign('kategori_id')->references('id')->on('kategori'); 
-            $table->string("judul");
+            $table->unsignedBigInteger('kategori_id')->nullable();
+            $table->foreign('kategori_id')->references('id')->on('kategori');
+            $table->string('judul');
             $table->string('penerbit');
-            $table->string("penulis");
+            $table->string('penulis');
             $table->text('keterangan');
             $table->integer('stok');
             $table->string('gambar');
@@ -34,6 +34,6 @@ class CreateBukusTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('bukus');
+        Schema::dropIfExists('buku');
     }
 }

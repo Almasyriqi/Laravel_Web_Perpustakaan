@@ -2,16 +2,16 @@
 
 namespace Database\Factories;
 
-use App\Models\Anggota;
+use App\Models\Admin;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Anggota>
+ * @extends Factory<Admin>
  */
-class AnggotaFactory extends Factory
+class AdminFactory extends Factory
 {
-    protected $model = Anggota::class;
+    protected $model = Admin::class;
 
     /**
      * @return array<string, mixed>
@@ -19,9 +19,7 @@ class AnggotaFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory()->anggota(),
-            'jurusan' => 'Teknologi Informasi',
-            'tgl_lahir' => fake()->date(),
+            'user_id' => User::factory()->admin(),
             'no_hp' => fake()->phoneNumber(),
             'alamat' => fake()->address(),
         ];
