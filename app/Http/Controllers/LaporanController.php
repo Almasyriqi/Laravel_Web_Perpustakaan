@@ -5,102 +5,83 @@ namespace App\Http\Controllers;
 use App\Models\Peminjaman;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class LaporanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
-    public function index() {}
+    public const NAMA_BULAN = [
+        1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+    ];
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
+     * Daftar peminjaman pada bulan & tahun tertentu (tahun via ?tahun=, default tahun berjalan).
      */
-    public function create()
+    public function show(Request $request, string $bulan)
     {
-        //
+        [$bulan, $tahun] = $this->periode($request, $bulan);
+
+        $laporan = $this->queryLaporan($bulan, $tahun)
+            ->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
+            ->get(['peminjaman.*', 'users.name', 'buku.judul']);
+
+        return view('laporan.index', [
+            'laporan' => $laporan,
+            'sekarang' => $bulan,
+            'tahun' => $tahun,
+            'namaBulan' => self::NAMA_BULAN,
+            'routePrefix' => $request->user()->role === 'admin' ? 'admin' : 'petugas',
+        ]);
+    }
+
+    public function cetak_pdf(Request $request, string $bulan)
+    {
+        [$bulan, $tahun] = $this->periode($request, $bulan);
+
+        $laporan = $this->queryLaporan($bulan, $tahun)
+            ->with('buku')
+            ->get(['peminjaman.*', 'users.name']);
+
+        $pdf = Pdf::loadView('laporan.pdf', [
+            'laporan' => $laporan,
+            'namaBulan' => self::NAMA_BULAN[$bulan],
+            'tahun' => $tahun,
+        ]);
+
+        return $pdf->stream("laporan-{$tahun}-{$bulan}.pdf");
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Validasi bulan (1-12) dari URL dan tahun dari query string.
      *
-     * @return Response
+     * @return array{0: int, 1: int}
      */
-    public function store(Request $request)
+    private function periode(Request $request, string $bulan): array
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function show($id)
-    {
-        $laporan = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
-            ->join('users', 'anggota.user_id', '=', 'users.id')->whereMonth('peminjaman.tgl_pinjam', '=', $id)
-            ->get(['peminjaman.*', 'anggota.*', 'users.name', 'buku.judul']);
-        $sekarang = $id;
-
-        return view('admin.laporan.index', compact('laporan', 'sekarang'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
-
-    public function cetak_pdf($id)
-    {
-        $laporan = Peminjaman::with('buku')->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
-            ->join('users', 'anggota.user_id', '=', 'users.id')->whereMonth('peminjaman.tgl_pinjam', '=', $id)
-            ->get(['peminjaman.*', 'anggota.*', 'users.name']);
-        $sekarang = (int) $id - 1;
-
-        if (Auth::user()->role == 'admin') {
-            $pdf = Pdf::loadView('admin.laporan.laporan_pdf', compact('laporan', 'sekarang'));
-
-            return $pdf->stream();
-        } else {
-            $pdf = Pdf::loadView('petugas.laporan.laporan_pdf', compact('laporan', 'sekarang'));
-
-            return $pdf->stream();
+        if (! ctype_digit($bulan) || (int) $bulan < 1 || (int) $bulan > 12) {
+            throw ValidationException::withMessages(['bulan' => 'Bulan harus di antara 1 dan 12.']);
         }
+
+        $tahun = $request->integer('tahun', now()->year);
+        if ($tahun < 2000 || $tahun > 2100) {
+            throw ValidationException::withMessages(['tahun' => 'Tahun tidak valid.']);
+        }
+
+        return [(int) $bulan, $tahun];
+    }
+
+    /**
+     * Peminjaman pada bulan+tahun tersebut; whereYear mencegah bulan yang sama
+     * di tahun berbeda ikut tercampur.
+     */
+    private function queryLaporan(int $bulan, int $tahun)
+    {
+        return Peminjaman::query()
+            ->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
+            ->join('users', 'anggota.user_id', '=', 'users.id')
+            ->whereMonth('peminjaman.tgl_pinjam', $bulan)
+            ->whereYear('peminjaman.tgl_pinjam', $tahun)
+            ->orderBy('peminjaman.tgl_pinjam')
+            ->orderBy('peminjaman.id');
     }
 }
