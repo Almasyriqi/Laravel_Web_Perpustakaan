@@ -80,6 +80,7 @@ Rekap peminjaman per bulan atau rentang tanggal bebas, cetak PDF (DomPDF) atau e
 | 👤 | **Profil & ganti password** | Setiap pengguna dapat memperbarui datanya sendiri |
 | 🔔 | **Notifikasi interaktif** | Alert & konfirmasi menggunakan SweetAlert |
 | 📧 | **Email pengingat** | Anggota dikirimi email H-1 sebelum jatuh tempo dan saat terlambat (scheduler harian + queue) |
+| 🌓 | **Dark mode & mobile** | Tombol dark mode di navbar (preferensi tersimpan di session), tabel melipat kolom di layar sempit |
 
 ### 👑 Admin
 
@@ -518,7 +519,7 @@ vendor/bin/pint --dirty          # rapikan format file yang berubah
 
 | Suite | Cakupan |
 |---|---|
-| `SmokeTest` | Halaman utama tiap role dapat dirender, middleware role menolak akses silang |
+| `SmokeTest` | Halaman utama tiap role dapat dirender, middleware role menolak akses silang, toggle dark mode bertahan antar halaman |
 | `AuthTest` | Login via username/email, logout `POST`, verifikasi email, registrasi |
 | `PeminjamanFlowTest` | Ajukan → konfirmasi → perpanjang → kembali, stok, denda, pembatalan, edit admin |
 | `LaporanTest` | Filter bulan + tahun dan rentang tanggal bebas, validasi periode, keluaran PDF & Excel |
@@ -564,7 +565,7 @@ Beberapa hal yang layak dikerjakan berikutnya, diurutkan berdasarkan prioritas.
 - [x] 📑 **Export laporan ke Excel** (`maatwebsite/excel` 4 — resmi mendukung Laravel 13) + **rentang tanggal bebas** (`/laporan/rentang?dari=&sampai=`, maks. 366 hari) — `PeriodeLaporan` dipakai bersama oleh HTML, PDF, dan Excel; filter memakai `whereBetween` sehingga index `tgl_pinjam` terpakai
 - [ ] 🔖 **Barcode / QR code** buku dan kartu anggota untuk mempercepat transaksi loket
 - [ ] ⭐ **Rating & ulasan buku** serta fitur *booking* buku yang stoknya sedang habis
-- [ ] 🌓 **Dark mode** dan penyempurnaan tampilan mobile
+- [x] 🌓 **Dark mode** lewat widget bawaan AdminLTE (`darkmode-widget`, preferensi di session) + CSS pelengkap untuk elemen custom; **mobile**: ekstensi DataTables Responsive dimuat (sebelumnya `responsive: true` tidak berefek), kartu detail fluid, tombol aksi tabel lebih ringkas
 - [x] 🤖 **CI GitHub Actions** — [`.github/workflows/ci.yml`](.github/workflows/ci.yml) menjalankan `pint --test` + `php artisan test` di setiap push & PR (PHP 8.3, SQLite in-memory); seluruh kode diformat Pint sekali sebagai prasyarat
 - [x] 🧹 **Bersihkan Laravel Mix** — `package.json`, `webpack.mix.js`, `resources/js|sass`, dan bundel `public/js/app.js` (3 MB) / `public/css/app.css` dihapus; semua asset berasal dari bundel AdminLTE + CDN sehingga instalasi tidak lagi butuh Node.js
 

@@ -96,6 +96,23 @@ class SmokeTest extends TestCase
         $this->actingAs($admin)->get('/anggota')->assertRedirect('/');
     }
 
+    public function test_dark_mode_dapat_diaktifkan_dan_bertahan_antar_halaman(): void
+    {
+        $admin = Admin::factory()->create()->user;
+        $bodyGelap = '/<body[^>]*class="[^"]*\bdark-mode\b/';
+
+        $awal = $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('adminlte-darkmode-widget');
+        $this->assertDoesNotMatchRegularExpression($bodyGelap, $awal->getContent());
+
+        $this->actingAs($admin)->post('/adminlte/darkmode/toggle')->assertOk();
+
+        $this->assertMatchesRegularExpression($bodyGelap, $this->actingAs($admin)->get('/admin')->assertOk()->getContent());
+        $this->assertMatchesRegularExpression($bodyGelap, $this->actingAs($admin)->get('/admin/buku')->assertOk()->getContent());
+
+        $this->actingAs($admin)->post('/adminlte/darkmode/toggle');
+        $this->assertDoesNotMatchRegularExpression($bodyGelap, $this->actingAs($admin)->get('/admin')->getContent());
+    }
+
     public function test_laporan_pdf_menghasilkan_dokumen_pdf(): void
     {
         $admin = Admin::factory()->create();

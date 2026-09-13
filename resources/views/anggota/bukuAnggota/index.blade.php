@@ -88,7 +88,7 @@
                     <i class="fas fa-building"></i> {{ $item->penerbit }}
                 </p>
             </div>
-            <div class="card-footer bg-white d-flex flex-wrap p-2">
+            <div class="card-footer d-flex flex-wrap p-2">
                 <a class="btn btn-sm btn-info flex-fill m-1" href="/anggota/buku/{{ $item->id }}">
                     <i class="fas fa-eye"></i> Detail</a>
                 @if ($item->stok > 0)
