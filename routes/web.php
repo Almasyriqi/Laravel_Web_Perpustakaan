@@ -3,15 +3,16 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\Auth\PasswordController;
-use App\Http\Controllers\PetugasController;
-use App\Http\Controllers\KategoriController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\BukuController;
-use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\BukuAnggotaController;
+use App\Http\Controllers\BukuController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PeminjamanAnggotaController;
 use App\Http\Controllers\PeminjamanController;
+use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\TransaksiPetugasController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -30,11 +31,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+// Termasuk rute verifikasi email (email/verify, email/resend) dan POST /logout
+Auth::routes(['verify' => true]);
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
 
     Route::get('password', [PasswordController::class, 'edit'])->name('user.password.edit');
 
@@ -81,7 +83,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['petugas'])->group(function () {
         Route::prefix('petugas')->group(function () {
-            Route::get('/', [PetugasController::class, 'home']); 
+            Route::get('/', [PetugasController::class, 'home']);
 
             // CRUD Anggota
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
@@ -116,18 +118,13 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('anggota')->group(function () {
             Route::get('/', [AnggotaController::class, 'home']);
             Route::resource('/buku', BukuAnggotaController::class);
-    
+
             Route::get('/pinjam/delete/{id}', [PeminjamanAnggotaController::class, 'delete']);
             Route::get('/pinjam/perpanjang/{id}', [PeminjamanAnggotaController::class, 'modalPerpanjang']);
             Route::put('/perpanjang/{id}', [PeminjamanAnggotaController::class, 'perpanjang']);
             Route::get('/modal/pinjam/{id}', [PeminjamanAnggotaController::class, 'pinjam']);
             Route::post('/peminjaman/{id}', [PeminjamanAnggotaController::class, 'peminjaman']);
-            Route::resource('/pinjam', PeminjamanAnggotaController::class); 
+            Route::resource('/pinjam', PeminjamanAnggotaController::class);
         });
-    });
-
-    Route::get('/logout', function () {
-        Auth::logout();
-        redirect('/');
     });
 });
