@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Services\PeminjamanService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 class Peminjaman extends Model
 {
@@ -57,5 +59,35 @@ class Peminjaman extends Model
         return $this->masihDipinjam()
             && $this->tgl_harus_kembali !== null
             && now()->startOfDay()->gt($this->tgl_harus_kembali);
+    }
+
+    /**
+     * Versi query dari terlambat() — dipanggil Peminjaman::lewatTempo(): masih di tangan anggota dan jatuh tempo sudah lewat.
+     */
+    public function scopeLewatTempo(Builder $query): Builder
+    {
+        return $query
+            ->whereIn('status', PeminjamanService::STATUS_MENAHAN_STOK)
+            ->where('tgl_harus_kembali', '<', now()->toDateString());
+    }
+
+    /**
+     * Berapa hari sudah lewat jatuh tempo (0 bila belum terlambat).
+     */
+    public function hariTerlambat(): int
+    {
+        if (! $this->terlambat()) {
+            return 0;
+        }
+
+        return (int) Carbon::parse($this->tgl_harus_kembali)->startOfDay()->diffInDays(now()->startOfDay());
+    }
+
+    /**
+     * Denda yang akan dikenakan bila buku dikembalikan hari ini.
+     */
+    public function estimasiDenda(): int
+    {
+        return $this->hariTerlambat() * (int) config('perpustakaan.denda_per_hari');
     }
 }

@@ -3,16 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Peminjaman;
+use App\Support\Bulan;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class LaporanController extends Controller
 {
-    public const NAMA_BULAN = [
-        1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-    ];
+    /** Alias agar pemanggil lama tetap jalan; sumbernya kini App\Support\Bulan. */
+    public const NAMA_BULAN = Bulan::NAMA;
 
     /**
      * Daftar peminjaman pada bulan & tahun tertentu (tahun via ?tahun=, default tahun berjalan).

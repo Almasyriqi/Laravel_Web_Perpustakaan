@@ -15,7 +15,8 @@ a:focus {
     height: 320px;
 }
 
-.card-primary{
+/* Kartu yang disejajarkan dengan kartu kalender di dashboard */
+.card-sejajar {
     height: 400px;
 }
 

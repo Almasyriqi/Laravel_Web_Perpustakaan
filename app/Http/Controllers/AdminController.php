@@ -9,6 +9,7 @@ use App\Models\Buku;
 use App\Models\Kategori;
 use App\Models\Petugas;
 use App\Models\User;
+use App\Services\StatistikService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -119,13 +120,14 @@ class AdminController extends Controller
         return view('admin.adminAdmin.index', compact('paginate'));
     }
 
-    public function home()
+    public function home(StatistikService $statistik)
     {
         return view('admin.home', [
             'anggota' => Anggota::count(),
             'buku' => Buku::count(),
             'kategori' => Kategori::count(),
             'petugas' => Petugas::count(),
+            'statistik' => $statistik->dashboard(),
         ]);
     }
 }

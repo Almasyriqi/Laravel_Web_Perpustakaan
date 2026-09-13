@@ -37,6 +37,9 @@ class PeminjamanService
     /** Status yang berarti buku sedang di tangan anggota (menahan stok). */
     public const STATUS_MENAHAN_STOK = [self::STATUS_DIPINJAM, self::STATUS_PERPANJANG];
 
+    /** Status yang sudah disetujui petugas (dihitung sebagai peminjaman nyata di statistik). */
+    public const STATUS_TERKONFIRMASI = [self::STATUS_DIPINJAM, self::STATUS_PERPANJANG, self::STATUS_KEMBALI];
+
     /**
      * Aturan (masa_pinjam, masa_perpanjang, maks_perpanjang, denda_per_hari)
      * dari config/perpustakaan.php; bisa diberikan langsung untuk unit test.

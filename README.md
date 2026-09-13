@@ -84,6 +84,7 @@ Rekap peminjaman per bulan, siap cetak lewat DomPDF
 
 | | Fitur | Keterangan |
 |:--:|---|---|
+| 📊 | **Dashboard statistik** | Tren peminjaman 12 bulan, buku terpopuler, daftar keterlambatan dengan estimasi denda |
 | 🧑‍💼 | **CRUD Admin** | Kelola akun administrator + pencarian data |
 | 🧑‍🏫 | **CRUD Petugas** | Kelola akun petugas perpustakaan + pencarian data |
 | 🎓 | **CRUD Anggota** | Kelola data anggota (NIM, jurusan, kontak, alamat) |
@@ -97,6 +98,7 @@ Rekap peminjaman per bulan, siap cetak lewat DomPDF
 
 | | Fitur | Keterangan |
 |:--:|---|---|
+| 📊 | **Dashboard statistik** | Tren peminjaman, buku terpopuler, daftar keterlambatan siap diproses |
 | 🎓 | **CRUD Anggota** | Pendataan anggota perpustakaan |
 | 🏷️ | **CRUD Kategori & Buku** | Pengelolaan koleksi perpustakaan, termasuk arsip & pulihkan |
 | ✅ | **Konfirmasi peminjaman** | Menyetujui pengajuan pinjam dari anggota (stok berkurang, jatuh tempo ditetapkan) |
@@ -527,7 +529,7 @@ Beberapa hal yang layak dikerjakan berikutnya, diurutkan berdasarkan prioritas.
 
 - [x] 🔍 **Pencarian & filter katalog** anggota — scope `Buku::cari()/dariKategori()/tersedia()`, `KatalogRequest`, grid kartu 12 per halaman dengan paginasi Bootstrap 4 yang mempertahankan query string
 - [ ] 📧 **Notifikasi email jatuh tempo** otomatis via Queue + Task Scheduler
-- [ ] 📊 **Dashboard statistik** — buku terpopuler, tren peminjaman, daftar keterlambatan
+- [x] 📊 **Dashboard statistik** admin & petugas — `StatistikService`: ringkasan (sedang dipinjam, menunggu konfirmasi, terlambat, denda bulan ini), bar chart tren 12 bulan (Chart.js), 5 buku terpopuler, daftar keterlambatan dengan estimasi denda; agregasi per bulan di PHP agar jalan di MySQL & SQLite
 - [ ] 📑 **Export laporan ke Excel** selain PDF, plus filter rentang tanggal bebas
 - [ ] 🔖 **Barcode / QR code** buku dan kartu anggota untuk mempercepat transaksi loket
 - [ ] ⭐ **Rating & ulasan buku** serta fitur *booking* buku yang stoknya sedang habis
