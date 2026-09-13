@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TransaksiRequest;
 use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Peminjaman;
 use App\Services\PeminjamanService;
-use Illuminate\Http\Request;
 
 class TransaksiPetugasController extends Controller
 {
@@ -38,18 +38,14 @@ class TransaksiPetugasController extends Controller
     /**
      * Peminjaman langsung di loket: stok langsung berkurang.
      */
-    public function store(Request $request)
+    public function store(TransaksiRequest $request)
     {
-        $request->validate([
-            'anggota' => 'required|exists:anggota,nim',
-            'judul' => 'required|exists:buku,id',
-            'jumlah' => 'required|integer|min:1',
-        ]);
+        $data = $request->validated();
 
         $this->service->pinjamLangsung(
-            anggotaId: (int) $request->input('anggota'),
-            bukuId: (int) $request->input('judul'),
-            jumlah: (int) $request->input('jumlah'),
+            anggotaId: (int) $data['anggota'],
+            bukuId: (int) $data['judul'],
+            jumlah: (int) $data['jumlah'],
         );
 
         return redirect()->route('transaksi.index')->with('success', 'Peminjaman Berhasil Ditambahkan');

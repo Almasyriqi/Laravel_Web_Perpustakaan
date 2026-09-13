@@ -2,165 +2,109 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PetugasRequest;
 use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Kategori;
-use App\Models\User;
 use App\Models\Petugas;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class PetugasController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $petugas = Petugas::with('user')->get();
         $paginate = Petugas::orderBy('id', 'desc')->paginate(10);
+
         return view('admin.petugasAdmin.index', ['petugas' => $petugas, 'paginate' => $paginate]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         return view('admin.petugasAdmin.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(PetugasRequest $request)
     {
-        $request->validate([
-            'username' => 'required', 'string', 'max:20', 'unique:users',
-            'password' => 'required', 'string', 'min:8',
-            'nama' => 'required',
-            'tgl_lahir' => 'required|date',
-            'no_hp' => 'required',
-            'email' => 'required|email',
-        ]);
-        //TODO : Implementasikan Proses Simpan Ke Database
-        $petugas = new Petugas();
-        $petugas->id = $request->get('id');
-        $petugas->tgl_lahir = $request->get('tgl_lahir');
-        $petugas->no_hp = $request->get('no_hp');
-        $petugas->alamat = $request->get('alamat');
-        $petugas->save();
+        $data = $request->validated();
 
-        $user = new User();
-        $user->username = $request->get('username');
-        $user->password = Hash::make($request->get('password'));
-        $user->name = $request->get('nama');
-        $user->email = $request->get('email');
-        $user->role = 'petugas';
-        $user->email_verified_at = now();
-        $user->save();
+        DB::transaction(function () use ($data) {
+            $user = User::create([
+                'username' => $data['username'],
+                'password' => Hash::make($data['password']),
+                'name' => $data['nama'],
+                'email' => $data['email'],
+                'role' => 'petugas',
+                'email_verified_at' => now(),
+            ]);
 
-        // fungsi eloquent untuk menambah data dengan relasi belongsTo
-        $petugas->user()->associate($user);
-        $petugas->save();
+            Petugas::create([
+                'user_id' => $user->id,
+                'tgl_lahir' => $data['tgl_lahir'],
+                'no_hp' => $data['no_hp'],
+                'alamat' => $data['alamat'] ?? '',
+            ]);
+        });
 
-        //jika data berhasil ditambahkan, akan kembali ke halaman utama
         return redirect()->route('petugas.index')->with('success', 'Petugas Berhasil Ditambahkan');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
-        $petugas = Petugas::with('user')->where('id', $id)->first();
+        $petugas = Petugas::with('user')->findOrFail($id);
+
         return view('admin.petugasAdmin.show', compact('petugas'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
-        $petugas = Petugas::with('user')->where('id', $id)->first();
+        $petugas = Petugas::with('user')->findOrFail($id);
+
         return view('admin.petugasAdmin.edit', compact('petugas'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(PetugasRequest $request, $id)
     {
-        $request->validate([
-            'username' => 'required', 'string', 'max:20', 'unique:users',
-            'id' => 'required',
-            'nama' => 'required',
-            'tgl_lahir' => 'required|date',
-            'no_hp' => 'required',
-            'email' => 'required|email',
-        ]);
-        //TODO : Implementasikan Proses Simpan Ke Database
-        $petugas = Petugas::find($id);
-        $user_id = $petugas->user_id;
-        $petugas->id = $request->get('id');
-        $petugas->tgl_lahir = $request->get('tgl_lahir');
-        $petugas->no_hp = $request->get('no_hp');
-        $petugas->alamat = $request->get('alamat');
-        $petugas->save();
+        $data = $request->validated();
+        $petugas = Petugas::with('user')->findOrFail($id);
 
-        $user = User::find($user_id);
-        $user->username = $request->get('username');
-        $user->name = $request->get('nama');
-        $user->email = $request->get('email');
-        $user->role = 'petugas';
-        $user->save();
+        DB::transaction(function () use ($petugas, $data) {
+            $petugas->update([
+                'tgl_lahir' => $data['tgl_lahir'],
+                'no_hp' => $data['no_hp'],
+                'alamat' => $data['alamat'] ?? '',
+            ]);
 
-        // fungsi eloquent untuk menambah data dengan relasi belongsTo
-        $petugas->user()->associate($user);
-        $petugas->save();
+            $petugas->user->update([
+                'username' => $data['username'],
+                'name' => $data['nama'],
+                'email' => $data['email'],
+            ]);
+        });
 
-        //jika data berhasil ditambahkan, akan kembali ke halaman utama
         return redirect()->route('petugas.index')->with('success', 'Petugas Berhasil Diedit');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-        $petugas = Petugas::find($id);
-        $user_id = $petugas->user_id;
-        $user = User::find($user_id);
-        $petugas->delete();
-        $user->delete();
+        $petugas = Petugas::with('user')->findOrFail($id);
+
+        DB::transaction(function () use ($petugas) {
+            $petugas->delete();
+            $petugas->user?->delete();
+        });
+
         return redirect()->route('petugas.index')
             ->with('success', 'Petugas Berhasil Dihapus');
     }
 
     public function delete($id)
     {
-        $petugas = Petugas::find($id);
+        $petugas = Petugas::findOrFail($id);
+
         return view('admin.petugasAdmin.delete', compact('petugas'));
     }
 
@@ -171,17 +115,16 @@ class PetugasController extends Controller
                 ->orWhere('email', 'like', "%{$request->keyword}%");
         })->paginate(10);
         $paginate->appends($request->only('keyword'));
+
         return view('admin.petugasAdmin.index', compact('paginate'));
     }
 
     public function home()
     {
-        $a = Anggota::all();
-        $b = Buku::all();
-        $k = Kategori::all();
-        $anggota = count($a);
-        $buku = count($b);
-        $kategori = count($k);
-        return view('petugas.home', compact('anggota', 'buku', 'kategori'));
+        return view('petugas.home', [
+            'anggota' => Anggota::count(),
+            'buku' => Buku::count(),
+            'kategori' => Kategori::count(),
+        ]);
     }
 }

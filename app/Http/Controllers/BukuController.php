@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\BukuRequest;
 use App\Models\Buku;
 use App\Models\Kategori;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
@@ -13,44 +15,37 @@ class BukuController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index()
     {
         $paginate = Buku::with('kategori')->get();
+
         return view('admin.bukuAdmin.index', compact('paginate'));
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function create()
     {
         $kategori = Kategori::all();
+
         return view('admin.bukuAdmin.create', compact('kategori'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @return Response
      */
-    public function store(Request $request)
+    public function store(BukuRequest $request)
     {
-        $request->validate([
-            'kategori' => 'required',
-            'judul' => 'required',
-            'penerbit' => 'required',
-            'penulis' => 'required',
-            'keterangan' => 'required',
-            'stok' => 'required|integer',
-            'gambar' => 'required|file|image|mimes:jpeg,png,jpg',
-        ]);
-        //TODO : Implementasikan Proses Simpan Ke Database
-        $buku = new Buku();
+        // TODO : Implementasikan Proses Simpan Ke Database
+        $buku = new Buku;
         $buku->kategori_id = $request->get('kategori');
         $buku->judul = $request->get('judul');
         $buku->penerbit = $request->get('penerbit');
@@ -58,7 +53,7 @@ class BukuController extends Controller
         $buku->keterangan = $request->get('keterangan');
         $buku->stok = $request->get('stok');
         $file = $request->file('gambar');
-        $image_name = '/images/' . $file->getClientOriginalName();
+        $image_name = '/images/'.$file->getClientOriginalName();
 
         // isi dengan nama folder tempat kemana file diupload
         $tujuan_upload = 'images';
@@ -66,7 +61,7 @@ class BukuController extends Controller
         $buku->gambar = $image_name;
         $buku->save();
 
-        //jika data berhasil ditambahkan, akan kembali ke halaman utama
+        // jika data berhasil ditambahkan, akan kembali ke halaman utama
         if (Auth::user()->role == 'admin') {
             return redirect()->to('/admin/buku')->with('success', 'Buku Berhasil Ditambahkan');
         } else {
@@ -78,11 +73,12 @@ class BukuController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function show($id)
     {
         $buku = Buku::with('kategori')->where('id', $id)->first();
+
         return view('admin.bukuAdmin.show', compact('buku'));
     }
 
@@ -90,34 +86,26 @@ class BukuController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function edit($id)
     {
         $buku = Buku::with('kategori')->where('id', $id)->first();
         $kategori = Kategori::all();
+
         return view('admin.bukuAdmin.edit', compact('buku', 'kategori'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(BukuRequest $request, $id)
     {
-        $request->validate([
-            'kategori' => 'required',
-            'judul' => 'required',
-            'penerbit' => 'required',
-            'penulis' => 'required',
-            'keterangan' => 'required',
-            'stok' => 'required|integer',
-        ]);
-        //TODO : Implementasikan Proses Simpan Ke Database
-        $buku = Buku::find($id);
+        $buku = Buku::findOrFail($id);
         $buku->kategori_id = $request->get('kategori');
         $buku->judul = $request->get('judul');
         $buku->penerbit = $request->get('penerbit');
@@ -126,7 +114,7 @@ class BukuController extends Controller
         $buku->stok = $request->get('stok');
         $buku->save();
         if ($request->file('gambar') != null) {
-            File::delete('/images/' . $buku->gambar);
+            File::delete('/images/'.$buku->gambar);
             $file = $request->file('gambar');
             $image_name = '/images/'.$file->getClientOriginalName();
             $tujuan_upload = 'images';
@@ -135,7 +123,7 @@ class BukuController extends Controller
             $buku->save();
         }
 
-        //jika data berhasil ditambahkan, akan kembali ke halaman utama
+        // jika data berhasil ditambahkan, akan kembali ke halaman utama
         if (Auth::user()->role == 'admin') {
             return redirect()->to('/admin/buku')->with('success', 'Buku Berhasil DiUpdate');
         } else {
@@ -147,13 +135,13 @@ class BukuController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy($id)
     {
 
-        $buku = Buku::find($id);
-        File::delete('/images/' . $buku->image);
+        $buku = Buku::findOrFail($id);
+        File::delete('/images/'.$buku->image);
         $buku->delete();
 
         if (Auth::user()->role == 'admin') {
@@ -166,6 +154,7 @@ class BukuController extends Controller
     public function delete($id)
     {
         $buku = Buku::find($id);
+
         return view('admin.bukuAdmin.delete', compact('buku'));
     }
 }

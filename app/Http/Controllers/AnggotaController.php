@@ -2,183 +2,110 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AnggotaRequest;
 use App\Models\Anggota;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AnggotaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $anggota = Anggota::with('user')->get();
         $paginate = Anggota::orderBy('nim', 'desc')->paginate(10);
+
         return view('admin.anggotaAdmin.index', ['anggota' => $anggota, 'paginate' => $paginate]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         return view('admin.anggotaAdmin.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(AnggotaRequest $request)
     {
-        //melakukan validasi data
-        $request->validate([
-            'username' => 'required', 'string', 'max:20', 'unique:users',
-            'password' => 'required', 'string', 'min:8',
-            'nim' => 'required|numeric',
-            'nama' => 'required',
-            'jurusan' => 'required',
-            'tgl_lahir' => 'required|date',
-            'no_hp' => 'required',
-            'email' => 'required|email',
-        ]);
-        //TODO : Implementasikan Proses Simpan Ke Database
-        $anggota = new Anggota();
-        $anggota->nim = $request->get('nim');
-        $anggota->jurusan = $request->get('jurusan');
-        $anggota->tgl_lahir = $request->get('tgl_lahir');
-        $anggota->no_hp = $request->get('no_hp');
-        $anggota->alamat = $request->get('alamat');
-        $anggota->save();
+        $data = $request->validated();
 
-        $user = new User();
-        $user->username = $request->get('username');
-        $user->password = Hash::make($request->get('password'));
-        $user->name = $request->get('nama');
-        $user->email = $request->get('email');
-        $user->role = 'anggota';
-        $user->email_verified_at = now();
-        $user->save();
+        DB::transaction(function () use ($data) {
+            $user = User::create([
+                'username' => $data['username'],
+                'password' => Hash::make($data['password']),
+                'name' => $data['nama'],
+                'email' => $data['email'],
+                'role' => 'anggota',
+                'email_verified_at' => now(),
+            ]);
 
-        // fungsi eloquent untuk menambah data dengan relasi belongsTo
-        $anggota->user()->associate($user);
-        $anggota->save();
+            Anggota::create([
+                'nim' => $data['nim'],
+                'user_id' => $user->id,
+                'jurusan' => $data['jurusan'],
+                'tgl_lahir' => $data['tgl_lahir'],
+                'no_hp' => $data['no_hp'],
+                'alamat' => $data['alamat'] ?? '',
+            ]);
+        });
 
-        //jika data berhasil ditambahkan, akan kembali ke halaman utama
-        if (Auth::user()->role == 'admin') {
-            return redirect()->to('/admin/anggota')->with('success', 'Anggota Berhasil Ditambah');
-        }
-        else {
-            return redirect()->to('/petugas/anggota')->with('success', 'Anggota Berhasil Ditambah');
-        }
+        return redirect()->to($this->prefix().'/anggota')->with('success', 'Anggota Berhasil Ditambah');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
-        $anggota = Anggota::with('user')->where('nim', $id)->first();
+        $anggota = Anggota::with('user')->where('nim', $id)->firstOrFail();
+
         return view('admin.anggotaAdmin.show', compact('anggota'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
-        $anggota = Anggota::with('user')->where('nim', $id)->first();
+        $anggota = Anggota::with('user')->where('nim', $id)->firstOrFail();
+
         return view('admin.anggotaAdmin.edit', compact('anggota'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(AnggotaRequest $request, $id)
     {
-        //melakukan validasi data
-        $request->validate([
-            'username' => 'required', 'string', 'max:20', 'unique:users',
-            'nim' => 'required|numeric',
-            'nama' => 'required',
-            'jurusan' => 'required',
-            'tgl_lahir' => 'required|date',
-            'no_hp' => 'required',
-            'email' => 'required|email',
-        ]);
-        //TODO : Implementasikan Proses Simpan Ke Database
-        $anggota = Anggota::find($id);
-        $user_id = $anggota->user_id;
-        $anggota->nim = $request->get('nim');
-        $anggota->jurusan = $request->get('jurusan');
-        $anggota->tgl_lahir = $request->get('tgl_lahir');
-        $anggota->no_hp = $request->get('no_hp');
-        $anggota->alamat = $request->get('alamat');
-        $anggota->save();
+        $data = $request->validated();
+        $anggota = Anggota::with('user')->findOrFail($id);
 
-        $user = User::find($user_id);
-        $user->username = $request->get('username');
-        $user->name = $request->get('nama');
-        $user->email = $request->get('email');
-        $user->role = 'anggota';
-        $user->save();
+        DB::transaction(function () use ($anggota, $data) {
+            $anggota->update([
+                'nim' => $data['nim'],
+                'jurusan' => $data['jurusan'],
+                'tgl_lahir' => $data['tgl_lahir'],
+                'no_hp' => $data['no_hp'],
+                'alamat' => $data['alamat'] ?? '',
+            ]);
 
-        // fungsi eloquent untuk menambah data dengan relasi belongsTo
-        $anggota->user()->associate($user);
-        $anggota->save();
+            $anggota->user->update([
+                'username' => $data['username'],
+                'name' => $data['nama'],
+                'email' => $data['email'],
+            ]);
+        });
 
-        //jika data berhasil ditambahkan, akan kembali ke halaman utama
-        if (Auth::user()->role == 'admin') {
-            return redirect()->to('/admin/anggota')->with('success', 'Anggota Berhasil Diupdate');
-        }
-        else {
-            return redirect()->to('/petugas/anggota')->with('success', 'Anggota Berhasil Diupdate');
-        }
+        return redirect()->to($this->prefix().'/anggota')->with('success', 'Anggota Berhasil Diupdate');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-        $anggota = Anggota::find($id);
-        $user_id = $anggota->user_id;
-        $user = User::find($user_id);
-        $anggota->delete();
-        $user->delete();
-        if (Auth::user()->role == 'admin') {
-            return redirect()->to('/admin/anggota')->with('success', 'Anggota Berhasil Dihapus');
-        }
-        else {
-            return redirect()->to('/petugas/anggota')->with('success', 'Anggota Berhasil Dihapus');
-        }
+        $anggota = Anggota::with('user')->findOrFail($id);
+
+        DB::transaction(function () use ($anggota) {
+            $anggota->delete();
+            $anggota->user?->delete();
+        });
+
+        return redirect()->to($this->prefix().'/anggota')->with('success', 'Anggota Berhasil Dihapus');
     }
 
     public function delete($id)
     {
-        $anggota = Anggota::find($id);
+        $anggota = Anggota::findOrFail($id);
+
         return view('admin.anggotaAdmin.delete', compact('anggota'));
     }
 
@@ -190,12 +117,22 @@ class AnggotaController extends Controller
                 ->orWhere('Jurusan', 'like', "%{$request->keyword}%");
         })->paginate(10);
         $paginate->appends($request->only('keyword'));
+
         return view('admin.anggotaAdmin.index', compact('paginate'));
     }
 
     public function home()
     {
         $user = Auth::user();
+
         return view('anggota.home', compact('user'));
+    }
+
+    /**
+     * Anggota dikelola dari panel admin maupun petugas; kembali ke panel yang sesuai.
+     */
+    private function prefix(): string
+    {
+        return Auth::user()->role === 'admin' ? '/admin' : '/petugas';
     }
 }

@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PeminjamanRequest;
 use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Peminjaman;
 use App\Services\PeminjamanService;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class PeminjamanController extends Controller
 {
@@ -29,15 +28,9 @@ class PeminjamanController extends Controller
         return view('admin.peminjaman.create', ['anggota' => $anggota, 'buku' => $buku]);
     }
 
-    public function store(Request $request)
+    public function store(PeminjamanRequest $request)
     {
-        $data = $request->validate([
-            'anggota' => 'required|exists:anggota,nim',
-            'judul' => 'required|exists:buku,id',
-            'jumlah' => 'required|integer|min:1',
-            'tgl_pinjam' => 'required|date',
-            'status' => ['required', Rule::in(PeminjamanService::SEMUA_STATUS)],
-        ]);
+        $data = $request->validated();
 
         $this->service->pinjamLangsung(
             anggotaId: (int) $data['anggota'],
@@ -68,19 +61,9 @@ class PeminjamanController extends Controller
      * Edit bebas oleh admin; stok disinkronkan oleh service dari perubahan
      * status/jumlah, lama pinjam & denda dihitung ulang bila status kembali.
      */
-    public function update(Request $request, $id)
+    public function update(PeminjamanRequest $request, $id)
     {
-        $pinjam = Peminjaman::findOrFail($id);
-
-        $data = $request->validate([
-            'jumlah' => 'required|integer|min:1',
-            'tgl_pinjam' => 'required|date',
-            'tgl_kembali' => 'nullable|date|after_or_equal:tgl_pinjam',
-            'status' => ['required', Rule::in(PeminjamanService::SEMUA_STATUS)],
-            'perpanjang' => 'nullable|boolean',
-        ]);
-
-        $this->service->ubah($pinjam, $data);
+        $this->service->ubah(Peminjaman::findOrFail($id), $request->validated());
 
         return redirect()->route('peminjaman.index')->with('success', 'Peminjaman Berhasil Diupdate');
     }

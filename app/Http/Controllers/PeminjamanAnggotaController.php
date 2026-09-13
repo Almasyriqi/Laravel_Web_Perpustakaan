@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AjukanPeminjamanRequest;
 use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Peminjaman;
 use App\Services\PeminjamanService;
-use Illuminate\Http\Request;
 
 class PeminjamanAnggotaController extends Controller
 {
@@ -62,15 +62,11 @@ class PeminjamanAnggotaController extends Controller
     /**
      * Mengajukan peminjaman dari katalog (menunggu konfirmasi petugas).
      */
-    public function peminjaman(Request $request, $id)
+    public function peminjaman(AjukanPeminjamanRequest $request, $id)
     {
         $buku = Buku::findOrFail($id);
 
-        $request->validate([
-            'jumlah' => 'required|integer|min:1',
-        ]);
-
-        $this->service->ajukan($this->anggotaSaatIni(), $buku, (int) $request->input('jumlah'));
+        $this->service->ajukan($this->anggotaSaatIni(), $buku, (int) $request->validated('jumlah'));
 
         return redirect()->to('/anggota/buku')->with('success', 'Berhasil Meminjam Buku');
     }
