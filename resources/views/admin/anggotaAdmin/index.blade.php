@@ -24,13 +24,9 @@
                 </form>
         </div>
         <div class="float-right my-2">
-            @if (Auth::user()->role == 'admin')
-            <a class="btn btn-success" href="/admin/anggota/create"><i class="fas fa-arrow-circle-down"></i> Input
-                anggota</a>
-            @else
-            <a class="btn btn-success" href="/petugas/anggota/create"><i class="fas fa-arrow-circle-down"></i> Input
-                anggota</a>
-            @endif
+            @php $prefix = Auth::user()->role == 'admin' ? '/admin' : '/petugas'; @endphp
+            <a class="btn btn-success" href="{{ $prefix }}/anggota/create"><i class="fas fa-arrow-circle-down"></i> Input anggota</a>
+            <a class="btn btn-outline-secondary" href="{{ $prefix }}/anggota/arsip"><i class="fas fa-archive"></i> Arsip</a>
 
         </div>
     </div>
@@ -41,6 +37,7 @@
     <p>{{ $message }}</p>
 </div>
 @endif
+@include('partials.errors')
 
 <table class="table table-bordered" id="example">
     <thead>

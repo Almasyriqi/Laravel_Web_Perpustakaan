@@ -49,6 +49,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [AdminController::class, 'home']);
 
             // CRUD Anggota
+            Route::get('/anggota/arsip', [AnggotaController::class, 'arsip']);
+            Route::put('/anggota/{id}/pulihkan', [AnggotaController::class, 'pulihkan']);
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
             Route::get('/anggota/cari', [AnggotaController::class, 'search']);
             Route::resource('/anggota', AnggotaController::class);
@@ -68,6 +70,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('/kategori', KategoriController::class);
 
             // CRUD Buku
+            Route::get('/buku/arsip', [BukuController::class, 'arsip']);
+            Route::put('/buku/{id}/pulihkan', [BukuController::class, 'pulihkan']);
             Route::get('/buku/delete/{id}', [BukuController::class, 'delete']);
             Route::resource('/buku', BukuController::class);
 
@@ -86,6 +90,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [PetugasController::class, 'home']);
 
             // CRUD Anggota
+            Route::get('/anggota/arsip', [AnggotaController::class, 'arsip']);
+            Route::put('/anggota/{id}/pulihkan', [AnggotaController::class, 'pulihkan']);
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
             Route::get('/anggota/cari', [AnggotaController::class, 'search']);
             Route::resource('/anggota', AnggotaController::class);
@@ -95,6 +101,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('/kategori', KategoriController::class);
 
             // CRUD Buku
+            Route::get('/buku/arsip', [BukuController::class, 'arsip']);
+            Route::put('/buku/{id}/pulihkan', [BukuController::class, 'pulihkan']);
             Route::get('/buku/delete/{id}', [BukuController::class, 'delete']);
             Route::resource('/buku', BukuController::class);
 

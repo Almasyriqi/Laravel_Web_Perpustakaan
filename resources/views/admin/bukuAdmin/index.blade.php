@@ -9,11 +9,9 @@
                 <h2>Data Buku Perpustakaan</h2><hr>
             </div>
             <div class="float-right my-2">
-                @if (Auth::user()->role == 'admin')
-                    <a class="btn btn-success" href="/admin/buku/create"><i class="fas fa-arrow-circle-down"></i> Input Buku</a>
-                    @else
-                    <a class="btn btn-success" href="/petugas/buku/create"><i class="fas fa-arrow-circle-down"></i> Input Buku</a>
-                    @endif
+                @php $prefix = Auth::user()->role == 'admin' ? '/admin' : '/petugas'; @endphp
+                <a class="btn btn-success" href="{{ $prefix }}/buku/create"><i class="fas fa-arrow-circle-down"></i> Input Buku</a>
+                <a class="btn btn-outline-secondary" href="{{ $prefix }}/buku/arsip"><i class="fas fa-archive"></i> Arsip</a>
                 
             </div>
         </div>
@@ -24,6 +22,7 @@
             <p>{{ $message }}</p>
         </div>
     @endif
+    @include('partials.errors')
 
     <table class="table table-bordered" id="example">
         <thead>

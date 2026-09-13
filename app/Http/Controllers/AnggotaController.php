@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AnggotaController extends Controller
 {
@@ -89,16 +90,45 @@ class AnggotaController extends Controller
         return redirect()->to($this->prefix().'/anggota')->with('success', 'Anggota Berhasil Diupdate');
     }
 
+    /**
+     * Soft delete anggota beserta akunnya (akun terhapus otomatis tidak bisa
+     * login); riwayat peminjaman tetap utuh dan bisa dipulihkan dari arsip.
+     */
     public function destroy($id)
     {
         $anggota = Anggota::with('user')->findOrFail($id);
+
+        if ($anggota->sedangMeminjam()) {
+            throw ValidationException::withMessages([
+                'anggota' => 'Anggota masih memegang buku pinjaman dan belum bisa dihapus.',
+            ]);
+        }
 
         DB::transaction(function () use ($anggota) {
             $anggota->delete();
             $anggota->user?->delete();
         });
 
-        return redirect()->to($this->prefix().'/anggota')->with('success', 'Anggota Berhasil Dihapus');
+        return redirect()->to($this->prefix().'/anggota')->with('success', 'Anggota dipindahkan ke arsip');
+    }
+
+    public function arsip()
+    {
+        $paginate = Anggota::onlyTrashed()->with('user')->latest('deleted_at')->get();
+
+        return view('admin.anggotaAdmin.arsip', compact('paginate'));
+    }
+
+    public function pulihkan($id)
+    {
+        $anggota = Anggota::onlyTrashed()->with('user')->findOrFail($id);
+
+        DB::transaction(function () use ($anggota) {
+            $anggota->restore();
+            $anggota->user?->restore();
+        });
+
+        return redirect()->to($this->prefix().'/anggota')->with('success', 'Anggota berhasil dipulihkan');
     }
 
     public function delete($id)

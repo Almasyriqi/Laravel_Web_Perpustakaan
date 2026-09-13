@@ -28,16 +28,17 @@ class Peminjaman extends Model
     ];
 
     /**
-     * anggota_id merujuk ke anggota.nim, bukan kolom id.
+     * anggota_id merujuk ke anggota.nim, bukan kolom id. withTrashed agar
+     * riwayat tetap menampilkan anggota/buku yang sudah diarsipkan.
      */
     public function anggota(): BelongsTo
     {
-        return $this->belongsTo(Anggota::class, 'anggota_id', 'nim');
+        return $this->belongsTo(Anggota::class, 'anggota_id', 'nim')->withTrashed();
     }
 
     public function buku(): BelongsTo
     {
-        return $this->belongsTo(Buku::class);
+        return $this->belongsTo(Buku::class)->withTrashed();
     }
 
     /**

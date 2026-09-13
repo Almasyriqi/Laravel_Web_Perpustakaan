@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Validation\ValidationException;
 
 class BukuController extends Controller
 {
@@ -77,7 +78,7 @@ class BukuController extends Controller
      */
     public function show($id)
     {
-        $buku = Buku::with('kategori')->where('id', $id)->first();
+        $buku = Buku::with('kategori')->findOrFail($id);
 
         return view('admin.bukuAdmin.show', compact('buku'));
     }
@@ -90,7 +91,7 @@ class BukuController extends Controller
      */
     public function edit($id)
     {
-        $buku = Buku::with('kategori')->where('id', $id)->first();
+        $buku = Buku::with('kategori')->findOrFail($id);
         $kategori = Kategori::all();
 
         return view('admin.bukuAdmin.edit', compact('buku', 'kategori'));
@@ -137,24 +138,52 @@ class BukuController extends Controller
      * @param  int  $id
      * @return Response
      */
+    /**
+     * Soft delete: buku masuk arsip, riwayat peminjaman tetap utuh, file sampul
+     * tidak dihapus supaya masih bisa ditampilkan dari riwayat.
+     */
     public function destroy($id)
     {
-
         $buku = Buku::findOrFail($id);
-        File::delete('/images/'.$buku->image);
+
+        if ($buku->sedangDipinjam()) {
+            throw ValidationException::withMessages([
+                'buku' => "Buku \"{$buku->judul}\" masih dipinjam anggota dan belum bisa dihapus.",
+            ]);
+        }
+
         $buku->delete();
 
-        if (Auth::user()->role == 'admin') {
-            return redirect()->to('/admin/buku')->with('success', 'Buku Berhasil DiHapus');
-        } else {
-            return redirect()->to('/petugas/buku')->with('success', 'Buku Berhasil DiHapus');
-        }
+        return redirect()->to($this->prefix().'/buku')->with('success', 'Buku dipindahkan ke arsip');
     }
 
     public function delete($id)
     {
-        $buku = Buku::find($id);
+        $buku = Buku::findOrFail($id);
 
         return view('admin.bukuAdmin.delete', compact('buku'));
+    }
+
+    public function arsip()
+    {
+        $paginate = Buku::onlyTrashed()->with('kategori')->latest('deleted_at')->get();
+
+        return view('admin.bukuAdmin.arsip', compact('paginate'));
+    }
+
+    public function pulihkan($id)
+    {
+        $buku = Buku::onlyTrashed()->findOrFail($id);
+        $buku->restore();
+
+        return redirect()->to($this->prefix().'/buku')->with('success', "Buku \"{$buku->judul}\" dipulihkan");
+    }
+
+    /**
+     * Buku dikelola dari panel admin maupun petugas; kembali ke panel yang sesuai.
+     */
+    private function prefix(): string
+    {
+        return Auth::user()->role === 'admin' ? '/admin' : '/petugas';
     }
 }

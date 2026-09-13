@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Services\PeminjamanService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Anggota extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'anggota';
 
@@ -24,9 +26,13 @@ class Anggota extends Model
         'alamat',
     ];
 
+    /**
+     * withTrashed: akun ikut diarsipkan bersama anggota, tapi nama tetap harus
+     * bisa ditampilkan di riwayat dan halaman arsip.
+     */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     /**
@@ -36,5 +42,13 @@ class Anggota extends Model
     public function peminjaman(): HasMany
     {
         return $this->hasMany(Peminjaman::class, 'anggota_id', 'nim');
+    }
+
+    /**
+     * Masih memegang buku (dipinjam / perpanjang).
+     */
+    public function sedangMeminjam(): bool
+    {
+        return $this->peminjaman()->whereIn('status', PeminjamanService::STATUS_MENAHAN_STOK)->exists();
     }
 }
