@@ -19,15 +19,6 @@ use Illuminate\Validation\ValidationException;
  */
 class PeminjamanService
 {
-    /** Masa pinjam normal (hari). */
-    public const MASA_PINJAM = 7;
-
-    /** Total masa pinjam setelah diperpanjang 1x (hari). */
-    public const MASA_PERPANJANG = 14;
-
-    /** Denda keterlambatan per hari untuk tiap judul (rupiah). */
-    public const DENDA_PER_HARI = 2000;
-
     public const STATUS_KONFIRMASI = 'konfirmasi';
 
     public const STATUS_DIPINJAM = 'dipinjam';
@@ -45,6 +36,37 @@ class PeminjamanService
 
     /** Status yang berarti buku sedang di tangan anggota (menahan stok). */
     public const STATUS_MENAHAN_STOK = [self::STATUS_DIPINJAM, self::STATUS_PERPANJANG];
+
+    /**
+     * Aturan (masa_pinjam, masa_perpanjang, maks_perpanjang, denda_per_hari)
+     * dari config/perpustakaan.php; bisa diberikan langsung untuk unit test.
+     *
+     * @var array{masa_pinjam: int, masa_perpanjang: int, maks_perpanjang: int, denda_per_hari: int}
+     */
+    private array $aturan;
+
+    /**
+     * @param  array{masa_pinjam?: int, masa_perpanjang?: int, maks_perpanjang?: int, denda_per_hari?: int}|null  $aturan
+     */
+    public function __construct(?array $aturan = null)
+    {
+        $this->aturan = $aturan ?? config('perpustakaan');
+    }
+
+    public function masaPinjam(): int
+    {
+        return $this->aturan['masa_pinjam'];
+    }
+
+    public function masaPerpanjang(): int
+    {
+        return $this->aturan['masa_perpanjang'];
+    }
+
+    public function dendaPerHari(): int
+    {
+        return $this->aturan['denda_per_hari'];
+    }
 
     /**
      * Anggota mengajukan peminjaman dari katalog. Stok belum berkurang
@@ -122,18 +144,19 @@ class PeminjamanService
     }
 
     /**
-     * Perpanjangan hanya boleh 1x dan hanya saat status dipinjam.
+     * Perpanjangan hanya saat buku masih di tangan anggota dan belum melewati
+     * batas maks_perpanjang (default 1x).
      */
     public function perpanjang(Peminjaman $peminjaman): Peminjaman
     {
-        if ($peminjaman->status !== self::STATUS_DIPINJAM || $peminjaman->perpanjang) {
+        if (! $this->menahanStok($peminjaman->status) || $peminjaman->perpanjang >= $this->aturan['maks_perpanjang']) {
             throw ValidationException::withMessages([
-                'perpanjang' => 'Peminjaman hanya bisa diperpanjang satu kali saat berstatus dipinjam.',
+                'perpanjang' => "Peminjaman hanya bisa diperpanjang {$this->aturan['maks_perpanjang']} kali saat berstatus dipinjam.",
             ]);
         }
 
         $peminjaman->status = self::STATUS_PERPANJANG;
-        $peminjaman->perpanjang = 1;
+        $peminjaman->perpanjang = $peminjaman->perpanjang + 1;
         $peminjaman->save();
 
         return $peminjaman;
@@ -255,13 +278,13 @@ class PeminjamanService
     }
 
     /**
-     * Denda = hari keterlambatan x tarif; batas 7 hari, atau 14 hari bila diperpanjang.
+     * Denda = hari keterlambatan x tarif; batas masa_pinjam, atau masa_perpanjang bila diperpanjang.
      */
     public function hitungDenda(int $lamaPinjam, bool $diperpanjang): int
     {
-        $batas = $diperpanjang ? self::MASA_PERPANJANG : self::MASA_PINJAM;
+        $batas = $diperpanjang ? $this->masaPerpanjang() : $this->masaPinjam();
 
-        return max(0, $lamaPinjam - $batas) * self::DENDA_PER_HARI;
+        return max(0, $lamaPinjam - $batas) * $this->dendaPerHari();
     }
 
     public function menahanStok(string $status): bool

@@ -169,6 +169,17 @@ class PeminjamanFlowTest extends TestCase
         $this->assertSame(5, $this->buku->fresh()->stok);
     }
 
+    public function test_tarif_denda_mengikuti_konfigurasi(): void
+    {
+        config(['perpustakaan.denda_per_hari' => 5000, 'perpustakaan.masa_pinjam' => 3]);
+        $pinjam = $this->dipinjam(jumlah: 1);
+
+        $this->travel(6)->days(); // 3 hari terlambat
+        $this->actingAs($this->petugas->user)->put('/petugas/transaksi/'.$pinjam->id);
+
+        $this->assertSame(15000, $pinjam->fresh()->denda);
+    }
+
     public function test_pengembalian_dua_kali_tidak_menambah_stok_dua_kali(): void
     {
         $pinjam = $this->dipinjam(jumlah: 1);
