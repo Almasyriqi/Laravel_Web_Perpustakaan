@@ -25,7 +25,7 @@
                     <li class="list-group-item"><b>Alamat: </b>{{ $anggota->alamat }}</li>
                 </ul>
             </div>
-            @if (Auth::user()->role == 'admin')
+            @if (Auth::user()->isAdmin())
             <a class="btn btn-success mt-3" href="/admin/anggota">Kembali</a>
             @else
             <a class="btn btn-success mt-3" href="/petugas/anggota">Kembali</a>

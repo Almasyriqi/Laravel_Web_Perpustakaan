@@ -165,6 +165,6 @@ class AnggotaController extends Controller
      */
     private function prefix(): string
     {
-        return Auth::user()->role === 'admin' ? '/admin' : '/petugas';
+        return Auth::user()->isAdmin() ? '/admin' : '/petugas';
     }
 }

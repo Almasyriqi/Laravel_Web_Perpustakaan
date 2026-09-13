@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Role;
 use App\Http\Requests\ProfileRequest;
 use App\Models\Admin;
 use App\Models\Anggota;
@@ -33,11 +34,11 @@ class UserController extends Controller
 
         DB::transaction(function () use ($profil, $data) {
             $profil->update(match (Auth::user()->role) {
-                'admin' => [
+                Role::Admin => [
                     'no_hp' => $data['no_hp'],
                     'alamat' => $data['alamat'] ?? '',
                 ],
-                'petugas' => [
+                Role::Petugas => [
                     'tgl_lahir' => $data['tgl_lahir'],
                     'no_hp' => $data['no_hp'],
                     'alamat' => $data['alamat'] ?? '',
@@ -66,9 +67,9 @@ class UserController extends Controller
         $user = Auth::user();
 
         $model = match ($user->role) {
-            'admin' => Admin::class,
-            'petugas' => Petugas::class,
-            default => Anggota::class,
+            Role::Admin => Admin::class,
+            Role::Petugas => Petugas::class,
+            Role::Anggota => Anggota::class,
         };
 
         return $model::with('user')->where('user_id', $user->id)->firstOrFail();

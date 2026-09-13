@@ -1,8 +1,6 @@
 <?php
 
-use App\Http\Middleware\AdminMiddleware;
-use App\Http\Middleware\AnggotaMiddleware;
-use App\Http\Middleware\PetugasMiddleware;
+use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,10 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
             ToSweetAlert::class,
         ]);
 
+        // Pemakaian di rute: ->middleware('role:admin') atau 'role:admin,petugas'
         $middleware->alias([
-            'admin' => AdminMiddleware::class,
-            'petugas' => PetugasMiddleware::class,
-            'anggota' => AnggotaMiddleware::class,
+            'role' => EnsureUserHasRole::class,
         ]);
 
         // Pengguna yang sudah login diarahkan ke /home (HomeController memilah per role)

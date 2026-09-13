@@ -26,7 +26,7 @@
                     <li class="list-group-item"><img width="150px" src="{{ $buku->gambar_url }}" alt="Sampul {{ $buku->judul }}"></li>
                 </ul>
             </div>
-            @if (Auth::user()->role == 'admin')
+            @if (Auth::user()->isAdmin())
             <a class="btn btn-success mt-3" href="/admin/buku">Kembali</a>
                     @else
                     <a class="btn btn-success mt-3" href="/petugas/buku">Kembali</a>

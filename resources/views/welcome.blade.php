@@ -29,13 +29,13 @@
                 <a href={{ route('login') }} class="btn-get-started">Login</a>
                 <a href={{ route('register') }} class="btn-get-started">Register</a>
             @else
-                @if (Auth::user()->role == 'admin')
+                @if (Auth::user()->isAdmin())
                     <a href='/admin' class="btn-get-started">Home</a>
                 @endif
-                @if (Auth::user()->role == 'petugas')
+                @if (Auth::user()->isPetugas())
                     <a href='/petugas' class="btn-get-started">Home</a>
                 @endif
-                @if (Auth::user()->role == 'anggota')
+                @if (Auth::user()->isAnggota())
                     <a href='/anggota' class="btn-get-started">Home</a>
                 @endif
             @endguest

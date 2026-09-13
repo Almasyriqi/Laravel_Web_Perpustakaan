@@ -9,7 +9,7 @@
             <h2>Data Anggota Perpustakaan</h2>
         </div>
         <div class="float-left my-4">
-            @if (Auth::user()->role == 'admin')
+            @if (Auth::user()->isAdmin())
             <form action="/admin/anggota/cari/" method="GET">
                 @else
                 <form action="/petugas/anggota/cari/" method="GET">
@@ -24,7 +24,7 @@
                 </form>
         </div>
         <div class="float-right my-2">
-            @php $prefix = Auth::user()->role == 'admin' ? '/admin' : '/petugas'; @endphp
+            @php $prefix = Auth::user()->isAdmin() ? '/admin' : '/petugas'; @endphp
             <a class="btn btn-success" href="{{ $prefix }}/anggota/create"><i class="fas fa-arrow-circle-down"></i> Input anggota</a>
             <a class="btn btn-outline-secondary" href="{{ $prefix }}/anggota/arsip"><i class="fas fa-archive"></i> Arsip</a>
 
@@ -61,7 +61,7 @@
             <td>{{ $anggota->no_hp }}</td>
             <td>{{ $anggota->user->email }}</td>
             <td>
-                @if (Auth::user()->role == 'admin')
+                @if (Auth::user()->isAdmin())
                 <a class="btn btn-info" href="/admin/anggota/{{ $anggota->nim }}">
                     <i class="fas fa-eye"></i> Show</a>
 
@@ -105,7 +105,7 @@
                 @endif
 
                 @for ($i = 1; $i <= $paginate->lastPage(); $i++)
-                    @if (Auth::user()->role == 'admin')
+                    @if (Auth::user()->isAdmin())
                         @if ($i == $paginate->currentPage())
                             <li class="page-item active"><a class="page-link" href="/admin/anggota?page={{ $i }}">{{ $i }}</a>
                             </li>

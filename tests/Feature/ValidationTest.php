@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use App\Models\Admin;
 use App\Models\Anggota;
 use App\Models\Buku;
@@ -77,7 +78,7 @@ class ValidationTest extends TestCase
             ->assertRedirect('/petugas/anggota');
 
         $user = User::where('username', 'siti')->firstOrFail();
-        $this->assertSame('anggota', $user->role);
+        $this->assertSame(Role::Anggota, $user->role);
         $this->assertDatabaseHas('anggota', ['nim' => 1941720100, 'user_id' => $user->id]);
     }
 

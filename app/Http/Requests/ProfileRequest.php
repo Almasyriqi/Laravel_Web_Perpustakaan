@@ -21,7 +21,7 @@ class ProfileRequest extends FormRequest
     public function rules(): array
     {
         $userId = $this->user()->id;
-        $anggota = $this->user()->role === 'anggota';
+        $anggota = $this->user()->isAnggota();
 
         return [
             'username' => ['required', 'string', 'max:20', Rule::unique('users', 'username')->ignore($userId)],

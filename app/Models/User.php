@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Role;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -39,7 +40,37 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'role' => Role::class,
         ];
+    }
+
+    /**
+     * Apakah user memiliki salah satu dari role yang diberikan.
+     */
+    public function hasRole(Role|string ...$roles): bool
+    {
+        foreach ($roles as $role) {
+            if ($this->role === ($role instanceof Role ? $role : Role::from($role))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === Role::Admin;
+    }
+
+    public function isPetugas(): bool
+    {
+        return $this->role === Role::Petugas;
+    }
+
+    public function isAnggota(): bool
+    {
+        return $this->role === Role::Anggota;
     }
 
     // Satu akun hanya punya satu profil sesuai role-nya

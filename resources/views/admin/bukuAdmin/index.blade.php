@@ -9,7 +9,7 @@
                 <h2>Data Buku Perpustakaan</h2><hr>
             </div>
             <div class="float-right my-2">
-                @php $prefix = Auth::user()->role == 'admin' ? '/admin' : '/petugas'; @endphp
+                @php $prefix = Auth::user()->isAdmin() ? '/admin' : '/petugas'; @endphp
                 <a class="btn btn-success" href="{{ $prefix }}/buku/create"><i class="fas fa-arrow-circle-down"></i> Input Buku</a>
                 <a class="btn btn-outline-secondary" href="{{ $prefix }}/buku/arsip"><i class="fas fa-archive"></i> Arsip</a>
                 
@@ -51,7 +51,7 @@
                     <td>
                         <img width="150px" src="{{ $buku->gambar_url }}" alt="Sampul {{ $buku->judul }}"></td>
                     <td>
-                        @if (Auth::user()->role == 'admin')
+                        @if (Auth::user()->isAdmin())
                         <a class="btn btn-info" href="/admin/buku/{{  $buku->id }}">
                             <i class="fas fa-eye"></i> Show</a>
 

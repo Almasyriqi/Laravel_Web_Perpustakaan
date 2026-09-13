@@ -1,5 +1,5 @@
 {{-- !-- Delete Warning Modal -->  --}}
-@if (Auth::user()->role == 'admin')
+@if (Auth::user()->isAdmin())
 <form action="/admin/anggota/{{ $anggota->nim }}" method="post">
 @else
 <form action="/petugas/anggota/{{ $anggota->nim }}" method="post">

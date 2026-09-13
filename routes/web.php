@@ -44,7 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('/profile', UserController::class);
 
-    Route::middleware(['admin'])->group(function () {
+    Route::middleware('role:admin')->group(function () {
         Route::prefix('admin')->group(function () {
             Route::get('/', [AdminController::class, 'home']);
 
@@ -85,7 +85,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     });
 
-    Route::middleware(['petugas'])->group(function () {
+    Route::middleware('role:petugas')->group(function () {
         Route::prefix('petugas')->group(function () {
             Route::get('/', [PetugasController::class, 'home']);
 
@@ -122,7 +122,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     });
 
-    Route::middleware(['anggota'])->group(function () {
+    Route::middleware('role:anggota')->group(function () {
         Route::prefix('anggota')->group(function () {
             Route::get('/', [AnggotaController::class, 'home']);
             Route::resource('/buku', BukuAnggotaController::class);

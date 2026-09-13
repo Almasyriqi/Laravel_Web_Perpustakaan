@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use App\Models\Anggota;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -57,14 +58,6 @@ class AuthTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_user_dengan_role_tidak_dikenal_dilogout(): void
-    {
-        $user = User::factory()->create(['role' => 'misterius']);
-
-        $this->actingAs($user)->get('/home')->assertRedirect('/');
-        $this->assertGuest();
-    }
-
     public function test_user_belum_verifikasi_diarahkan_ke_halaman_verifikasi(): void
     {
         $user = User::factory()->unverified()->create();
@@ -90,7 +83,7 @@ class AuthTest extends TestCase
         ])->assertRedirect('/home');
 
         $user = User::where('username', 'budi')->firstOrFail();
-        $this->assertSame('anggota', $user->role);
+        $this->assertSame(Role::Anggota, $user->role);
         $this->assertNull($user->email_verified_at);
         Notification::assertSentTo($user, VerifyEmail::class);
     }

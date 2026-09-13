@@ -28,7 +28,7 @@ class LaporanController extends Controller
             'sekarang' => $bulan,
             'tahun' => $tahun,
             'namaBulan' => self::NAMA_BULAN,
-            'routePrefix' => $request->user()->role === 'admin' ? 'admin' : 'petugas',
+            'routePrefix' => $request->user()->isAdmin() ? 'admin' : 'petugas',
         ]);
     }
 

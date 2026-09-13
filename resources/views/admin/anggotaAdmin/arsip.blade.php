@@ -3,7 +3,7 @@
 @section('title', 'Arsip Anggota')
 
 @section('content-custom')
-@php $prefix = Auth::user()->role == 'admin' ? '/admin' : '/petugas'; @endphp
+@php $prefix = Auth::user()->isAdmin() ? '/admin' : '/petugas'; @endphp
 <div class="row">
     <div class="col-lg-12 margin-tb">
         <div class="pull-left mt-2">

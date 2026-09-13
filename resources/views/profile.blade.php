@@ -17,7 +17,7 @@
                 </div>
                 <!-- /.card-header -->
                 <!-- form start -->
-                @if (Auth::user()->role == 'anggota')
+                @if (Auth::user()->isAnggota())
                     <form method="post" action="{{ route('profile.update', $user->nim) }}" id="myForm">
                 @else
                     <form method="post" action="{{ route('profile.update', $user->id) }}" id="myForm">
@@ -41,7 +41,7 @@
                             <input type="username" name="username" class="form-control" id="username"
                                 aria-describedby="username" value="{{ $user->user->username }}">
                         </div>
-                        @if (Auth::user()->role == 'anggota')
+                        @if (Auth::user()->isAnggota())
                         <div class="form-group">
                             <label for="nim">Nim</label>
                             <input type="text" name="nim" class="form-control" id="nim" aria-describedby="nim"
@@ -67,7 +67,7 @@
                                 value="{{ $user->tgl_lahir }}">
                         </div>
                         @endif
-                        @if (Auth::user()->role == 'petugas')
+                        @if (Auth::user()->isPetugas())
                         <div class="form-group">
                             <label for="tgl_lahir">Tanggal Lahir</label>
                             <input type="date" name="tgl_lahir" class="form-control datepicker" id="tgl_lahir"
@@ -98,13 +98,13 @@
                     </div>
                     <div class="card-footer">
                         <button type="submit" class="btn btn-primary">Submit</button>
-                        @if (Auth::user()->role == 'admin')
+                        @if (Auth::user()->isAdmin())
                             <a href="/admin" class="btn btn-success float-right">Kembali</a>
                         @endif
-                        @if (Auth::user()->role == 'petugas')
+                        @if (Auth::user()->isPetugas())
                             <a href="/petugas" class="btn btn-success float-right">Kembali</a>
                         @endif
-                        @if (Auth::user()->role == 'anggota')
+                        @if (Auth::user()->isAnggota())
                             <a href="/anggota" class="btn btn-success float-right">Kembali</a>
                         @endif
                     </div>

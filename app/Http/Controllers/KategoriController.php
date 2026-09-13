@@ -46,7 +46,7 @@ class KategoriController extends Controller
         $kategori->save();
 
         // jika data berhasil ditambahkan, akan kembali ke halaman utama
-        if (Auth::user()->role == 'admin') {
+        if (Auth::user()->isAdmin()) {
             return redirect()->to('/admin/kategori')->with('success', 'Kategori Berhasil Ditambah');
         } else {
             return redirect()->to('/petugas/kategori')->with('success', 'Kategori Berhasil Ditambah');
@@ -93,7 +93,7 @@ class KategoriController extends Controller
         $kategori->keterangan = $request->get('keterangan');
         $kategori->save();
 
-        if (Auth::user()->role == 'admin') {
+        if (Auth::user()->isAdmin()) {
             return redirect()->to('/admin/kategori')->with('success', 'Kategori Berhasil Diupdate');
         } else {
             return redirect()->to('/petugas/kategori')->with('success', 'Kategori Berhasil Diupdate');
@@ -110,7 +110,7 @@ class KategoriController extends Controller
     {
         $kategori = Kategori::findOrFail($id);
         $kategori->delete();
-        if (Auth::user()->role == 'admin') {
+        if (Auth::user()->isAdmin()) {
             return redirect()->to('/admin/kategori')->with('success', 'Kategori Berhasil Dihapus');
         } else {
             return redirect()->to('/petugas/kategori')->with('success', 'Kategori Berhasil Dihapus');
