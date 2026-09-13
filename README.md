@@ -109,7 +109,7 @@ Rekap peminjaman per bulan, siap cetak lewat DomPDF
 
 | | Fitur | Keterangan |
 |:--:|---|---|
-| 📖 | **Katalog buku** | Menelusuri koleksi lengkap dengan sampul dan detail buku |
+| 📖 | **Katalog buku** | Grid kartu bersampul dengan pencarian (judul/penulis/penerbit), filter kategori, opsi "hanya yang tersedia", dan paginasi |
 | 🛒 | **Ajukan peminjaman** | Pinjam buku langsung dari katalog (status awal: `konfirmasi`) |
 | 📋 | **Riwayat peminjaman** | Memantau status, tanggal jatuh tempo (badge *Terlambat*), dan denda tiap transaksi |
 | ⏳ | **Ajukan perpanjangan** | Memperpanjang masa pinjam buku yang sedang dipinjam |
@@ -525,7 +525,7 @@ Beberapa hal yang layak dikerjakan berikutnya, diurutkan berdasarkan prioritas.
 
 ### 🟢 Nice to Have — fitur baru
 
-- [ ] 🔍 **Pencarian & filter katalog** untuk anggota (judul, penulis, kategori)
+- [x] 🔍 **Pencarian & filter katalog** anggota — scope `Buku::cari()/dariKategori()/tersedia()`, `KatalogRequest`, grid kartu 12 per halaman dengan paginasi Bootstrap 4 yang mempertahankan query string
 - [ ] 📧 **Notifikasi email jatuh tempo** otomatis via Queue + Task Scheduler
 - [ ] 📊 **Dashboard statistik** — buku terpopuler, tren peminjaman, daftar keterlambatan
 - [ ] 📑 **Export laporan ke Excel** selain PDF, plus filter rentang tanggal bebas

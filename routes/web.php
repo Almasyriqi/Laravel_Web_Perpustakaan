@@ -125,7 +125,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:anggota')->group(function () {
         Route::prefix('anggota')->group(function () {
             Route::get('/', [AnggotaController::class, 'home']);
-            Route::resource('/buku', BukuAnggotaController::class);
+            Route::resource('/buku', BukuAnggotaController::class)->only(['index', 'show']);
 
             Route::get('/pinjam/delete/{id}', [PeminjamanAnggotaController::class, 'delete']);
             Route::get('/pinjam/perpanjang/{id}', [PeminjamanAnggotaController::class, 'modalPerpanjang']);
