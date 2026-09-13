@@ -21,6 +21,11 @@
                     <li class="list-group-item"><b>Judul Buku: </b>{{ $pinjam->buku->judul }}</li>
                     <li class="list-group-item"><b>Jumlah: </b>{{$pinjam->jumlah }}</li>
                     <li class="list-group-item"><b>Tanggal Pinjam: </b>{{  date('d-m-Y', strtotime($pinjam->tgl_pinjam)) }}</li>
+                    @if ($pinjam->tgl_harus_kembali)
+                    <li class="list-group-item"><b>Harus Kembali: </b>{{ date('d-m-Y', strtotime($pinjam->tgl_harus_kembali)) }}
+                        @if ($pinjam->terlambat())<span class="badge badge-danger">Terlambat</span>@endif
+                    </li>
+                    @endif
                     @if ($pinjam->status == 'kembali')
                     <li class="list-group-item"><b>Tanggal Kembali: </b>{{  date('d-m-Y', strtotime($pinjam->tgl_kembali)) }}</li>
                     <li class="list-group-item"><b>Lama Pinjam: </b>{{ $pinjam->lama_pinjam }} Hari</li>

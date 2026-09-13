@@ -108,13 +108,17 @@ class PeminjamanService
                 $buku->decrement('stok', $jumlah);
             }
 
+            $tglPinjam ??= now()->toDateString();
+            $diperpanjang = $status === self::STATUS_PERPANJANG;
+
             return Peminjaman::create([
                 'anggota_id' => $anggotaId,
                 'buku_id' => $buku->id,
                 'jumlah' => $jumlah,
-                'tgl_pinjam' => $tglPinjam ?? now()->toDateString(),
+                'tgl_pinjam' => $tglPinjam,
+                'tgl_harus_kembali' => $status === self::STATUS_KONFIRMASI ? null : $this->jatuhTempo($tglPinjam, $diperpanjang),
                 'status' => $status,
-                'perpanjang' => $status === self::STATUS_PERPANJANG ? 1 : 0,
+                'perpanjang' => $diperpanjang ? 1 : 0,
                 'denda' => 0,
             ]);
         });
@@ -137,6 +141,7 @@ class PeminjamanService
             $buku->decrement('stok', $peminjaman->jumlah);
 
             $peminjaman->status = self::STATUS_DIPINJAM;
+            $peminjaman->tgl_harus_kembali = $this->jatuhTempo($peminjaman->tgl_pinjam, false);
             $peminjaman->save();
 
             return $peminjaman;
@@ -157,6 +162,7 @@ class PeminjamanService
 
         $peminjaman->status = self::STATUS_PERPANJANG;
         $peminjaman->perpanjang = $peminjaman->perpanjang + 1;
+        $peminjaman->tgl_harus_kembali = $this->jatuhTempo($peminjaman->tgl_pinjam, true);
         $peminjaman->save();
 
         return $peminjaman;
@@ -182,7 +188,8 @@ class PeminjamanService
             $peminjaman->status = self::STATUS_KEMBALI;
             $peminjaman->tgl_kembali = $tglKembali->toDateString();
             $peminjaman->lama_pinjam = $lamaPinjam;
-            $peminjaman->denda = $this->hitungDenda($lamaPinjam, (bool) $peminjaman->perpanjang);
+            $peminjaman->tgl_harus_kembali ??= $this->jatuhTempo($peminjaman->tgl_pinjam, (bool) $peminjaman->perpanjang);
+            $peminjaman->denda = $this->hitungDendaDariJatuhTempo($peminjaman->tgl_harus_kembali, $tglKembali);
             $peminjaman->save();
 
             return $peminjaman;
@@ -250,13 +257,16 @@ class PeminjamanService
             $peminjaman->tgl_pinjam = $data['tgl_pinjam'];
             $peminjaman->status = $statusBaru;
             $peminjaman->perpanjang = (int) ($data['perpanjang'] ?? $peminjaman->perpanjang);
+            $peminjaman->tgl_harus_kembali = $statusBaru === self::STATUS_KONFIRMASI
+                ? null
+                : $this->jatuhTempo($peminjaman->tgl_pinjam, (bool) $peminjaman->perpanjang);
 
             if ($statusBaru === self::STATUS_KEMBALI) {
                 $tglKembali = Carbon::parse($data['tgl_kembali'] ?? now());
                 $lamaPinjam = $this->hitungLamaPinjam($peminjaman->tgl_pinjam, $tglKembali);
                 $peminjaman->tgl_kembali = $tglKembali->toDateString();
                 $peminjaman->lama_pinjam = $lamaPinjam;
-                $peminjaman->denda = $this->hitungDenda($lamaPinjam, (bool) $peminjaman->perpanjang);
+                $peminjaman->denda = $this->hitungDendaDariJatuhTempo($peminjaman->tgl_harus_kembali, $tglKembali);
             } else {
                 $peminjaman->tgl_kembali = null;
                 $peminjaman->lama_pinjam = null;
@@ -267,6 +277,26 @@ class PeminjamanService
 
             return $peminjaman;
         });
+    }
+
+    /**
+     * Tanggal buku harus dikembalikan: tgl_pinjam + masa pinjam (atau masa perpanjang).
+     */
+    public function jatuhTempo(string|CarbonInterface $tglPinjam, bool $diperpanjang): string
+    {
+        return Carbon::parse($tglPinjam)
+            ->addDays($diperpanjang ? $this->masaPerpanjang() : $this->masaPinjam())
+            ->toDateString();
+    }
+
+    /**
+     * Denda = hari keterlambatan setelah jatuh tempo x tarif.
+     */
+    public function hitungDendaDariJatuhTempo(string|CarbonInterface $tglHarusKembali, CarbonInterface $tglKembali): int
+    {
+        $terlambat = $this->hitungLamaPinjam($tglHarusKembali, $tglKembali);
+
+        return $terlambat * $this->dendaPerHari();
     }
 
     public function hitungLamaPinjam(string|CarbonInterface $tglPinjam, CarbonInterface $tglKembali): int

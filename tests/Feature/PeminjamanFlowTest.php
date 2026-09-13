@@ -180,6 +180,54 @@ class PeminjamanFlowTest extends TestCase
         $this->assertSame(15000, $pinjam->fresh()->denda);
     }
 
+    public function test_konfirmasi_menetapkan_jatuh_tempo_dan_timestamps(): void
+    {
+        $pinjam = $this->pengajuan(jumlah: 1);
+        $this->assertNull($pinjam->tgl_harus_kembali);
+
+        $this->actingAs($this->petugas->user)->put('/petugas/transaksi/konfirmasi/'.$pinjam->id);
+
+        $pinjam->refresh();
+        $this->assertSame('2026-09-08', $pinjam->tgl_harus_kembali);
+        $this->assertNotNull($pinjam->created_at);
+        $this->assertNotNull($pinjam->updated_at);
+    }
+
+    public function test_perpanjangan_menggeser_jatuh_tempo(): void
+    {
+        $pinjam = $this->dipinjam(jumlah: 1);
+        $this->assertSame('2026-09-08', $pinjam->tgl_harus_kembali);
+
+        $this->actingAs($this->petugas->user)->put('/petugas/transaksi/perpanjang/'.$pinjam->id);
+
+        $this->assertSame('2026-09-15', $pinjam->fresh()->tgl_harus_kembali);
+    }
+
+    public function test_riwayat_menandai_peminjaman_yang_terlambat(): void
+    {
+        $pinjam = $this->dipinjam(jumlah: 1);
+
+        $this->travel(9)->days();
+
+        $this->actingAs($this->anggota->user)->get('/anggota/pinjam')
+            ->assertOk()
+            ->assertSee('08-09-2026')
+            ->assertSee('Terlambat')
+            ->assertDontSee('Perpanjang</a>', false);
+        $this->assertTrue($pinjam->fresh()->terlambat());
+    }
+
+    public function test_admin_mengubah_tgl_pinjam_menggeser_jatuh_tempo(): void
+    {
+        $pinjam = $this->dipinjam(jumlah: 1);
+
+        $this->actingAs(Admin::factory()->create()->user)->put('/admin/peminjaman/'.$pinjam->id, [
+            'jumlah' => 1, 'tgl_pinjam' => '2026-09-03', 'status' => 'dipinjam', 'perpanjang' => 0,
+        ]);
+
+        $this->assertSame('2026-09-10', $pinjam->fresh()->tgl_harus_kembali);
+    }
+
     public function test_pengembalian_dua_kali_tidak_menambah_stok_dua_kali(): void
     {
         $pinjam = $this->dipinjam(jumlah: 1);

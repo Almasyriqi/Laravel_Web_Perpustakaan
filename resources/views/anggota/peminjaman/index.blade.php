@@ -37,6 +37,7 @@
             <th>Judul Buku</th>
             <th>Jumlah</th>
             <th>Tanggal Pinjam</th>
+            <th>Harus Kembali</th>
             <th>Denda</th>
             <th>Status</th>
             <th width="320px">Action</th>
@@ -48,19 +49,24 @@
             <td>{{ $peminjaman->buku->judul }}</td>
             <td>{{$peminjaman->jumlah}}</td>
             <td>{{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam)) }}</td>
+            <td>
+                @if ($peminjaman->tgl_harus_kembali)
+                    {{ date('d-m-Y', strtotime($peminjaman->tgl_harus_kembali)) }}
+                    @if ($peminjaman->terlambat())
+                        <span class="badge badge-danger">Terlambat</span>
+                    @endif
+                @else
+                    -
+                @endif
+            </td>
             <td>@currency($peminjaman->denda)</td>
             <td>{{ $peminjaman->status }}</td>
             <td>
                 <a class="btn btn-info" href="/anggota/pinjam/{{  $peminjaman->id }}">
                     <i class="fas fa-eye"></i> Show</a>
 
-                @php
-                $tgl1 = new DateTime($peminjaman->tgl_pinjam);
-                $tgl2 = new DateTime(now());
-                $d = $tgl2->diff($tgl1)->days;
-                @endphp
                 @if ($peminjaman->status == 'dipinjam')
-                    @if ($d <= 7) 
+                    @if (! $peminjaman->terlambat())
                         <a class="btn btn-warning" href="" data-toggle="modal" id="Button"
                         title="Perpanjang Peminjaman" data-target="#defaultModal"
                         data-attr="/anggota/pinjam/perpanjang/{{  $peminjaman->id }}">

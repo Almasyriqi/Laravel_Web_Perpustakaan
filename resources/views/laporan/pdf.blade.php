@@ -25,6 +25,7 @@
                 <th>Buku</th>
                 <th>Jumlah</th>
                 <th>Tanggal Pinjam</th>
+                <th>Harus Kembali</th>
                 <th>Tanggal Kembali</th>
                 <th>Lama Pinjam</th>
                 <th>Status</th>
@@ -38,6 +39,7 @@
                 <td>{{ $lp->buku->judul }}</td>
                 <td class="angka">{{ $lp->jumlah }}</td>
                 <td>{{ date('d-m-Y', strtotime($lp->tgl_pinjam)) }}</td>
+                <td>{{ $lp->tgl_harus_kembali ? date('d-m-Y', strtotime($lp->tgl_harus_kembali)) : '-' }}</td>
                 @if ($lp->tgl_kembali === null)
                 <td>Belum</td>
                 <td class="angka">0</td>
@@ -52,7 +54,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="8" style="text-align:center">Tidak ada peminjaman pada periode ini.</td>
+                <td colspan="9" style="text-align:center">Tidak ada peminjaman pada periode ini.</td>
             </tr>
             @endforelse
         </tbody>
