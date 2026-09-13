@@ -19,15 +19,6 @@ use Illuminate\Validation\ValidationException;
  */
 class PeminjamanService
 {
-    /** Masa pinjam normal (hari). */
-    public const MASA_PINJAM = 7;
-
-    /** Total masa pinjam setelah diperpanjang 1x (hari). */
-    public const MASA_PERPANJANG = 14;
-
-    /** Denda keterlambatan per hari untuk tiap judul (rupiah). */
-    public const DENDA_PER_HARI = 2000;
-
     public const STATUS_KONFIRMASI = 'konfirmasi';
 
     public const STATUS_DIPINJAM = 'dipinjam';
@@ -45,6 +36,37 @@ class PeminjamanService
 
     /** Status yang berarti buku sedang di tangan anggota (menahan stok). */
     public const STATUS_MENAHAN_STOK = [self::STATUS_DIPINJAM, self::STATUS_PERPANJANG];
+
+    /**
+     * Aturan (masa_pinjam, masa_perpanjang, maks_perpanjang, denda_per_hari)
+     * dari config/perpustakaan.php; bisa diberikan langsung untuk unit test.
+     *
+     * @var array{masa_pinjam: int, masa_perpanjang: int, maks_perpanjang: int, denda_per_hari: int}
+     */
+    private array $aturan;
+
+    /**
+     * @param  array{masa_pinjam?: int, masa_perpanjang?: int, maks_perpanjang?: int, denda_per_hari?: int}|null  $aturan
+     */
+    public function __construct(?array $aturan = null)
+    {
+        $this->aturan = $aturan ?? config('perpustakaan');
+    }
+
+    public function masaPinjam(): int
+    {
+        return $this->aturan['masa_pinjam'];
+    }
+
+    public function masaPerpanjang(): int
+    {
+        return $this->aturan['masa_perpanjang'];
+    }
+
+    public function dendaPerHari(): int
+    {
+        return $this->aturan['denda_per_hari'];
+    }
 
     /**
      * Anggota mengajukan peminjaman dari katalog. Stok belum berkurang
@@ -86,13 +108,17 @@ class PeminjamanService
                 $buku->decrement('stok', $jumlah);
             }
 
+            $tglPinjam ??= now()->toDateString();
+            $diperpanjang = $status === self::STATUS_PERPANJANG;
+
             return Peminjaman::create([
                 'anggota_id' => $anggotaId,
                 'buku_id' => $buku->id,
                 'jumlah' => $jumlah,
-                'tgl_pinjam' => $tglPinjam ?? now()->toDateString(),
+                'tgl_pinjam' => $tglPinjam,
+                'tgl_harus_kembali' => $status === self::STATUS_KONFIRMASI ? null : $this->jatuhTempo($tglPinjam, $diperpanjang),
                 'status' => $status,
-                'perpanjang' => $status === self::STATUS_PERPANJANG ? 1 : 0,
+                'perpanjang' => $diperpanjang ? 1 : 0,
                 'denda' => 0,
             ]);
         });
@@ -115,6 +141,7 @@ class PeminjamanService
             $buku->decrement('stok', $peminjaman->jumlah);
 
             $peminjaman->status = self::STATUS_DIPINJAM;
+            $peminjaman->tgl_harus_kembali = $this->jatuhTempo($peminjaman->tgl_pinjam, false);
             $peminjaman->save();
 
             return $peminjaman;
@@ -122,18 +149,20 @@ class PeminjamanService
     }
 
     /**
-     * Perpanjangan hanya boleh 1x dan hanya saat status dipinjam.
+     * Perpanjangan hanya saat buku masih di tangan anggota dan belum melewati
+     * batas maks_perpanjang (default 1x).
      */
     public function perpanjang(Peminjaman $peminjaman): Peminjaman
     {
-        if ($peminjaman->status !== self::STATUS_DIPINJAM || $peminjaman->perpanjang) {
+        if (! $this->menahanStok($peminjaman->status) || $peminjaman->perpanjang >= $this->aturan['maks_perpanjang']) {
             throw ValidationException::withMessages([
-                'perpanjang' => 'Peminjaman hanya bisa diperpanjang satu kali saat berstatus dipinjam.',
+                'perpanjang' => "Peminjaman hanya bisa diperpanjang {$this->aturan['maks_perpanjang']} kali saat berstatus dipinjam.",
             ]);
         }
 
         $peminjaman->status = self::STATUS_PERPANJANG;
-        $peminjaman->perpanjang = 1;
+        $peminjaman->perpanjang = $peminjaman->perpanjang + 1;
+        $peminjaman->tgl_harus_kembali = $this->jatuhTempo($peminjaman->tgl_pinjam, true);
         $peminjaman->save();
 
         return $peminjaman;
@@ -159,7 +188,8 @@ class PeminjamanService
             $peminjaman->status = self::STATUS_KEMBALI;
             $peminjaman->tgl_kembali = $tglKembali->toDateString();
             $peminjaman->lama_pinjam = $lamaPinjam;
-            $peminjaman->denda = $this->hitungDenda($lamaPinjam, (bool) $peminjaman->perpanjang);
+            $peminjaman->tgl_harus_kembali ??= $this->jatuhTempo($peminjaman->tgl_pinjam, (bool) $peminjaman->perpanjang);
+            $peminjaman->denda = $this->hitungDendaDariJatuhTempo($peminjaman->tgl_harus_kembali, $tglKembali);
             $peminjaman->save();
 
             return $peminjaman;
@@ -227,13 +257,16 @@ class PeminjamanService
             $peminjaman->tgl_pinjam = $data['tgl_pinjam'];
             $peminjaman->status = $statusBaru;
             $peminjaman->perpanjang = (int) ($data['perpanjang'] ?? $peminjaman->perpanjang);
+            $peminjaman->tgl_harus_kembali = $statusBaru === self::STATUS_KONFIRMASI
+                ? null
+                : $this->jatuhTempo($peminjaman->tgl_pinjam, (bool) $peminjaman->perpanjang);
 
             if ($statusBaru === self::STATUS_KEMBALI) {
                 $tglKembali = Carbon::parse($data['tgl_kembali'] ?? now());
                 $lamaPinjam = $this->hitungLamaPinjam($peminjaman->tgl_pinjam, $tglKembali);
                 $peminjaman->tgl_kembali = $tglKembali->toDateString();
                 $peminjaman->lama_pinjam = $lamaPinjam;
-                $peminjaman->denda = $this->hitungDenda($lamaPinjam, (bool) $peminjaman->perpanjang);
+                $peminjaman->denda = $this->hitungDendaDariJatuhTempo($peminjaman->tgl_harus_kembali, $tglKembali);
             } else {
                 $peminjaman->tgl_kembali = null;
                 $peminjaman->lama_pinjam = null;
@@ -246,6 +279,26 @@ class PeminjamanService
         });
     }
 
+    /**
+     * Tanggal buku harus dikembalikan: tgl_pinjam + masa pinjam (atau masa perpanjang).
+     */
+    public function jatuhTempo(string|CarbonInterface $tglPinjam, bool $diperpanjang): string
+    {
+        return Carbon::parse($tglPinjam)
+            ->addDays($diperpanjang ? $this->masaPerpanjang() : $this->masaPinjam())
+            ->toDateString();
+    }
+
+    /**
+     * Denda = hari keterlambatan setelah jatuh tempo x tarif.
+     */
+    public function hitungDendaDariJatuhTempo(string|CarbonInterface $tglHarusKembali, CarbonInterface $tglKembali): int
+    {
+        $terlambat = $this->hitungLamaPinjam($tglHarusKembali, $tglKembali);
+
+        return $terlambat * $this->dendaPerHari();
+    }
+
     public function hitungLamaPinjam(string|CarbonInterface $tglPinjam, CarbonInterface $tglKembali): int
     {
         $mulai = Carbon::parse($tglPinjam)->startOfDay();
@@ -255,13 +308,13 @@ class PeminjamanService
     }
 
     /**
-     * Denda = hari keterlambatan x tarif; batas 7 hari, atau 14 hari bila diperpanjang.
+     * Denda = hari keterlambatan x tarif; batas masa_pinjam, atau masa_perpanjang bila diperpanjang.
      */
     public function hitungDenda(int $lamaPinjam, bool $diperpanjang): int
     {
-        $batas = $diperpanjang ? self::MASA_PERPANJANG : self::MASA_PINJAM;
+        $batas = $diperpanjang ? $this->masaPerpanjang() : $this->masaPinjam();
 
-        return max(0, $lamaPinjam - $batas) * self::DENDA_PER_HARI;
+        return max(0, $lamaPinjam - $batas) * $this->dendaPerHari();
     }
 
     public function menahanStok(string $status): bool

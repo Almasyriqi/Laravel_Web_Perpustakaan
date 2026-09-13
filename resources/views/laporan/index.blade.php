@@ -49,8 +49,8 @@
         @foreach ($laporan as $lp)
         <tr>
             <td>{{ $lp->id }}</td>
-            <td>{{ $lp->name }}</td>
-            <td>{{ $lp->judul }}</td>
+            <td>{{ $lp->anggota->user->name }}</td>
+            <td>{{ $lp->buku->judul }}</td>
             <td>{{ $lp->jumlah }}</td>
             <td>{{ date('d-m-Y', strtotime($lp->tgl_pinjam)) }}</td>
             <td>{{ $lp->status }}</td>

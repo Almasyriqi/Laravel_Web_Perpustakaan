@@ -14,8 +14,7 @@ class PeminjamanController extends Controller
 
     public function index()
     {
-        $pinjam = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
-            ->join('users', 'anggota.user_id', '=', 'users.id')->get(['peminjaman.*', 'anggota.*', 'users.name', 'buku.judul']);
+        $pinjam = Peminjaman::with(['anggota.user', 'buku'])->latest('id')->get();
 
         return view('admin.peminjaman.index', compact('pinjam'));
     }
@@ -84,8 +83,6 @@ class PeminjamanController extends Controller
 
     private function detail($id): Peminjaman
     {
-        return Peminjaman::with('buku')->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
-            ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.id', '=', $id)
-            ->select(['peminjaman.*', 'anggota.*', 'users.name'])->firstOrFail();
+        return Peminjaman::with(['anggota.user', 'buku'])->findOrFail($id);
     }
 }

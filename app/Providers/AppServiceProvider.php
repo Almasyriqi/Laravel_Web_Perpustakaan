@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
@@ -23,9 +24,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Gate per role, dipakai oleh menu AdminLTE lewat key 'can' di config/adminlte.php
-        Gate::define('admin-only', fn (User $user) => $user->role === 'admin');
-        Gate::define('petugas-only', fn (User $user) => $user->role === 'petugas');
-        Gate::define('anggota-only', fn (User $user) => $user->role === 'anggota');
+        Gate::define('admin-only', fn (User $user) => $user->hasRole(Role::Admin));
+        Gate::define('petugas-only', fn (User $user) => $user->hasRole(Role::Petugas));
+        Gate::define('anggota-only', fn (User $user) => $user->hasRole(Role::Anggota));
 
         Blade::directive('currency', function ($expression) {
             return "Rp <?php echo number_format($expression,0,',','.'); ?>";

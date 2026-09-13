@@ -21,16 +21,14 @@ class LaporanController extends Controller
     {
         [$bulan, $tahun] = $this->periode($request, $bulan);
 
-        $laporan = $this->queryLaporan($bulan, $tahun)
-            ->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
-            ->get(['peminjaman.*', 'users.name', 'buku.judul']);
+        $laporan = $this->queryLaporan($bulan, $tahun)->get();
 
         return view('laporan.index', [
             'laporan' => $laporan,
             'sekarang' => $bulan,
             'tahun' => $tahun,
             'namaBulan' => self::NAMA_BULAN,
-            'routePrefix' => $request->user()->role === 'admin' ? 'admin' : 'petugas',
+            'routePrefix' => $request->user()->isAdmin() ? 'admin' : 'petugas',
         ]);
     }
 
@@ -38,9 +36,7 @@ class LaporanController extends Controller
     {
         [$bulan, $tahun] = $this->periode($request, $bulan);
 
-        $laporan = $this->queryLaporan($bulan, $tahun)
-            ->with('buku')
-            ->get(['peminjaman.*', 'users.name']);
+        $laporan = $this->queryLaporan($bulan, $tahun)->get();
 
         $pdf = Pdf::loadView('laporan.pdf', [
             'laporan' => $laporan,
@@ -76,12 +72,10 @@ class LaporanController extends Controller
      */
     private function queryLaporan(int $bulan, int $tahun)
     {
-        return Peminjaman::query()
-            ->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
-            ->join('users', 'anggota.user_id', '=', 'users.id')
-            ->whereMonth('peminjaman.tgl_pinjam', $bulan)
-            ->whereYear('peminjaman.tgl_pinjam', $tahun)
-            ->orderBy('peminjaman.tgl_pinjam')
-            ->orderBy('peminjaman.id');
+        return Peminjaman::with(['anggota.user', 'buku'])
+            ->whereMonth('tgl_pinjam', $bulan)
+            ->whereYear('tgl_pinjam', $tahun)
+            ->orderBy('tgl_pinjam')
+            ->orderBy('id');
     }
 }

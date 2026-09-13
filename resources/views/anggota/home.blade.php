@@ -30,9 +30,9 @@
                     <div class="alert alert-info alert-dismissible" style="margin-top: 20px">
                         <h5><i class="icon fas fa-info"></i> Informasi Aturan Peminjaman</h5>
                         <ol>
-                            <li>Waktu Peminjaman maksimal 7 hari</li>
-                            <li>Peminjaman dapat diperpanjang maksimal 1 kali (total lama pinjam 14 hari)</li>
-                            <li>Jika mengembalikan lebih dari waktu yang ditentukan akan dikenakan denda setiap judul Rp 2.000 / hari</li>
+                            <li>Waktu Peminjaman maksimal {{ config('perpustakaan.masa_pinjam') }} hari</li>
+                            <li>Peminjaman dapat diperpanjang maksimal {{ config('perpustakaan.maks_perpanjang') }} kali (total lama pinjam {{ config('perpustakaan.masa_perpanjang') }} hari)</li>
+                            <li>Jika mengembalikan lebih dari waktu yang ditentukan akan dikenakan denda setiap judul @currency(config('perpustakaan.denda_per_hari')) / hari</li>
                             <li>Jika telah memilih buku dan klik pinjam, silahkan ke petugas untuk melakukan konfirmasi</li>
                             <li>Jika terlambat mengembalikan buku dan mendapat denda, wajib langsung bayar denda ke petugas saat mengembalikan buku</li>
                         </ol>

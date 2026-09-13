@@ -9,7 +9,7 @@
                 <h2>Data Kategori Buku Perpustakaan</h2><hr>
             </div>
             <div class="float-right my-2">
-                @if (Auth::user()->role == 'admin')
+                @if (Auth::user()->isAdmin())
                 <a class="btn btn-success" href="/admin/kategori/create"><i class="fas fa-arrow-circle-down"></i>
                     Input Kategori Buku</a>
                 @else
@@ -42,7 +42,7 @@
                     <td>{{ $kategori->nama }}</td>
                     <td>{{ $kategori->keterangan }}</td>
                     <td>
-                        @if (Auth::user()->role == 'admin')
+                        @if (Auth::user()->isAdmin())
                         <a class="btn btn-info" href="/admin/kategori/{{ $kategori->id }}">
                             <i class="fas fa-eye"></i> Show</a>
 

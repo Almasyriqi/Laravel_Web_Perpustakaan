@@ -18,19 +18,14 @@ class PeminjamanAnggotaController extends Controller
     public function index()
     {
         $anggota = $this->anggotaSaatIni();
-        $pinjam = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
-            ->where('peminjaman.anggota_id', '=', $anggota->nim)->orderBy('peminjaman.id', 'desc')
-            ->get(['peminjaman.*', 'anggota.*', 'buku.judul']);
+        $pinjam = $anggota->peminjaman()->with('buku')->latest('id')->get();
 
         return view('anggota.peminjaman.index', compact('pinjam', 'anggota'));
     }
 
     public function show($id)
     {
-        $milik = $this->peminjamanMilikSaya($id);
-        $pinjam = Peminjaman::with('buku')->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
-            ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.id', '=', $milik->id)
-            ->select(['peminjaman.*', 'anggota.*', 'users.name'])->first();
+        $pinjam = $this->peminjamanMilikSaya($id)->load(['anggota.user', 'buku']);
 
         return view('anggota.peminjaman.show', compact('pinjam'));
     }

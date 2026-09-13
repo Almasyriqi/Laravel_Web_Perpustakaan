@@ -32,9 +32,9 @@
     <tbody>
         @foreach ($pinjam as $peminjaman)
         <tr>
-            <td>{{ $peminjaman->nim }}</td>
-            <td>{{ $peminjaman->name }}</td>
-            <td>{{ $peminjaman->judul }}</td>
+            <td>{{ $peminjaman->anggota->nim }}</td>
+            <td>{{ $peminjaman->anggota->user->name }}</td>
+            <td>{{ $peminjaman->buku->judul }}</td>
             <td>{{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam))}}</td>
             <td>
                 <a class="btn btn-warning" href="" data-toggle="modal" id="Button" title="Konfirmasi Peminjaman"

@@ -1,5 +1,5 @@
 {{-- !-- Delete Warning Modal -->  --}}
-@if (Auth::user()->role == 'admin')
+@if (Auth::user()->isAdmin())
 <form action="/admin/kategori/{{  $kategori->id }}" method="post">    
 @else
 <form action="/petugas/kategori/{{  $kategori->id }}" method="post"> 

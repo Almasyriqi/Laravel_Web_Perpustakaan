@@ -2,19 +2,20 @@
 
 namespace App\Models;
 
+use App\Enums\Role;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'username',
@@ -25,9 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -35,21 +34,59 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
+     * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-
-    public function anggota()
+    protected function casts(): array
     {
-        return $this->hasMany(Anggota::class);
+        return [
+            'email_verified_at' => 'datetime',
+            'role' => Role::class,
+        ];
     }
 
-    public function admin()
+    /**
+     * Apakah user memiliki salah satu dari role yang diberikan.
+     */
+    public function hasRole(Role|string ...$roles): bool
     {
-        return $this->hasMany(Admin::class);
+        foreach ($roles as $role) {
+            if ($this->role === ($role instanceof Role ? $role : Role::from($role))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === Role::Admin;
+    }
+
+    public function isPetugas(): bool
+    {
+        return $this->role === Role::Petugas;
+    }
+
+    public function isAnggota(): bool
+    {
+        return $this->role === Role::Anggota;
+    }
+
+    // Satu akun hanya punya satu profil sesuai role-nya
+
+    public function anggota(): HasOne
+    {
+        return $this->hasOne(Anggota::class);
+    }
+
+    public function admin(): HasOne
+    {
+        return $this->hasOne(Admin::class);
+    }
+
+    public function petugas(): HasOne
+    {
+        return $this->hasOne(Petugas::class);
     }
 }

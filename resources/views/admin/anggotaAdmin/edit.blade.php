@@ -29,7 +29,7 @@
                     </ul>
                 </div>
                 @endif
-                @if (Auth::user()->role == 'admin')
+                @if (Auth::user()->isAdmin())
                 <form method="post" action="/admin/anggota/{{$anggota->nim }}" id="myForm">
                 @else
                     <form method="post" action="/petugas/anggota/{{$anggota->nim }}" id="myForm">

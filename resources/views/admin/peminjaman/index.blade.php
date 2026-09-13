@@ -38,8 +38,8 @@
         @foreach ($pinjam as $peminjaman)
         <tr>
             <td>{{ $peminjaman->id }}</td>
-            <td>{{ $peminjaman->name }}</td>
-            <td>{{ $peminjaman->judul }}</td>
+            <td>{{ $peminjaman->anggota->user->name }}</td>
+            <td>{{ $peminjaman->buku->judul }}</td>
             <td>{{$peminjaman->jumlah}}</td>
             <td>{{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam)) }}</td>
             <td>{{ $peminjaman->status }}</td>

@@ -29,7 +29,7 @@
                             </ul>
                         </div>
                     @endif
-                    @if (Auth::user()->role == 'admin')
+                    @if (Auth::user()->isAdmin())
                     <form method="post" action="/admin/buku" id="myForm" enctype="multipart/form-data">
                     @else
                     <form method="post" action="/petugas/buku" id="myForm" enctype="multipart/form-data">

@@ -2,38 +2,53 @@
 
 namespace App\Models;
 
+use App\Services\PeminjamanService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Anggota extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    protected $table = "anggota";
+    protected $table = 'anggota';
+
     protected $primaryKey = 'nim';
+
     protected $fillable = [
         'nim',
         'user_id',
         'jurusan',
         'tgl_lahir',
         'no_hp',
-        'alamat'
+        'alamat',
     ];
 
-    public function user()
+    /**
+     * withTrashed: akun ikut diarsipkan bersama anggota, tapi nama tetap harus
+     * bisa ditampilkan di riwayat dan halaman arsip.
+     */
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
-    }
-    
-    public function peminjaman()
-    {
-        return $this->hasMany(Peminjaman::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
-    public static function getByUser($user_id)
+    /**
+     * Kolom peminjaman.anggota_id merujuk ke nim (bukan id), jadi FK dan
+     * local key harus disebut eksplisit.
+     */
+    public function peminjaman(): HasMany
     {
-        return Anggota::where([
-            'user_id' => $user_id
-        ])->first();
+        return $this->hasMany(Peminjaman::class, 'anggota_id', 'nim');
+    }
+
+    /**
+     * Masih memegang buku (dipinjam / perpanjang).
+     */
+    public function sedangMeminjam(): bool
+    {
+        return $this->peminjaman()->whereIn('status', PeminjamanService::STATUS_MENAHAN_STOK)->exists();
     }
 }

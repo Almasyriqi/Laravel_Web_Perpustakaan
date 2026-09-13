@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -12,20 +11,10 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-        $role = Auth::user()->role;
+        $role = $request->user()->role;
 
-        if (in_array($role, ['admin', 'petugas', 'anggota'], true)) {
-            alert()->success('Success', 'Berhasil login sebagai '.$role);
+        alert()->success('Success', 'Berhasil login sebagai '.$role->label());
 
-            return redirect()->to('/'.$role);
-        }
-
-        // Role tidak dikenal: putuskan sesi alih-alih memutar ke rute logout GET
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        alert()->error('Error', 'Terjadi kesalahan saat login');
-
-        return redirect()->to('/');
+        return redirect()->to($role->dashboardPath());
     }
 }
