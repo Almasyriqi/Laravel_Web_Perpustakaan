@@ -37,10 +37,16 @@
                         </li>
                         <li class="list-group-item"><b>Gambar: </b></li>
                         <li class="list-group-item"><img width="150px" src="{{ $buku->gambar_url }}" alt="Sampul {{ $buku->judul }}"></li>
+                        <li class="list-group-item"><b>Kode QR: </b><code>{{ $kode }}</code><br>
+                            <img width="110" src="{{ $qr }}" alt="QR {{ $kode }}" class="mt-1">
+                        </li>
                     </ul>
                 </div>
-                <div class="card-footer">
-                    <a class="btn btn-success" href="/{{ $prefix }}/buku"><i class="fas fa-undo"></i> Kembali</a>
+                <div class="card-footer d-flex flex-wrap">
+                    <a class="btn btn-success m-1" href="/{{ $prefix }}/buku"><i class="fas fa-undo"></i> Kembali</a>
+                    <a class="btn btn-outline-primary m-1" href="/{{ $prefix }}/buku/{{ $buku->id }}/label" target="_blank" title="Label QR untuk ditempel di buku (PDF 60x40 mm)">
+                        <i class="fas fa-qrcode"></i> Cetak label QR
+                    </a>
                 </div>
             </div>
         </div>

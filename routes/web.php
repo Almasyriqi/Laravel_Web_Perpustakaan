@@ -5,6 +5,7 @@ use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\BukuAnggotaController;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\CetakController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LaporanController;
@@ -54,6 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/anggota/{id}/pulihkan', [AnggotaController::class, 'pulihkan']);
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
             Route::get('/anggota/cari', [AnggotaController::class, 'search']);
+            Route::get('/anggota/{nim}/kartu', [CetakController::class, 'kartuAnggota']);
             Route::resource('/anggota', AnggotaController::class);
 
             // CRUD Admin
@@ -75,6 +77,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/buku/{id}/pulihkan', [BukuController::class, 'pulihkan']);
             Route::get('/buku/delete/{id}', [BukuController::class, 'delete']);
             Route::delete('/buku/{buku}/ulasan/{ulasan}', [UlasanController::class, 'moderasi']);
+            Route::get('/buku/{id}/label', [CetakController::class, 'labelBuku']);
             Route::resource('/buku', BukuController::class);
 
             // CRUD Peminjaman
@@ -100,6 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/anggota/{id}/pulihkan', [AnggotaController::class, 'pulihkan']);
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
             Route::get('/anggota/cari', [AnggotaController::class, 'search']);
+            Route::get('/anggota/{nim}/kartu', [CetakController::class, 'kartuAnggota']);
             Route::resource('/anggota', AnggotaController::class);
 
             // CRUD Kategori
@@ -111,6 +115,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/buku/{id}/pulihkan', [BukuController::class, 'pulihkan']);
             Route::get('/buku/delete/{id}', [BukuController::class, 'delete']);
             Route::delete('/buku/{buku}/ulasan/{ulasan}', [UlasanController::class, 'moderasi']);
+            Route::get('/buku/{id}/label', [CetakController::class, 'labelBuku']);
             Route::resource('/buku', BukuController::class);
 
             // Transaksi
@@ -136,6 +141,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:anggota')->group(function () {
         Route::prefix('anggota')->group(function () {
             Route::get('/', [AnggotaController::class, 'home']);
+            Route::get('/kartu', [CetakController::class, 'kartuSaya']);
             Route::resource('/buku', BukuAnggotaController::class)->only(['index', 'show']);
 
             // Rating & ulasan buku

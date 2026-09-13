@@ -106,6 +106,9 @@
                         @endif
                         @if (Auth::user()->isAnggota())
                             <a href="/anggota" class="btn btn-success float-right">Kembali</a>
+                            <a href="/anggota/kartu" target="_blank" class="btn btn-outline-primary float-right mr-2" title="Kartu anggota dengan kode QR (PDF)">
+                                <i class="fas fa-id-card"></i> Cetak kartu anggota
+                            </a>
                         @endif
                     </div>
                 </form>
