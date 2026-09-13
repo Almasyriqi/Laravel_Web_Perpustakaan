@@ -3,32 +3,29 @@
 namespace Database\Factories;
 
 use App\Models\Buku;
+use App\Models\Kategori;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Buku>
+ */
 class BukuFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Buku::class;
 
     /**
-     * Define the model's default state.
-     *
-     * @return array
+     * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
         return [
-            'kategori_id' => $this->faker->numberBetween(1,3),
-            'judul' => $this->faker->sentence(3, true),
-            'penerbit' => $this->faker->company,
-            'penulis' => $this->faker->name(),
-            'keterangan' => $this->faker->text(100),
-            'stok' => $this->faker->numberBetween(1,100),
-            'gambar' => $this->faker->imageUrl(640, 480, 'Buku', true),
+            'kategori_id' => Kategori::factory(),
+            'judul' => fake()->sentence(3, true),
+            'penerbit' => fake()->company(),
+            'penulis' => fake()->name(),
+            'keterangan' => fake()->text(100),
+            'stok' => fake()->numberBetween(1, 100),
+            'gambar' => '/images/harry_potter.jpg',
         ];
     }
 }

@@ -29,6 +29,7 @@
     <p>{{ $message }}</p>
 </div>
 @endif
+@include('partials.errors')
 
 <table class="table table-bordered" id="example">
     <thead>

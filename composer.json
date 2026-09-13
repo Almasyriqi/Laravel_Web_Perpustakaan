@@ -1,30 +1,27 @@
 {
-    "name": "laravel/laravel",
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "almasyriqi/polinema-library",
     "type": "project",
-    "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "description": "Sistem Informasi Perpustakaan Polinema (Laravel + AdminLTE).",
+    "keywords": ["laravel", "perpustakaan", "adminlte"],
     "license": "MIT",
     "require": {
-        "php": "^7.3|^8.0",
-        "barryvdh/laravel-debugbar": "^3.5",
-        "barryvdh/laravel-dompdf": "^0.9.0",
-        "barryvdh/laravel-ide-helper": "^2.10",
-        "fideloper/proxy": "^4.4",
-        "fruitcake/laravel-cors": "^2.0",
-        "guzzlehttp/guzzle": "^7.0.1",
-        "jeroennoten/laravel-adminlte": "^3.6",
-        "laravel/framework": "^8.40",
-        "laravel/tinker": "^2.5",
-        "laravel/ui": "^3.3",
-        "realrashid/sweet-alert": "^3.2"
+        "php": "^8.3",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "jeroennoten/laravel-adminlte": "^3.16",
+        "laravel/framework": "^13.0",
+        "laravel/tinker": "^3.0",
+        "laravel/ui": "^4.6",
+        "realrashid/sweet-alert": "^7.3"
     },
     "require-dev": {
-        "facade/ignition": "^2.5",
-        "fakerphp/faker": "^1.9.1",
-        "laravel/sail": "^1.0.1",
-        "mockery/mockery": "^1.4.2",
-        "nunomaduro/collision": "^5.0",
-        "phpunit/phpunit": "^9.3.3"
+        "barryvdh/laravel-debugbar": "^4.4",
+        "barryvdh/laravel-ide-helper": "^3.7",
+        "fakerphp/faker": "^1.23",
+        "laravel/pint": "^1.27",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.6",
+        "phpunit/phpunit": "^12.5"
     },
     "autoload": {
         "psr-4": {
@@ -39,15 +36,25 @@
         }
     },
     "scripts": {
+        "test": [
+            "@php artisan config:clear --ansi @no_additional_args",
+            "@php artisan test"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
+        ],
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
+        ],
+        "pre-package-uninstall": [
+            "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ]
     },
     "extra": {
@@ -58,8 +65,11 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }

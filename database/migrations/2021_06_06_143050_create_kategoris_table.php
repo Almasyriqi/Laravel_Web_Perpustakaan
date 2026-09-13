@@ -28,6 +28,6 @@ class CreateKategorisTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('kategoris');
+        Schema::dropIfExists('kategori');
     }
 }

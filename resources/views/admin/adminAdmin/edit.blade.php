@@ -39,7 +39,7 @@
                         </div>
                         <div class="form-group">
                             <label for="id">Id</label>
-                            <input type="text" name="id" class="form-control" id="id" aria-describedby="id"
+                            <input type="text" name="id" class="form-control" id="id" aria-describedby="id" readonly
                                 value="{{ $admin->id }}">
                         </div>
                         <div class="form-group">
