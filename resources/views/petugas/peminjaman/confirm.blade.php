@@ -49,6 +49,48 @@
         @endforeach
     </tbody>
 </table>
+
+{{-- Antrean booking: naik otomatis ke tabel di atas begitu stok buku kembali --}}
+<div class="card card-outline card-warning mt-4">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-bookmark"></i> Antrean Booking ({{ $booking->count() }})</h3>
+    </div>
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>NIM</th>
+                    <th>Nama</th>
+                    <th>Judul Buku</th>
+                    <th>Stok</th>
+                    <th>Tanggal Booking</th>
+                    <th width="120px">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($booking as $antre)
+                <tr>
+                    <td>{{ $antre->anggota->nim }}</td>
+                    <td>{{ $antre->anggota->user->name }}</td>
+                    <td>{{ $antre->buku->judul }}</td>
+                    <td>{{ $antre->buku->stok }}</td>
+                    <td>{{ date('d-m-Y', strtotime($antre->tgl_pinjam)) }}</td>
+                    <td>
+                        <a class="btn btn-sm btn-danger" href="" data-toggle="modal" id="smallButton" data-target="#smallModal"
+                            data-attr="/petugas/transaksi/delete/{{ $antre->id }}" title="Batalkan booking">
+                            <i class="fas fa-times-circle"></i> Batal
+                        </a>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-3">Tidak ada booking yang menunggu stok.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 <div class="modal fade" id="smallModal" tabindex="-1" role="dialog" aria-labelledby="smallModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">

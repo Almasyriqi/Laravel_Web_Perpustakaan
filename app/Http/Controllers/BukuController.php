@@ -46,9 +46,10 @@ class BukuController extends Controller
 
     public function show($id)
     {
-        $buku = Buku::with('kategori')->findOrFail($id);
+        $buku = Buku::with('kategori')->denganRating()->findOrFail($id);
+        $ulasan = $buku->ulasan()->with('anggota.user')->latest('updated_at')->get();
 
-        return view('admin.bukuAdmin.show', compact('buku'));
+        return view('admin.bukuAdmin.show', compact('buku', 'ulasan'));
     }
 
     public function edit($id)

@@ -60,7 +60,13 @@
                 @endif
             </td>
             <td>@currency($peminjaman->denda)</td>
-            <td>{{ $peminjaman->status }}</td>
+            <td>
+                @if ($peminjaman->status === 'booking')
+                    <span class="badge badge-warning" title="Menunggu stok tersedia">booking</span>
+                @else
+                    {{ $peminjaman->status }}
+                @endif
+            </td>
             <td>
                 <a class="btn btn-info" href="/anggota/pinjam/{{  $peminjaman->id }}">
                     <i class="fas fa-eye"></i> Show</a>
@@ -73,7 +79,7 @@
                         <i class="fas fa-edit"></i> Perpanjang</a>
                     @endif
                 @endif
-                @if ($peminjaman->status == 'konfirmasi')
+                @if (in_array($peminjaman->status, ['konfirmasi', 'booking'], true))
                     <a class="btn btn-danger" href="" data-toggle="modal" id="smallButton" data-target="#smallModal"
                         data-attr="/anggota/pinjam/delete/{{ $peminjaman->id }}" title="Batal Pinjam Buku">
                         <i class="fas fa-times"></i> Batal

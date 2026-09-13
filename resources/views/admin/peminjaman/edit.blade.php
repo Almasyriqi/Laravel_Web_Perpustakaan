@@ -66,7 +66,7 @@
                     <div class="form-group">
                         <label for="status">status</label>
                         @php
-                        $status = ['konfirmasi', 'dipinjam', 'perpanjang', 'kembali'];
+                        $status = \App\Services\PeminjamanService::SEMUA_STATUS;
                         @endphp
                         <select name="status" class="form-control" id="status">
                             @foreach ($status as $item)

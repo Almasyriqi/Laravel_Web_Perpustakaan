@@ -12,6 +12,7 @@ use App\Http\Controllers\PeminjamanAnggotaController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\TransaksiPetugasController;
+use App\Http\Controllers\UlasanController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -73,6 +74,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/buku/arsip', [BukuController::class, 'arsip']);
             Route::put('/buku/{id}/pulihkan', [BukuController::class, 'pulihkan']);
             Route::get('/buku/delete/{id}', [BukuController::class, 'delete']);
+            Route::delete('/buku/{buku}/ulasan/{ulasan}', [UlasanController::class, 'moderasi']);
             Route::resource('/buku', BukuController::class);
 
             // CRUD Peminjaman
@@ -108,6 +110,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/buku/arsip', [BukuController::class, 'arsip']);
             Route::put('/buku/{id}/pulihkan', [BukuController::class, 'pulihkan']);
             Route::get('/buku/delete/{id}', [BukuController::class, 'delete']);
+            Route::delete('/buku/{buku}/ulasan/{ulasan}', [UlasanController::class, 'moderasi']);
             Route::resource('/buku', BukuController::class);
 
             // Transaksi
@@ -135,11 +138,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [AnggotaController::class, 'home']);
             Route::resource('/buku', BukuAnggotaController::class)->only(['index', 'show']);
 
+            // Rating & ulasan buku
+            Route::post('/buku/{buku}/ulasan', [UlasanController::class, 'store']);
+            Route::delete('/buku/{buku}/ulasan', [UlasanController::class, 'destroy']);
+
             Route::get('/pinjam/delete/{id}', [PeminjamanAnggotaController::class, 'delete']);
             Route::get('/pinjam/perpanjang/{id}', [PeminjamanAnggotaController::class, 'modalPerpanjang']);
             Route::put('/perpanjang/{id}', [PeminjamanAnggotaController::class, 'perpanjang']);
             Route::get('/modal/pinjam/{id}', [PeminjamanAnggotaController::class, 'pinjam']);
             Route::post('/peminjaman/{id}', [PeminjamanAnggotaController::class, 'peminjaman']);
+            Route::get('/modal/booking/{id}', [PeminjamanAnggotaController::class, 'modalBooking']);
+            Route::post('/booking/{id}', [PeminjamanAnggotaController::class, 'booking']);
             Route::resource('/pinjam', PeminjamanAnggotaController::class);
         });
     });

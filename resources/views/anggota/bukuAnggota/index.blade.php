@@ -81,6 +81,7 @@
                 <span class="badge badge-danger mb-1">Stok habis</span>
                 @endif
                 <h5 class="card-title mb-1 text-truncate" title="{{ $item->judul }}">{{ $item->judul }}</h5>
+                <div class="mb-1">@include('partials.bintang', ['rating' => $item->ulasan_avg_rating, 'jumlah' => $item->ulasan_count])</div>
                 <p class="card-text text-muted small mb-0 text-truncate" title="{{ $item->penulis }}">
                     <i class="fas fa-pen-nib"></i> {{ $item->penulis }}
                 </p>
@@ -97,9 +98,10 @@
                     <i class="fas fa-book"></i> Pinjam
                 </a>
                 @else
-                <button type="button" class="btn btn-sm btn-secondary flex-fill m-1" disabled>
-                    <i class="fas fa-book"></i> Habis
-                </button>
+                <a class="btn btn-sm btn-warning flex-fill m-1" href="" data-toggle="modal" id="smallButton"
+                    data-target="#smallModal" data-attr="/anggota/modal/booking/{{ $item->id }}" title="Booking (antre saat stok habis)">
+                    <i class="fas fa-bookmark"></i> Booking
+                </a>
                 @endif
             </div>
         </div>

@@ -151,3 +151,30 @@ a:focus {
 .dark-mode .text-muted {
     color: #adb5bd !important;
 }
+
+/* Pemilih rating bintang (radio tersembunyi, urutan 5..1 agar :checked ~ label bisa menyorot ke kiri) */
+.pilih-bintang {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    font-size: 1.75rem;
+}
+
+.pilih-bintang input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.pilih-bintang label {
+    color: #ced4da;
+    cursor: pointer;
+    margin: 0 2px;
+    transition: color 0.15s;
+}
+
+.pilih-bintang input:checked ~ label,
+.pilih-bintang label:hover,
+.pilih-bintang label:hover ~ label {
+    color: #ffc107;
+}
