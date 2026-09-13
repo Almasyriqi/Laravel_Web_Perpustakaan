@@ -79,6 +79,7 @@ Rekap peminjaman per bulan atau rentang tanggal bebas, cetak PDF (DomPDF) atau e
 | 🔑 | **Login fleksibel** | Bisa masuk dengan **username** maupun **email** |
 | 👤 | **Profil & ganti password** | Setiap pengguna dapat memperbarui datanya sendiri |
 | 🔔 | **Notifikasi interaktif** | Alert & konfirmasi menggunakan SweetAlert |
+| 📧 | **Email pengingat** | Anggota dikirimi email H-1 sebelum jatuh tempo dan saat terlambat (scheduler harian + queue) |
 
 ### 👑 Admin
 
@@ -210,6 +211,8 @@ erDiagram
         string status "index"
         tinyint perpanjang
         int denda
+        timestamp pengingat_dikirim_at
+        timestamp teguran_dikirim_at
         timestamp created_at
         timestamp updated_at
     }
@@ -240,7 +243,7 @@ flowchart LR
 | 🤝 Pembayaran denda | Dibayarkan langsung ke petugas saat pengembalian |
 | 🧾 Konfirmasi | Pengajuan pinjam dari anggota harus dikonfirmasi petugas |
 
-> ⚙️ Masa pinjam, batas perpanjangan, dan tarif denda dibaca dari [`config/perpustakaan.php`](config/perpustakaan.php) dan bisa ditimpa lewat `.env` (`PERPUS_MASA_PINJAM`, `PERPUS_MASA_PERPANJANG`, `PERPUS_MAKS_PERPANJANG`, `PERPUS_DENDA_PER_HARI`). Dashboard anggota menampilkan nilai yang sama.
+> ⚙️ Masa pinjam, batas perpanjangan, dan tarif denda dibaca dari [`config/perpustakaan.php`](config/perpustakaan.php) dan bisa ditimpa lewat `.env` (`PERPUS_MASA_PINJAM`, `PERPUS_MASA_PERPANJANG`, `PERPUS_MAKS_PERPANJANG`, `PERPUS_DENDA_PER_HARI`, `PERPUS_PENGINGAT_HARI_SEBELUM`). Dashboard anggota menampilkan nilai yang sama.
 
 ---
 
@@ -369,6 +372,30 @@ Buka browser ke **<http://127.0.0.1:8000>** — selamat mencoba! 😉
 > 💡 Seeder juga membuat **20 user + data anggota** dan **50 buku** dummy melalui Faker, sehingga aplikasi langsung berisi data untuk diuji coba.
 >
 > 🔒 Akun di atas hanya untuk lingkungan development — **ganti seluruh kredensial sebelum digunakan secara nyata.**
+
+---
+
+## ⏰ Penjadwalan & Queue (email pengingat)
+
+Setiap pagi pukul **07:00** command `perpus:kirim-pengingat` mengirim dua jenis email ke anggota (dijadwalkan di [`routes/console.php`](routes/console.php)):
+
+| Email | Kapan | Isi |
+|---|---|---|
+| 📨 **Pengingat jatuh tempo** | H-1 sebelum `tgl_harus_kembali` (ubah lewat `PERPUS_PENGINGAT_HARI_SEBELUM`) | Judul buku, tanggal harus kembali, tarif denda |
+| ⚠️ **Pemberitahuan terlambat** | Sekali, saat peminjaman melewati jatuh tempo | Hari keterlambatan & estimasi denda berjalan |
+
+Setiap peminjaman hanya dikirimi **sekali** per jenis email (penanda kolom `pengingat_dikirim_at` / `teguran_dikirim_at`), jadi command aman dijalankan berulang.
+
+```bash
+php artisan perpus:kirim-pengingat --dry-run   # lihat berapa email yang akan dikirim
+php artisan perpus:kirim-pengingat             # kirim sekarang (email ke storage/logs/laravel.log bila MAIL_MAILER=log)
+php artisan schedule:list                      # cek jadwal
+php artisan schedule:work                      # jalankan scheduler di development
+```
+
+Di server, tambahkan satu entri cron: `* * * * * cd /path/ke/aplikasi && php artisan schedule:run >> /dev/null 2>&1`.
+
+> 📬 Notifikasi diantrekan (`ShouldQueue`). Dengan `QUEUE_CONNECTION=sync` (default) email dikirim langsung; untuk produksi ganti ke `database` dan jalankan `php artisan queue:work` — tabel `jobs` sudah disediakan migrasi.
 
 ---
 
@@ -503,6 +530,7 @@ vendor/bin/pint --dirty          # rapikan format file yang berubah
 | `PeminjamanServiceTest` | Unit test perhitungan denda dan lama pinjam dengan aturan yang dapat diatur |
 | `KatalogTest` | Pencarian judul/penulis/penerbit, filter kategori & ketersediaan, paginasi katalog anggota |
 | `StatistikTest` | Buku terpopuler, tren 12 bulan, daftar keterlambatan & estimasi denda, tampilan dashboard |
+| `PengingatJatuhTempoTest` | Pengingat H-N & teguran terkirim sekali, `--dry-run`, isi email, notifikasi masuk antrean |
 
 ---
 
@@ -531,7 +559,7 @@ Beberapa hal yang layak dikerjakan berikutnya, diurutkan berdasarkan prioritas.
 ### 🟢 Nice to Have — fitur baru
 
 - [x] 🔍 **Pencarian & filter katalog** anggota — scope `Buku::cari()/dariKategori()/tersedia()`, `KatalogRequest`, grid kartu 12 per halaman dengan paginasi Bootstrap 4 yang mempertahankan query string
-- [ ] 📧 **Notifikasi email jatuh tempo** otomatis via Queue + Task Scheduler
+- [x] 📧 **Notifikasi email jatuh tempo** — command `perpus:kirim-pengingat` (H-1 + teguran terlambat, sekali per peminjaman lewat kolom penanda) dijadwalkan harian di `routes/console.php`; notifikasi `ShouldQueue`, tabel `jobs` disediakan untuk `QUEUE_CONNECTION=database`; lihat bagian [Penjadwalan & Queue](#-penjadwalan--queue-email-pengingat)
 - [x] 📊 **Dashboard statistik** admin & petugas — `StatistikService`: ringkasan (sedang dipinjam, menunggu konfirmasi, terlambat, denda bulan ini), bar chart tren 12 bulan (Chart.js), 5 buku terpopuler, daftar keterlambatan dengan estimasi denda; agregasi per bulan di PHP agar jalan di MySQL & SQLite
 - [x] 📑 **Export laporan ke Excel** (`maatwebsite/excel` 4 — resmi mendukung Laravel 13) + **rentang tanggal bebas** (`/laporan/rentang?dari=&sampai=`, maks. 366 hari) — `PeriodeLaporan` dipakai bersama oleh HTML, PDF, dan Excel; filter memakai `whereBetween` sehingga index `tgl_pinjam` terpakai
 - [ ] 🔖 **Barcode / QR code** buku dan kartu anggota untuk mempercepat transaksi loket

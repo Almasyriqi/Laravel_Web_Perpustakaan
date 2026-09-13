@@ -27,7 +27,20 @@ class Peminjaman extends Model
         'perpanjang',
         'status',
         'denda',
+        'pengingat_dikirim_at',
+        'teguran_dikirim_at',
     ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'pengingat_dikirim_at' => 'datetime',
+            'teguran_dikirim_at' => 'datetime',
+        ];
+    }
 
     /**
      * anggota_id merujuk ke anggota.nim, bukan kolom id. withTrashed agar
