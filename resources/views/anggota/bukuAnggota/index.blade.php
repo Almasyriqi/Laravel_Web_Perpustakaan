@@ -44,7 +44,7 @@
             <td>{{ $buku->keterangan }}</td>
             <td>{{ $buku->stok }}</td>
             <td>
-                <img width="150px" src="{{ $buku->gambar }}"></td>
+                <img width="150px" src="{{ $buku->gambar_url }}" alt="Sampul {{ $buku->judul }}"></td>
             <td>
                 <a class="btn btn-info" href="/anggota/buku/{{  $buku->id }}">
                     <i class="fas fa-eye"></i> Show</a>

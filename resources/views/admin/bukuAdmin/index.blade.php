@@ -49,7 +49,7 @@
                     <td>{{ $buku->keterangan }}</td>
                     <td>{{ $buku->stok }}</td>
                     <td>
-                        <img width="150px" src="{{ $buku->gambar }}"></td>
+                        <img width="150px" src="{{ $buku->gambar_url }}" alt="Sampul {{ $buku->judul }}"></td>
                     <td>
                         @if (Auth::user()->role == 'admin')
                         <a class="btn btn-info" href="/admin/buku/{{  $buku->id }}">

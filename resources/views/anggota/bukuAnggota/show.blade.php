@@ -24,7 +24,7 @@
                     <li class="list-group-item"><b>Keterangan: </b>{{ $buku->keterangan }}</li>
                     <li class="list-group-item"><b>Stok: </b>{{ $buku->stok }}</li>
                     <li class="list-group-item"><b>Gambar: </b></li>
-                    <li class="list-group-item"><img width="150px" src="{{ $buku->gambar }}"></li>
+                    <li class="list-group-item"><img width="150px" src="{{ $buku->gambar_url }}" alt="Sampul {{ $buku->judul }}"></li>
                 </ul>
             </div>
             <a class="btn btn-info" href="" data-toggle="modal" id="smallButton" data-target="#smallModal"

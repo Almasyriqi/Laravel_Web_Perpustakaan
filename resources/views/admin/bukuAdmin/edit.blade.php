@@ -71,8 +71,11 @@
                         </div>
                         <div class="form-group">
                             <label for="gambar">Gambar</label>
-                            <input type="file" name="gambar" class="form-control" id="field-file"
-                                aria-describedby="gambar" value="{{ $buku->gambar }}">
+                            @if ($buku->gambar_url)
+                            <div class="mb-2"><img src="{{ $buku->gambar_url }}" alt="Sampul saat ini" width="120"></div>
+                            @endif
+                            <input type="file" name="gambar" class="form-control" id="field-file" aria-describedby="gambar">
+                            <small class="form-text text-muted">Kosongkan jika tidak ingin mengganti sampul.</small>
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </form>

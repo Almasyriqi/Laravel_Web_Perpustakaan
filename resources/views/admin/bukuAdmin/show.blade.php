@@ -23,7 +23,7 @@
                     <li class="list-group-item"><b>Keterangan: </b>{{ $buku->keterangan }}</li>
                     <li class="list-group-item"><b>Stok: </b>{{ $buku->stok }}</li>
                     <li class="list-group-item"><b>Gambar: </b></li>
-                    <li class="list-group-item"><img width="150px" src="{{ $buku->gambar }}"></li>
+                    <li class="list-group-item"><img width="150px" src="{{ $buku->gambar_url }}" alt="Sampul {{ $buku->judul }}"></li>
                 </ul>
             </div>
             @if (Auth::user()->role == 'admin')
