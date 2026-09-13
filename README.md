@@ -88,7 +88,8 @@ Rekap peminjaman per bulan, siap cetak lewat DomPDF
 | 🧑‍🏫 | **CRUD Petugas** | Kelola akun petugas perpustakaan + pencarian data |
 | 🎓 | **CRUD Anggota** | Kelola data anggota (NIM, jurusan, kontak, alamat) |
 | 🏷️ | **CRUD Kategori** | Pengelompokan koleksi buku |
-| 📚 | **CRUD Buku** | Judul, penulis, penerbit, stok, dan sampul buku |
+| 📚 | **CRUD Buku** | Judul, penulis, penerbit, stok, dan sampul buku (disimpan di Storage disk) |
+| 🗄️ | **Arsip & pulihkan** | Buku/anggota yang dihapus masuk arsip (soft delete), riwayat tetap utuh, bisa dipulihkan |
 | 🔁 | **CRUD Peminjaman** | Kontrol penuh atas seluruh transaksi peminjaman |
 | 🧾 | **Cetak laporan** | Laporan peminjaman per bulan dalam bentuk PDF |
 
@@ -97,8 +98,8 @@ Rekap peminjaman per bulan, siap cetak lewat DomPDF
 | | Fitur | Keterangan |
 |:--:|---|---|
 | 🎓 | **CRUD Anggota** | Pendataan anggota perpustakaan |
-| 🏷️ | **CRUD Kategori & Buku** | Pengelolaan koleksi perpustakaan |
-| ✅ | **Konfirmasi peminjaman** | Menyetujui pengajuan pinjam dari anggota (stok otomatis berkurang) |
+| 🏷️ | **CRUD Kategori & Buku** | Pengelolaan koleksi perpustakaan, termasuk arsip & pulihkan |
+| ✅ | **Konfirmasi peminjaman** | Menyetujui pengajuan pinjam dari anggota (stok berkurang, jatuh tempo ditetapkan) |
 | ➕ | **Peminjaman langsung** | Input transaksi untuk anggota yang datang ke loket |
 | ⏳ | **Perpanjangan** | Memperpanjang masa pinjam (maksimal 1×) |
 | 📥 | **Pengembalian** | Hitung lama pinjam & denda otomatis, stok buku dikembalikan |
@@ -110,7 +111,7 @@ Rekap peminjaman per bulan, siap cetak lewat DomPDF
 |:--:|---|---|
 | 📖 | **Katalog buku** | Menelusuri koleksi lengkap dengan sampul dan detail buku |
 | 🛒 | **Ajukan peminjaman** | Pinjam buku langsung dari katalog (status awal: `konfirmasi`) |
-| 📋 | **Riwayat peminjaman** | Memantau status, tanggal, dan denda tiap transaksi |
+| 📋 | **Riwayat peminjaman** | Memantau status, tanggal jatuh tempo (badge *Terlambat*), dan denda tiap transaksi |
 | ⏳ | **Ajukan perpanjangan** | Memperpanjang masa pinjam buku yang sedang dipinjam |
 | ❌ | **Batalkan pengajuan** | Selama status masih `konfirmasi`, peminjaman bisa dibatalkan |
 | 📅 | **Kalender & aturan** | Dashboard berisi kalender dan ringkasan aturan peminjaman |
@@ -154,6 +155,7 @@ erDiagram
         string password
         string role "admin, petugas, anggota"
         timestamp email_verified_at
+        timestamp deleted_at
     }
     ADMIN {
         bigint id PK
@@ -175,6 +177,7 @@ erDiagram
         date tgl_lahir
         string no_hp
         text alamat
+        timestamp deleted_at
     }
     KATEGORI {
         bigint id PK
@@ -190,6 +193,7 @@ erDiagram
         text keterangan
         int stok
         string gambar
+        timestamp deleted_at
     }
     PEMINJAMAN {
         bigint id PK
@@ -197,11 +201,14 @@ erDiagram
         bigint buku_id FK
         int jumlah
         date tgl_pinjam
+        date tgl_harus_kembali
         date tgl_kembali
         int lama_pinjam
-        string status
+        string status "index"
         tinyint perpanjang
         int denda
+        timestamp created_at
+        timestamp updated_at
     }
 ```
 
@@ -213,8 +220,8 @@ erDiagram
 flowchart LR
     A([🎓 Anggota pilih buku]) --> B[status: konfirmasi]
     B -->|❌ dibatalkan anggota| X([Peminjaman dihapus])
-    B -->|✅ dikonfirmasi petugas| C[status: dipinjam<br/>stok berkurang]
-    C -->|⏳ perpanjang 1x| D[status: perpanjang]
+    B -->|✅ dikonfirmasi petugas| C[status: dipinjam<br/>stok berkurang<br/>jatuh tempo +7 hari]
+    C -->|⏳ perpanjang 1x| D[status: perpanjang<br/>jatuh tempo +14 hari]
     C --> E([📥 Pengembalian])
     D --> E
     E --> F[status: kembali<br/>stok bertambah<br/>denda dihitung]
@@ -229,6 +236,8 @@ flowchart LR
 | 💸 Denda keterlambatan | **Rp 2.000 / hari** untuk setiap judul buku |
 | 🤝 Pembayaran denda | Dibayarkan langsung ke petugas saat pengembalian |
 | 🧾 Konfirmasi | Pengajuan pinjam dari anggota harus dikonfirmasi petugas |
+
+> ⚙️ Masa pinjam, batas perpanjangan, dan tarif denda dibaca dari [`config/perpustakaan.php`](config/perpustakaan.php) dan bisa ditimpa lewat `.env` (`PERPUS_MASA_PINJAM`, `PERPUS_MASA_PERPANJANG`, `PERPUS_MAKS_PERPANJANG`, `PERPUS_DENDA_PER_HARI`). Dashboard anggota menampilkan nilai yang sama.
 
 ---
 
@@ -324,13 +333,21 @@ MAIL_FROM_NAME="${APP_NAME}"
 php artisan migrate --seed
 ```
 
-**7️⃣ Jalankan test** *(opsional, tidak butuh database — memakai SQLite in-memory)*
+**7️⃣ Hubungkan folder sampul buku** — unggahan disimpan di `storage/app/public/sampul` dan dilayani lewat `public/storage`:
+
+```bash
+php artisan storage:link
+```
+
+> `APP_URL` di `.env` harus sesuai alamat yang Anda buka di browser (mis. `http://127.0.0.1:8000`), karena URL sampul dibangun dari nilai itu.
+
+**8️⃣ Jalankan test** *(opsional, tidak butuh database — memakai SQLite in-memory)*
 
 ```bash
 php artisan test
 ```
 
-**8️⃣ Jalankan aplikasi** 🎉
+**9️⃣ Jalankan aplikasi** 🎉
 
 ```bash
 php artisan serve
@@ -476,7 +493,11 @@ vendor/bin/pint --dirty          # rapikan format file yang berubah
 | `PeminjamanFlowTest` | Ajukan → konfirmasi → perpanjang → kembali, stok, denda, pembatalan, edit admin |
 | `LaporanTest` | Filter bulan + tahun, validasi periode, keluaran PDF |
 | `ValidationTest` | Duplikat username/email, profil orang lain, jumlah/status tidak valid |
-| `PeminjamanServiceTest` | Unit test perhitungan denda dan lama pinjam |
+| `EagerLoadingTest` | Halaman daftar memakai ≤ 6 query untuk 15 baris (tidak ada N+1) |
+| `SoftDeleteTest` | Arsip & pulihkan buku/anggota, akun terarsip tidak bisa login, riwayat utuh |
+| `SampulBukuTest` | Unggah/ganti sampul di Storage disk, path legacy tetap dilayani |
+| `RoleTest` | Enum `Role`, helper `isAdmin()`, middleware `role:admin,petugas` |
+| `PeminjamanServiceTest` | Unit test perhitungan denda dan lama pinjam dengan aturan yang dapat diatur |
 
 ---
 
@@ -491,16 +512,16 @@ Beberapa hal yang layak dikerjakan berikutnya, diurutkan berdasarkan prioritas.
 - [x] **Filter laporan per bulan dan tahun** (`whereMonth` + `whereYear`, pemilih tahun di halaman laporan)
 - [x] **Mutasi stok dalam DB transaction + `lockForUpdate`** lewat `App\Services\PeminjamanService` — sekaligus memperbaiki stok yang bergeser saat admin mengedit dan anggota yang bisa membatalkan peminjaman orang lain
 - [x] **Validasi lewat Form Request** — rule `unique:users` kini benar-benar dieksekusi, edit meng-*ignore* data sendiri
-- [x] **Automated test PHPUnit** — 53 test (auth, akses per role, alur pinjam → konfirmasi → perpanjang → kembali → denda, laporan, validasi); jalankan dengan `php artisan test`
+- [x] **Automated test PHPUnit** — 87 test (auth, akses per role, alur pinjam → konfirmasi → perpanjang → kembali → denda, laporan, validasi, arsip, sampul); jalankan dengan `php artisan test`
 
 ### 🟡 Prioritas Menengah — kualitas kode
 
-- [ ] Ganti *raw join* berulang dengan **Eloquent relationship + eager loading** (`with()`) untuk menghindari N+1 query
-- [ ] Pindahkan logika **denda & lama pinjam** dari controller ke *service class*, dan jadikan tarif denda sebagai nilai konfigurasi
-- [ ] Simpan sampul buku lewat **Storage disk** (`storage:link`) — path penghapusan file lama saat ini belum tepat
-- [ ] Tambahkan kolom **`tgl_harus_kembali`**, `timestamps`, serta **index** pada kolom `status` dan `tgl_pinjam`
-- [ ] Terapkan **soft delete** pada buku & anggota agar riwayat peminjaman tetap utuh
-- [ ] Pertimbangkan **Policy/Gate** atau `spatie/laravel-permission` menggantikan tiga middleware role terpisah
+- [x] **Eloquent relationship + eager loading** menggantikan *raw join* — relasi `Peminjaman::anggota()`/`Anggota::peminjaman()` diperbaiki (FK `anggota_id` → `nim`), halaman daftar terukur 2–4 query
+- [x] **Logika denda & lama pinjam di `PeminjamanService`**, tarif & masa pinjam dari `config/perpustakaan.php` / env `PERPUS_*`
+- [x] **Sampul buku lewat Storage disk** (`storage:link`), file lama dihapus saat diganti; sampul legacy di `public/images` tetap dilayani
+- [x] **Kolom `tgl_harus_kembali`, `timestamps`, index** `status`, `tgl_pinjam`, `(anggota_id, status)` — denda dihitung dari jatuh tempo, riwayat menampilkan badge *Terlambat*
+- [x] **Soft delete buku, anggota, dan akun user** + halaman Arsip & Pulihkan; hapus ditolak bila masih ada pinjaman aktif
+- [x] **Enum `Role` + satu middleware `role:admin,petugas`** menggantikan tiga middleware; dipilih alih-alih `spatie/laravel-permission` karena hanya ada tiga role tetap yang terikat tabel profil
 
 ### 🟢 Nice to Have — fitur baru
 
