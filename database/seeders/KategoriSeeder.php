@@ -17,10 +17,10 @@ class KategoriSeeder extends Seeder
         $nama = ['Novel', 'Fiksi', 'Referensi'];
         $keterangan = ['Koleksi buku novel', 'Koleksi buku Fiksi', 'Koleksi buku Referensi'];
 
-        for ($i=0; $i < 3; $i++) { 
+        for ($i = 0; $i < 3; $i++) {
             DB::table('kategori')->insert([
                 'nama' => $nama[$i],
-                'keterangan' => $keterangan[$i]
+                'keterangan' => $keterangan[$i],
             ]);
         }
     }

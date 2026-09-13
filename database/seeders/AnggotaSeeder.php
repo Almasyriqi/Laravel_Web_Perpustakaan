@@ -20,7 +20,7 @@ class AnggotaSeeder extends Seeder
             'jurusan' => 'Teknologi Informasi',
             'tgl_lahir' => '2000-07-06',
             'no_hp' => '082213589072',
-            'alamat' => 'Puri Cempaka Putih 2 Blok AY-02'
+            'alamat' => 'Puri Cempaka Putih 2 Blok AY-02',
         ]);
     }
 }

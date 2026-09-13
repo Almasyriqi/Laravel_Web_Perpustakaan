@@ -21,7 +21,7 @@ class BukuSeeder extends Seeder
             'penulis' => 'JK Rowling',
             'keterangan' => 'Novel ini bercerita tentang petualangan Harry Potter',
             'stok' => 5,
-            'gambar' => '/images/harry_potter.jpg'
+            'gambar' => '/images/harry_potter.jpg',
         ]);
     }
 }

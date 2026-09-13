@@ -15,11 +15,11 @@ class CreateTableAnggota extends Migration
     {
         Schema::create('anggota', function (Blueprint $table) {
             $table->id('nim');
-            $table->unsignedBigInteger('user_id')->nullable(); 
-            $table->foreign('user_id')->references('id')->on('users'); 
-            $table->string("jurusan", 30);
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->string('jurusan', 30);
             $table->date('tgl_lahir');
-            $table->string("no_hp");
+            $table->string('no_hp');
             $table->text('alamat');
             $table->timestamps();
         });

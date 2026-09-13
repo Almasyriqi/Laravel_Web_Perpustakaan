@@ -21,14 +21,14 @@ class UserSeeder extends Seeder
         $password = ['12345678', '12345678', '12345678'];
         $role = ['admin', 'anggota', 'petugas'];
 
-        for ($i=0; $i < 3; $i++) { 
+        for ($i = 0; $i < 3; $i++) {
             DB::table('users')->insert([
                 'username' => $username[$i],
-                'name'=> $name[$i],
-                'email'=> $email[$i],
-                'password'=>Hash::make($password[$i]),
+                'name' => $name[$i],
+                'email' => $email[$i],
+                'password' => Hash::make($password[$i]),
                 'role' => $role[$i],
-                'email_verified_at' => now()
+                'email_verified_at' => now(),
             ]);
         }
     }

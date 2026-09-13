@@ -13,7 +13,7 @@ class TambahKolomPerpanjangTabelPeminjaman extends Migration
      */
     public function up()
     {
-        schema::table('peminjaman', function(Blueprint $table) {
+        Schema::table('peminjaman', function (Blueprint $table) {
             $table->tinyInteger('perpanjang')->after('status')->nullable();
         });
     }
@@ -25,8 +25,8 @@ class TambahKolomPerpanjangTabelPeminjaman extends Migration
      */
     public function down()
     {
-        schema::table('peminjaman', function(Blueprint $table){
+        Schema::table('peminjaman', function (Blueprint $table) {
             $table->dropColumn('perpanjang');
-        }); 
+        });
     }
 }
