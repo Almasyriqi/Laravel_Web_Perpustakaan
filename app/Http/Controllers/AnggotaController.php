@@ -14,10 +14,9 @@ class AnggotaController extends Controller
 {
     public function index()
     {
-        $anggota = Anggota::with('user')->get();
-        $paginate = Anggota::orderBy('nim', 'desc')->paginate(10);
+        $paginate = Anggota::with('user')->orderBy('nim', 'desc')->paginate(10);
 
-        return view('admin.anggotaAdmin.index', ['anggota' => $anggota, 'paginate' => $paginate]);
+        return view('admin.anggotaAdmin.index', compact('paginate'));
     }
 
     public function create()
@@ -111,11 +110,14 @@ class AnggotaController extends Controller
 
     public function search(Request $request)
     {
-        $paginate = Anggota::join('users', 'anggota.user_id', '=', 'users.id')->when($request->keyword, function ($query) use ($request) {
-            $query->where('name', 'like', "%{$request->keyword}%")
-                ->orWhere('email', 'like', "%{$request->keyword}%")
-                ->orWhere('Jurusan', 'like', "%{$request->keyword}%");
-        })->paginate(10);
+        $paginate = Anggota::with('user')
+            ->when($request->keyword, fn ($query, $keyword) => $query->where(fn ($q) => $q
+                ->where('jurusan', 'like', "%{$keyword}%")
+                ->orWhereHas('user', fn ($user) => $user
+                    ->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('email', 'like', "%{$keyword}%"))))
+            ->orderBy('nim', 'desc')
+            ->paginate(10);
         $paginate->appends($request->only('keyword'));
 
         return view('admin.anggotaAdmin.index', compact('paginate'));

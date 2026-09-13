@@ -16,10 +16,9 @@ class PetugasController extends Controller
 {
     public function index()
     {
-        $petugas = Petugas::with('user')->get();
-        $paginate = Petugas::orderBy('id', 'desc')->paginate(10);
+        $paginate = Petugas::with('user')->orderBy('id', 'desc')->paginate(10);
 
-        return view('admin.petugasAdmin.index', ['petugas' => $petugas, 'paginate' => $paginate]);
+        return view('admin.petugasAdmin.index', compact('paginate'));
     }
 
     public function create()
@@ -110,10 +109,12 @@ class PetugasController extends Controller
 
     public function search(Request $request)
     {
-        $paginate = Petugas::join('users', 'petugas.user_id', '=', 'users.id')->select('petugas.*', 'users.name', 'users.username', 'users.email')->when($request->keyword, function ($query) use ($request) {
-            $query->where('name', 'like', "%{$request->keyword}%")
-                ->orWhere('email', 'like', "%{$request->keyword}%");
-        })->paginate(10);
+        $paginate = Petugas::with('user')
+            ->when($request->keyword, fn ($query, $keyword) => $query->whereHas('user', fn ($user) => $user
+                ->where('name', 'like', "%{$keyword}%")
+                ->orWhere('email', 'like', "%{$keyword}%")))
+            ->orderBy('id', 'desc')
+            ->paginate(10);
         $paginate->appends($request->only('keyword'));
 
         return view('admin.petugasAdmin.index', compact('paginate'));

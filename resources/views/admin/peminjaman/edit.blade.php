@@ -31,7 +31,7 @@
                     <div class="form-group">
                         <label for="anggota">anggota</label>
                         <input type="anggota" name="anggota" class="form-control" id="anggota"
-                            aria-describedby="anggota" readonly value="{{$pinjam->name}}">
+                            aria-describedby="anggota" readonly value="{{$pinjam->anggota->user->name}}">
                     </div>
                     <div class="form-group">
                         <label for="judul">Judul</label>

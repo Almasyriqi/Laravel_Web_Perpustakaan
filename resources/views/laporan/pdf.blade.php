@@ -34,7 +34,7 @@
         <tbody>
             @forelse ($laporan as $lp)
             <tr>
-                <td>{{ $lp->name }}</td>
+                <td>{{ $lp->anggota->user->name }}</td>
                 <td>{{ $lp->buku->judul }}</td>
                 <td class="angka">{{ $lp->jumlah }}</td>
                 <td>{{ date('d-m-Y', strtotime($lp->tgl_pinjam)) }}</td>

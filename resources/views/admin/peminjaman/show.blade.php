@@ -16,8 +16,8 @@
             <div class="card-body">
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><b>Id: </b>{{ $pinjam->id }}</li>
-                    <li class="list-group-item"><b>NIM Anggota: </b>{{ $pinjam->nim }}</li>
-                    <li class="list-group-item"><b>Nama Anggota: </b>{{ $pinjam->name }}</li>
+                    <li class="list-group-item"><b>NIM Anggota: </b>{{ $pinjam->anggota->nim }}</li>
+                    <li class="list-group-item"><b>Nama Anggota: </b>{{ $pinjam->anggota->user->name }}</li>
                     <li class="list-group-item"><b>Judul Buku: </b>{{ $pinjam->buku->judul }}</li>
                     <li class="list-group-item"><b>Jumlah: </b>{{$pinjam->jumlah }}</li>
                     <li class="list-group-item"><b>Tanggal Pinjam: </b>{{  date('d-m-Y', strtotime($pinjam->tgl_pinjam)) }}</li>

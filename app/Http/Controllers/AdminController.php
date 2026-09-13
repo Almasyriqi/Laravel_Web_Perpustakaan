@@ -17,10 +17,9 @@ class AdminController extends Controller
 {
     public function index()
     {
-        $admin = Admin::with('user')->get();
-        $paginate = Admin::orderBy('id', 'desc')->paginate(10);
+        $paginate = Admin::with('user')->orderBy('id', 'desc')->paginate(10);
 
-        return view('admin.adminAdmin.index', ['admin' => $admin, 'paginate' => $paginate]);
+        return view('admin.adminAdmin.index', compact('paginate'));
     }
 
     public function create()
@@ -109,10 +108,12 @@ class AdminController extends Controller
 
     public function search(Request $request)
     {
-        $paginate = Admin::join('users', 'admin.user_id', '=', 'users.id')->select('admin.*', 'users.name', 'users.username', 'users.email')->when($request->keyword, function ($query) use ($request) {
-            $query->where('name', 'like', "%{$request->keyword}%")
-                ->orWhere('email', 'like', "%{$request->keyword}%");
-        })->paginate(10);
+        $paginate = Admin::with('user')
+            ->when($request->keyword, fn ($query, $keyword) => $query->whereHas('user', fn ($user) => $user
+                ->where('name', 'like', "%{$keyword}%")
+                ->orWhere('email', 'like', "%{$keyword}%")))
+            ->orderBy('id', 'desc')
+            ->paginate(10);
         $paginate->appends($request->only('keyword'));
 
         return view('admin.adminAdmin.index', compact('paginate'));

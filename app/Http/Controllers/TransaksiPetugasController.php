@@ -14,13 +14,11 @@ class TransaksiPetugasController extends Controller
 
     public function index()
     {
-        // Satu baris per anggota yang punya transaksi aktif, terbaru di atas.
-        // (DISTINCT + ORDER BY kolom di luar SELECT ditolak MySQL 8 mode strict)
-        $pinjam = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
-            ->join('users', 'anggota.user_id', '=', 'users.id')
-            ->where('peminjaman.status', '!=', PeminjamanService::STATUS_KONFIRMASI)
-            ->selectRaw('anggota.*, users.name, users.email, MAX(peminjaman.id) as last_id')
-            ->groupBy('anggota.nim', 'users.name', 'users.email')
+        // Satu baris per anggota yang punya transaksi aktif, yang terbaru di atas
+        $aktif = fn ($q) => $q->where('status', '!=', PeminjamanService::STATUS_KONFIRMASI);
+        $pinjam = Anggota::with('user')
+            ->whereHas('peminjaman', $aktif)
+            ->withMax(['peminjaman as last_id' => $aktif], 'id')
             ->orderByDesc('last_id')
             ->get();
 
@@ -53,9 +51,7 @@ class TransaksiPetugasController extends Controller
 
     public function show($id)
     {
-        $pinjam = Peminjaman::with('buku')->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
-            ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.id', '=', $id)
-            ->select(['peminjaman.*', 'anggota.*', 'users.name'])->firstOrFail();
+        $pinjam = Peminjaman::with(['anggota.user', 'buku'])->findOrFail($id);
 
         return view('petugas.peminjaman.show', compact('pinjam'));
     }
@@ -65,10 +61,11 @@ class TransaksiPetugasController extends Controller
      */
     public function edit($id)
     {
-        $pinjam = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
-            ->where('peminjaman.anggota_id', '=', $id)->where('peminjaman.status', '!=', PeminjamanService::STATUS_KONFIRMASI)
-            ->get(['peminjaman.*', 'anggota.*', 'buku.judul']);
-        $anggota = Anggota::with('user')->where('nim', $id)->firstOrFail();
+        $anggota = Anggota::with('user')->findOrFail($id);
+        $pinjam = $anggota->peminjaman()->with('buku')
+            ->where('status', '!=', PeminjamanService::STATUS_KONFIRMASI)
+            ->latest('id')
+            ->get();
 
         return view('petugas.peminjaman.edit', compact('pinjam', 'anggota'));
     }
@@ -109,9 +106,10 @@ class TransaksiPetugasController extends Controller
 
     public function konfirmasiPeminjaman()
     {
-        $pinjam = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
-            ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.status', '=', PeminjamanService::STATUS_KONFIRMASI)
-            ->get(['peminjaman.*', 'anggota.*', 'users.name', 'buku.judul']);
+        $pinjam = Peminjaman::with(['anggota.user', 'buku'])
+            ->where('status', PeminjamanService::STATUS_KONFIRMASI)
+            ->oldest('id')
+            ->get();
 
         return view('petugas.peminjaman.confirm', compact('pinjam'));
     }

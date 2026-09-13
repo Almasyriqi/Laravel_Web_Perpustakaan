@@ -4,13 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Peminjaman extends Model
 {
     use HasFactory;
 
-    protected $table = "peminjaman";
+    protected $table = 'peminjaman';
+
     public $timestamps = false;
+
     protected $fillable = [
         'id',
         'anggota_id',
@@ -21,15 +24,18 @@ class Peminjaman extends Model
         'lama_pinjam',
         'perpanjang',
         'status',
-        'denda'
+        'denda',
     ];
 
-    public function anggota()
+    /**
+     * anggota_id merujuk ke anggota.nim, bukan kolom id.
+     */
+    public function anggota(): BelongsTo
     {
-        return $this->belongsTo(Anggota::class);
+        return $this->belongsTo(Anggota::class, 'anggota_id', 'nim');
     }
 
-    public function buku()
+    public function buku(): BelongsTo
     {
         return $this->belongsTo(Buku::class);
     }
