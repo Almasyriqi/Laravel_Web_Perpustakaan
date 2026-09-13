@@ -1,0 +1,40 @@
+# Menjalankan Laravel Pint (cek format) dan PHPUnit pada setiap push & pull request.
+# Test memakai SQLite in-memory (lihat phpunit.xml), jadi tidak butuh service database.
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: Pint + PHPUnit (PHP 8.3)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, gd, zip, sqlite3, pdo_sqlite, xml, bcmath
+          coverage: none
+
+      - name: Install dependency Composer
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: --no-progress --prefer-dist
+
+      - name: Siapkan environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --ansi
+
+      - name: Laravel Pint
+        run: vendor/bin/pint --test
+
+      - name: PHPUnit
+        run: php artisan test --ansi

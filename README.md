@@ -14,7 +14,7 @@ Mulai dari kelola koleksi buku, transaksi peminjaman & pengembalian, perhitungan
 [![MySQL](https://img.shields.io/badge/MySQL-MariaDB-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
 [![AdminLTE](https://img.shields.io/badge/AdminLTE-3.16-00A65A?style=for-the-badge&logo=adminlte&logoColor=white)](https://adminlte.io)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-4.6-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com)
-[![Tests](https://img.shields.io/badge/Tests-PHPUnit_12-6DB33F?style=for-the-badge&logo=php&logoColor=white)](#-testing)
+[![CI](https://img.shields.io/github/actions/workflow/status/Almasyriqi/Laravel_Web_Perpustakaan/ci.yml?branch=master&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/Almasyriqi/Laravel_Web_Perpustakaan/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-MIT-22272e?style=for-the-badge)](https://github.com/laravel/laravel/blob/master/LICENSE)
 
 <br>
@@ -486,6 +486,8 @@ php artisan test --filter=Peminjaman   # hanya alur peminjaman
 vendor/bin/pint --dirty          # rapikan format file yang berubah
 ```
 
+> 🤖 Setiap push dan pull request otomatis menjalankan `vendor/bin/pint --test` + `php artisan test` lewat GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+
 | Suite | Cakupan |
 |---|---|
 | `SmokeTest` | Halaman utama tiap role dapat dirender, middleware role menolak akses silang |
@@ -532,7 +534,7 @@ Beberapa hal yang layak dikerjakan berikutnya, diurutkan berdasarkan prioritas.
 - [ ] 🔖 **Barcode / QR code** buku dan kartu anggota untuk mempercepat transaksi loket
 - [ ] ⭐ **Rating & ulasan buku** serta fitur *booking* buku yang stoknya sedang habis
 - [ ] 🌓 **Dark mode** dan penyempurnaan tampilan mobile
-- [ ] 🤖 **CI/CD GitHub Actions** — menjalankan Laravel Pint + test otomatis di setiap push
+- [x] 🤖 **CI GitHub Actions** — [`.github/workflows/ci.yml`](.github/workflows/ci.yml) menjalankan `pint --test` + `php artisan test` di setiap push & PR (PHP 8.3, SQLite in-memory); seluruh kode diformat Pint sekali sebagai prasyarat
 - [ ] 🧹 **Bersihkan Laravel Mix** — asset tidak pernah dikompilasi (CSS/JS statis di `public/`); hapus `package.json`/`webpack.mix.js` atau ganti ke Vite
 
 ---
