@@ -2,78 +2,63 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LaporanExport;
 use App\Models\Peminjaman;
 use App\Support\Bulan;
+use App\Support\PeriodeLaporan;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
+/**
+ * Laporan peminjaman per bulan (/laporan/{bulan}?tahun=) atau rentang tanggal
+ * bebas (/laporan/rentang?dari=&sampai=), dalam bentuk HTML, PDF, dan Excel.
+ */
 class LaporanController extends Controller
 {
     /** Alias agar pemanggil lama tetap jalan; sumbernya kini App\Support\Bulan. */
     public const NAMA_BULAN = Bulan::NAMA;
 
-    /**
-     * Daftar peminjaman pada bulan & tahun tertentu (tahun via ?tahun=, default tahun berjalan).
-     */
-    public function show(Request $request, string $bulan)
+    public function show(Request $request, ?string $bulan = null)
     {
-        [$bulan, $tahun] = $this->periode($request, $bulan);
-
-        $laporan = $this->queryLaporan($bulan, $tahun)->get();
+        $periode = PeriodeLaporan::dariRequest($request, $bulan);
+        $prefix = $request->user()->isAdmin() ? 'admin' : 'petugas';
+        $akhiran = $periode->bulanan() ? '' : '.rentang';
 
         return view('laporan.index', [
-            'laporan' => $laporan,
-            'sekarang' => $bulan,
-            'tahun' => $tahun,
-            'namaBulan' => self::NAMA_BULAN,
-            'routePrefix' => $request->user()->isAdmin() ? 'admin' : 'petugas',
+            'laporan' => $this->queryLaporan($periode)->get(),
+            'periode' => $periode,
+            'sekarang' => $periode->bulan,
+            'tahun' => $periode->tahun ?? now()->year,
+            'namaBulan' => Bulan::NAMA,
+            'routePrefix' => $prefix,
+            'urlPdf' => route($prefix.'.cetak_pdf'.$akhiran, $periode->parameter()),
+            'urlExcel' => route($prefix.'.excel'.$akhiran, $periode->parameter()),
         ]);
     }
 
-    public function cetak_pdf(Request $request, string $bulan)
+    public function cetak_pdf(Request $request, ?string $bulan = null)
     {
-        [$bulan, $tahun] = $this->periode($request, $bulan);
-
-        $laporan = $this->queryLaporan($bulan, $tahun)->get();
+        $periode = PeriodeLaporan::dariRequest($request, $bulan);
 
         $pdf = Pdf::loadView('laporan.pdf', [
-            'laporan' => $laporan,
-            'namaBulan' => self::NAMA_BULAN[$bulan],
-            'tahun' => $tahun,
+            'laporan' => $this->queryLaporan($periode)->get(),
+            'periode' => $periode,
         ]);
 
-        return $pdf->stream("laporan-{$tahun}-{$bulan}.pdf");
+        return $pdf->stream("laporan-{$periode->slug()}.pdf");
     }
 
-    /**
-     * Validasi bulan (1-12) dari URL dan tahun dari query string.
-     *
-     * @return array{0: int, 1: int}
-     */
-    private function periode(Request $request, string $bulan): array
+    public function excel(Request $request, ?string $bulan = null)
     {
-        if (! ctype_digit($bulan) || (int) $bulan < 1 || (int) $bulan > 12) {
-            throw ValidationException::withMessages(['bulan' => 'Bulan harus di antara 1 dan 12.']);
-        }
+        $periode = PeriodeLaporan::dariRequest($request, $bulan);
 
-        $tahun = $request->integer('tahun', now()->year);
-        if ($tahun < 2000 || $tahun > 2100) {
-            throw ValidationException::withMessages(['tahun' => 'Tahun tidak valid.']);
-        }
-
-        return [(int) $bulan, $tahun];
+        return Excel::download(new LaporanExport($periode), "laporan-{$periode->slug()}.xlsx");
     }
 
-    /**
-     * Peminjaman pada bulan+tahun tersebut; whereYear mencegah bulan yang sama
-     * di tahun berbeda ikut tercampur.
-     */
-    private function queryLaporan(int $bulan, int $tahun)
+    private function queryLaporan(PeriodeLaporan $periode)
     {
-        return Peminjaman::with(['anggota.user', 'buku'])
-            ->whereMonth('tgl_pinjam', $bulan)
-            ->whereYear('tgl_pinjam', $tahun)
+        return $periode->terapkan(Peminjaman::with(['anggota.user', 'buku']))
             ->orderBy('tgl_pinjam')
             ->orderBy('id');
     }

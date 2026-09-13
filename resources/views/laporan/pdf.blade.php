@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Laporan Peminjaman {{ $namaBulan }} {{ $tahun }}</title>
+    <title>Laporan Peminjaman {{ $periode->label() }}</title>
     <style>
         body { font-family: DejaVu Sans, Helvetica, Arial, sans-serif; font-size: 12px; }
         h3 { margin: 0 0 4px; text-align: center; }
@@ -16,7 +16,7 @@
 <body>
     <div class="judul">
         <h3>LAPORAN PERPUSTAKAAN POLINEMA</h3>
-        <h3>BULAN {{ strtoupper($namaBulan) }} {{ $tahun }}</h3>
+        <h3>{{ $periode->bulanan() ? 'BULAN '.strtoupper($periode->label()) : 'PERIODE '.$periode->label() }}</h3>
     </div>
     <table>
         <thead>

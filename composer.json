@@ -12,6 +12,7 @@
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "laravel/ui": "^4.6",
+        "maatwebsite/excel": "^4.0",
         "realrashid/sweet-alert": "^7.3"
     },
     "require-dev": {

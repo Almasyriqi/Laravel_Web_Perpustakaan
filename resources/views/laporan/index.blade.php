@@ -7,7 +7,7 @@
     <div class="col-lg-12 margin-tb">
         <div class="pull-left mt-2">
             <h2>Data Laporan Perpustakaan</h2>
-            <p class="text-muted mb-0">Periode: <b>{{ $namaBulan[$sekarang] }} {{ $tahun }}</b></p>
+            <p class="text-muted mb-0">Periode: <b>{{ $periode->label() }}</b> — {{ $laporan->count() }} transaksi</p>
             <hr>
         </div>
     </div>
@@ -18,13 +18,17 @@
     <p>{{ $message }}</p>
 </div>
 @endif
+@include('partials.errors')
 
 <div class="d-flex flex-wrap align-items-center mb-3">
-    <a href="{{ route($routePrefix.'.cetak_pdf', ['bulan' => $sekarang, 'tahun' => $tahun]) }}" class="btn btn-warning mr-3">
-        <i class="fas fa-print"></i> Cetak Laporan
+    <a href="{{ $urlPdf }}" class="btn btn-warning mr-2 mb-2">
+        <i class="fas fa-file-pdf"></i> Cetak PDF
+    </a>
+    <a href="{{ $urlExcel }}" class="btn btn-success mr-3 mb-2">
+        <i class="fas fa-file-excel"></i> Export Excel
     </a>
 
-    <form method="get" action="{{ route($routePrefix.'.laporan', ['bulan' => $sekarang]) }}" class="form-inline">
+    <form method="get" action="{{ route($routePrefix.'.laporan', ['bulan' => $sekarang ?? now()->month]) }}" class="form-inline mb-2">
         <label for="tahun" class="mr-2">Tahun</label>
         <select name="tahun" id="tahun" class="form-control" onchange="this.form.submit()">
             @foreach (range(now()->year + 1, now()->year - 5) as $th)
@@ -34,6 +38,20 @@
     </form>
 </div>
 
+{{-- Rentang tanggal bebas (alternatif dari pilihan bulan di bawah) --}}
+<form method="get" action="{{ route($routePrefix.'.laporan.rentang') }}" class="form-inline mb-3" id="form-rentang">
+    <label for="dari" class="mr-2">Rentang tanggal</label>
+    <input type="date" name="dari" id="dari" class="form-control mr-2 mb-2" required
+        value="{{ old('dari', $periode->bulanan() ? '' : $periode->dari->toDateString()) }}">
+    <span class="mr-2 mb-2">s.d.</span>
+    <input type="date" name="sampai" id="sampai" class="form-control mr-2 mb-2" required
+        value="{{ old('sampai', $periode->bulanan() ? '' : $periode->sampai->toDateString()) }}">
+    <button type="submit" class="btn btn-primary mb-2">
+        <i class="fas fa-filter"></i> Tampilkan
+    </button>
+</form>
+
+<div class="table-responsive">
 <table class="table table-bordered" id="example">
     <thead>
         <tr>
@@ -43,6 +61,7 @@
             <th>Jumlah</th>
             <th>Tanggal Pinjam</th>
             <th>Status</th>
+            <th>Denda</th>
         </tr>
     </thead>
     <tbody>
@@ -54,10 +73,12 @@
             <td>{{ $lp->jumlah }}</td>
             <td>{{ date('d-m-Y', strtotime($lp->tgl_pinjam)) }}</td>
             <td>{{ $lp->status }}</td>
+            <td>@currency($lp->denda)</td>
         </tr>
         @endforeach
     </tbody>
 </table>
+</div>
 
 <div class="row">
     <div class="col-12">
@@ -68,7 +89,7 @@
             <div class="card-body">
                 <ul class="pagination pagination-month justify-content-center">
                     @foreach ($namaBulan as $i => $item)
-                    <li class="page-item {{ $i == $sekarang ? 'active' : '' }}">
+                    <li class="page-item {{ $i === $sekarang ? 'active' : '' }}">
                         <a class="page-link" href="{{ route($routePrefix.'.laporan', ['bulan' => $i, 'tahun' => $tahun]) }}">
                             <p class="page-month">{{ $item }}</p>
                             <p class="page-year">{{ $tahun }}</p>

@@ -57,9 +57,9 @@ Pinjam → konfirmasi → perpanjang → kembali, dengan denda otomatis
 <td width="33%" align="center">
 
 ### 📊
-**Laporan PDF**
+**Laporan PDF & Excel**
 
-Rekap peminjaman per bulan, siap cetak lewat DomPDF
+Rekap peminjaman per bulan atau rentang tanggal bebas, cetak PDF (DomPDF) atau export Excel
 
 </td>
 </tr>
@@ -92,7 +92,7 @@ Rekap peminjaman per bulan, siap cetak lewat DomPDF
 | 📚 | **CRUD Buku** | Judul, penulis, penerbit, stok, dan sampul buku (disimpan di Storage disk) |
 | 🗄️ | **Arsip & pulihkan** | Buku/anggota yang dihapus masuk arsip (soft delete), riwayat tetap utuh, bisa dipulihkan |
 | 🔁 | **CRUD Peminjaman** | Kontrol penuh atas seluruh transaksi peminjaman |
-| 🧾 | **Cetak laporan** | Laporan peminjaman per bulan dalam bentuk PDF |
+| 🧾 | **Cetak & export laporan** | Laporan per bulan atau rentang tanggal bebas — PDF dan Excel (.xlsx) |
 
 ### 🧑‍🏫 Petugas
 
@@ -105,7 +105,7 @@ Rekap peminjaman per bulan, siap cetak lewat DomPDF
 | ➕ | **Peminjaman langsung** | Input transaksi untuk anggota yang datang ke loket |
 | ⏳ | **Perpanjangan** | Memperpanjang masa pinjam (maksimal 1×) |
 | 📥 | **Pengembalian** | Hitung lama pinjam & denda otomatis, stok buku dikembalikan |
-| 🧾 | **Cetak laporan** | Laporan peminjaman bulanan dalam bentuk PDF |
+| 🧾 | **Cetak & export laporan** | Laporan per bulan atau rentang tanggal bebas — PDF dan Excel (.xlsx) |
 
 ### 🎓 Anggota
 
@@ -131,6 +131,7 @@ Rekap peminjaman per bulan, siap cetak lewat DomPDF
 | **Frontend** | Bootstrap, jQuery — bundel AdminLTE (`public/vendor`) + plugin CDN, tanpa build step | `4.6` / `3.6` |
 | **Autentikasi** | [Laravel UI](https://github.com/laravel/ui) — scaffolding + email verification | `4.6` |
 | **Cetak PDF** | [DomPDF](https://github.com/barryvdh/laravel-dompdf) — `barryvdh/laravel-dompdf` | `3.1` |
+| **Export Excel** | [Laravel Excel](https://github.com/SpartnerNL/Laravel-Excel) — `maatwebsite/excel` (PhpSpreadsheet) | `4.0` |
 | **Notifikasi** | [SweetAlert](https://github.com/realrashid/sweet-alert) — `realrashid/sweet-alert` | `7.3` |
 | **Kalender** | FullCalendar | — |
 | **Testing** | PHPUnit (SQLite in-memory), Faker | `12.5` |
@@ -493,13 +494,15 @@ vendor/bin/pint --dirty          # rapikan format file yang berubah
 | `SmokeTest` | Halaman utama tiap role dapat dirender, middleware role menolak akses silang |
 | `AuthTest` | Login via username/email, logout `POST`, verifikasi email, registrasi |
 | `PeminjamanFlowTest` | Ajukan → konfirmasi → perpanjang → kembali, stok, denda, pembatalan, edit admin |
-| `LaporanTest` | Filter bulan + tahun, validasi periode, keluaran PDF |
+| `LaporanTest` | Filter bulan + tahun dan rentang tanggal bebas, validasi periode, keluaran PDF & Excel |
 | `ValidationTest` | Duplikat username/email, profil orang lain, jumlah/status tidak valid |
 | `EagerLoadingTest` | Halaman daftar memakai ≤ 6 query untuk 15 baris (tidak ada N+1) |
 | `SoftDeleteTest` | Arsip & pulihkan buku/anggota, akun terarsip tidak bisa login, riwayat utuh |
 | `SampulBukuTest` | Unggah/ganti sampul di Storage disk, path legacy tetap dilayani |
 | `RoleTest` | Enum `Role`, helper `isAdmin()`, middleware `role:admin,petugas` |
 | `PeminjamanServiceTest` | Unit test perhitungan denda dan lama pinjam dengan aturan yang dapat diatur |
+| `KatalogTest` | Pencarian judul/penulis/penerbit, filter kategori & ketersediaan, paginasi katalog anggota |
+| `StatistikTest` | Buku terpopuler, tren 12 bulan, daftar keterlambatan & estimasi denda, tampilan dashboard |
 
 ---
 
@@ -530,7 +533,7 @@ Beberapa hal yang layak dikerjakan berikutnya, diurutkan berdasarkan prioritas.
 - [x] 🔍 **Pencarian & filter katalog** anggota — scope `Buku::cari()/dariKategori()/tersedia()`, `KatalogRequest`, grid kartu 12 per halaman dengan paginasi Bootstrap 4 yang mempertahankan query string
 - [ ] 📧 **Notifikasi email jatuh tempo** otomatis via Queue + Task Scheduler
 - [x] 📊 **Dashboard statistik** admin & petugas — `StatistikService`: ringkasan (sedang dipinjam, menunggu konfirmasi, terlambat, denda bulan ini), bar chart tren 12 bulan (Chart.js), 5 buku terpopuler, daftar keterlambatan dengan estimasi denda; agregasi per bulan di PHP agar jalan di MySQL & SQLite
-- [ ] 📑 **Export laporan ke Excel** selain PDF, plus filter rentang tanggal bebas
+- [x] 📑 **Export laporan ke Excel** (`maatwebsite/excel` 4 — resmi mendukung Laravel 13) + **rentang tanggal bebas** (`/laporan/rentang?dari=&sampai=`, maks. 366 hari) — `PeriodeLaporan` dipakai bersama oleh HTML, PDF, dan Excel; filter memakai `whereBetween` sehingga index `tgl_pinjam` terpakai
 - [ ] 🔖 **Barcode / QR code** buku dan kartu anggota untuk mempercepat transaksi loket
 - [ ] ⭐ **Rating & ulasan buku** serta fitur *booking* buku yang stoknya sedang habis
 - [ ] 🌓 **Dark mode** dan penyempurnaan tampilan mobile
