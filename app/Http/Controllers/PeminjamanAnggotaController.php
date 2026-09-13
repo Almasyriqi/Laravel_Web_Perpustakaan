@@ -5,142 +5,101 @@ namespace App\Http\Controllers;
 use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Peminjaman;
+use App\Services\PeminjamanService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class PeminjamanAnggotaController extends Controller
 {
+    public function __construct(private readonly PeminjamanService $service) {}
+
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Riwayat peminjaman milik anggota yang sedang login.
      */
     public function index()
     {
-        $anggota = Anggota::with('user')->where('user_id', Auth::user()->id)->first();
+        $anggota = $this->anggotaSaatIni();
         $pinjam = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
             ->where('peminjaman.anggota_id', '=', $anggota->nim)->orderBy('peminjaman.id', 'desc')
             ->get(['peminjaman.*', 'anggota.*', 'buku.judul']);
+
         return view('anggota.peminjaman.index', compact('pinjam', 'anggota'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
+        $milik = $this->peminjamanMilikSaya($id);
         $pinjam = Peminjaman::with('buku')->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
-            ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.id', '=', $id)
+            ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.id', '=', $milik->id)
             ->select(['peminjaman.*', 'anggota.*', 'users.name'])->first();
+
         return view('anggota.peminjaman.show', compact('pinjam'));
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Membatalkan pengajuan sendiri yang masih berstatus konfirmasi.
      */
     public function destroy($id)
     {
-        $peminjaman = Peminjaman::find($id);
-        $peminjaman->delete();
+        $this->service->batalkan($this->peminjamanMilikSaya($id));
+
         return redirect()->to('/anggota/pinjam')->with('success', 'Peminjaman Berhasil Dibatalkan');
     }
 
     public function delete($id)
     {
-        $pinjam = Peminjaman::find($id);
+        $pinjam = $this->peminjamanMilikSaya($id);
+
         return view('anggota.peminjaman.delete', compact('pinjam'));
     }
 
     public function pinjam($id)
     {
-        $pinjam = Buku::find($id);
+        $pinjam = Buku::findOrFail($id);
+
         return view('anggota.peminjaman.modalPinjam', compact('pinjam'));
     }
 
+    /**
+     * Mengajukan peminjaman dari katalog (menunggu konfirmasi petugas).
+     */
     public function peminjaman(Request $request, $id)
     {
-        $buku = Buku::find($id);
-        $user_id = Auth::user()->id;
-        $anggota = Anggota::getByUser($user_id);
+        $buku = Buku::findOrFail($id);
 
         $request->validate([
-            'jumlah' => 'required|integer|max:'.$buku->stok,
+            'jumlah' => 'required|integer|min:1',
         ]);
-        $pinjam = new Peminjaman();
-        $pinjam->anggota_id = $anggota->nim;
-        $pinjam->buku_id = $buku->id;
-        $pinjam->jumlah = $request->get('jumlah');
-        $pinjam->tgl_pinjam = now();
-        $pinjam->status = 'konfirmasi';
-        $pinjam->denda = 0;
-        $pinjam->perpanjang = 0;
-        $pinjam->save();
-        
+
+        $this->service->ajukan($this->anggotaSaatIni(), $buku, (int) $request->input('jumlah'));
+
         return redirect()->to('/anggota/buku')->with('success', 'Berhasil Meminjam Buku');
     }
 
     public function modalPerpanjang($id)
     {
-        $pinjam = Peminjaman::find($id);
+        $pinjam = $this->peminjamanMilikSaya($id);
+
         return view('anggota.peminjaman.modalPerpanjang', compact('pinjam'));
     }
 
     public function perpanjang($id)
     {
-        $pinjam = Peminjaman::find($id);
-        $pinjam->status = 'perpanjang';
-        $pinjam->perpanjang = 1;
-        $pinjam->save();
+        $this->service->perpanjang($this->peminjamanMilikSaya($id));
+
         return redirect()->to('/anggota/pinjam')->with('success', 'Perpanjang Peminjaman Berhasil!');
+    }
+
+    private function anggotaSaatIni(): Anggota
+    {
+        return Anggota::where('user_id', auth()->id())->firstOrFail();
+    }
+
+    /**
+     * 404 bila peminjaman bukan milik anggota yang login, supaya anggota tidak
+     * bisa membatalkan/memperpanjang transaksi orang lain lewat id di URL.
+     */
+    private function peminjamanMilikSaya($id): Peminjaman
+    {
+        return Peminjaman::where('anggota_id', $this->anggotaSaatIni()->nim)->findOrFail($id);
     }
 }

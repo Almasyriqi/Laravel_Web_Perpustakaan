@@ -8,6 +8,7 @@
 
 @section('content')
 <div class="container mt-5">
+@include('partials.errors')
     <div class="row justify-content-center align-items-center">
         <div class="card" style="width: 24rem;">
             <div class="card-header">

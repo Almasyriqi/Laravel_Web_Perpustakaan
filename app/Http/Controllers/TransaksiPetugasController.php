@@ -5,24 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Peminjaman;
-use DateTime;
+use App\Services\PeminjamanService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class TransaksiPetugasController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
+    public function __construct(private readonly PeminjamanService $service) {}
+
     public function index()
     {
         // Satu baris per anggota yang punya transaksi aktif, terbaru di atas.
         // (DISTINCT + ORDER BY kolom di luar SELECT ditolak MySQL 8 mode strict)
         $pinjam = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
             ->join('users', 'anggota.user_id', '=', 'users.id')
-            ->where('peminjaman.status', '!=', 'konfirmasi')
+            ->where('peminjaman.status', '!=', PeminjamanService::STATUS_KONFIRMASI)
             ->selectRaw('anggota.*, users.name, users.email, MAX(peminjaman.id) as last_id')
             ->groupBy('anggota.nim', 'users.name', 'users.email')
             ->orderByDesc('last_id')
@@ -31,11 +27,6 @@ class TransaksiPetugasController extends Controller
         return view('petugas.peminjaman.index', compact('pinjam'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     */
     public function create()
     {
         $anggota = Anggota::with('user')->get();
@@ -45,142 +36,77 @@ class TransaksiPetugasController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @return Response
+     * Peminjaman langsung di loket: stok langsung berkurang.
      */
     public function store(Request $request)
     {
-        // TODO : Implementasikan Proses Simpan Ke Database
-        $pinjam = new Peminjaman;
-        $pinjam->anggota_id = $request->get('anggota');
-        $buku_id = $request->get('judul');
-        $pinjam->buku_id = $buku_id;
-        $jumlah = $request->get('jumlah');
-        $pinjam->jumlah = $jumlah;
-        $pinjam->tgl_pinjam = now();
-        $pinjam->status = 'dipinjam';
-        $pinjam->denda = 0;
-        $pinjam->perpanjang = 0;
-
-        $buku = Buku::find($buku_id);
         $request->validate([
-            'anggota' => 'required',
-            'judul' => 'required',
-            'jumlah' => 'required|integer|max:'.$buku->stok,
+            'anggota' => 'required|exists:anggota,nim',
+            'judul' => 'required|exists:buku,id',
+            'jumlah' => 'required|integer|min:1',
         ]);
-        $buku->stok -= $jumlah;
-        $buku->save();
-        $pinjam->save();
 
-        // jika data berhasil ditambahkan, akan kembali ke halaman utama
+        $this->service->pinjamLangsung(
+            anggotaId: (int) $request->input('anggota'),
+            bukuId: (int) $request->input('judul'),
+            jumlah: (int) $request->input('jumlah'),
+        );
+
         return redirect()->route('transaksi.index')->with('success', 'Peminjaman Berhasil Ditambahkan');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
     public function show($id)
     {
         $pinjam = Peminjaman::with('buku')->join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')
             ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.id', '=', $id)
-            ->select(['peminjaman.*', 'anggota.*', 'users.name'])->first();
+            ->select(['peminjaman.*', 'anggota.*', 'users.name'])->firstOrFail();
 
         return view('petugas.peminjaman.show', compact('pinjam'));
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
+     * Daftar transaksi aktif seorang anggota ($id = nim).
      */
     public function edit($id)
     {
         $pinjam = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
-            ->where('peminjaman.anggota_id', '=', $id)->where('peminjaman.status', '!=', 'konfirmasi')
+            ->where('peminjaman.anggota_id', '=', $id)->where('peminjaman.status', '!=', PeminjamanService::STATUS_KONFIRMASI)
             ->get(['peminjaman.*', 'anggota.*', 'buku.judul']);
-        $anggota = Anggota::with('user')->where('nim', $id)->first();
+        $anggota = Anggota::with('user')->where('nim', $id)->firstOrFail();
 
         return view('petugas.peminjaman.edit', compact('pinjam', 'anggota'));
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  Request  $request
-     * @param  int  $id
-     * @return Response
+     * Pengembalian buku: lama pinjam & denda dihitung, stok kembali.
      */
     public function update($id)
     {
-        $kembali = Peminjaman::find($id);
-        $jumlah = $kembali->jumlah;
-        $buku_id = $kembali->buku_id;
-        $nim = $kembali->anggota_id;
-        $kembali->status = 'kembali';
-        $tgl_pinjam = $kembali->tgl_pinjam;
-        $tgl_kembali = now();
-        $kembali->tgl_kembali = $tgl_kembali;
+        $kembali = $this->service->kembalikan(Peminjaman::findOrFail($id));
+        $tujuan = '/petugas/transaksi/'.$kembali->anggota_id.'/edit';
 
-        // Menghitung lama pinjam
-        $tgl1 = new DateTime($tgl_pinjam);
-        $tgl2 = new DateTime($tgl_kembali);
-        $d = $tgl2->diff($tgl1)->days;
-        $kembali->lama_pinjam = $d;
-
-        // Menghitung denda
-        $lama_pinjam = $d;
-        $perpanjang = $kembali->perpanjang;
-        $denda = 0;
-        if ($perpanjang == 1) {
-            if ($lama_pinjam > 14) {
-                $lama_pinjam -= 14;
-                $denda = $lama_pinjam * 2000;
-                $kembali->denda = $denda;
-            }
-        } else {
-            if ($lama_pinjam > 7) {
-                $lama_pinjam -= 7;
-                $denda = $lama_pinjam * 2000;
-                $kembali->denda = $denda;
-            }
+        if ($kembali->denda > 0) {
+            return redirect()->to($tujuan)->with('success', 'Berhasil Mengembalikan Buku, '
+                .'mendapatkan denda sebesar Rp '.number_format($kembali->denda, 0, ',', '.')
+                .'. Silahkan langsung membayar denda ke petugas!');
         }
 
-        $buku = Buku::find($buku_id);
-        $buku->stok += $jumlah;
-        $buku->save();
-        $kembali->save();
-
-        if ($denda > 0) {
-            return redirect()->to('/petugas/transaksi/'.$nim.'/edit')->with('success', 'Berhasil Mengembalikan Buku, 
-            mendapatkan denda sebesar Rp '.$denda.' Silahkan langsung membayar denda ke petugas!');
-        } else {
-            return redirect()->to('/petugas/transaksi/'.$nim.'/edit')->with('success', 'Berhasil Mengembalikan Buku, Terima kasih telah mengembalikan tepat waktu');
-        }
-
+        return redirect()->to($tujuan)->with('success', 'Berhasil Mengembalikan Buku, Terima kasih telah mengembalikan tepat waktu');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return Response
+     * Menolak/membatalkan pengajuan yang belum dikonfirmasi.
      */
     public function destroy($id)
     {
-        $peminjaman = Peminjaman::find($id);
-        $peminjaman->delete();
+        $this->service->batalkan(Peminjaman::findOrFail($id));
 
         return redirect()->to('/petugas/transaksi/konfirmasi')->with('success', 'Peminjaman Berhasil Dibatalkan');
     }
 
     public function delete($id)
     {
-        $pinjam = Peminjaman::find($id);
+        $pinjam = Peminjaman::findOrFail($id);
 
         return view('petugas.peminjaman.delete', compact('pinjam'));
     }
@@ -188,7 +114,7 @@ class TransaksiPetugasController extends Controller
     public function konfirmasiPeminjaman()
     {
         $pinjam = Peminjaman::join('anggota', 'peminjaman.anggota_id', '=', 'anggota.nim')->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
-            ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.status', '=', 'konfirmasi')
+            ->join('users', 'anggota.user_id', '=', 'users.id')->where('peminjaman.status', '=', PeminjamanService::STATUS_KONFIRMASI)
             ->get(['peminjaman.*', 'anggota.*', 'users.name', 'buku.judul']);
 
         return view('petugas.peminjaman.confirm', compact('pinjam'));
@@ -196,45 +122,35 @@ class TransaksiPetugasController extends Controller
 
     public function confirm($id)
     {
-        $pinjam = Peminjaman::find($id);
+        $pinjam = Peminjaman::findOrFail($id);
 
         return view('petugas.peminjaman.modalConfirm', compact('pinjam'));
     }
 
     public function konfirmasi($id)
     {
-        $pinjam = Peminjaman::find($id);
-        $pinjam->status = 'dipinjam';
-        $buku_id = $pinjam->buku_id;
-        $buku = Buku::find($buku_id);
-        $buku->stok -= $pinjam->jumlah;
-        $buku->save();
-        $pinjam->save();
+        $this->service->konfirmasi(Peminjaman::findOrFail($id));
 
         return redirect()->to('/petugas/transaksi/konfirmasi')->with('success', 'Konfirmasi Peminjaman Berhasil!');
     }
 
     public function modalPerpanjang($id)
     {
-        $pinjam = Peminjaman::find($id);
+        $pinjam = Peminjaman::findOrFail($id);
 
         return view('petugas.peminjaman.modalPerpanjang', compact('pinjam'));
     }
 
     public function perpanjang($id)
     {
-        $pinjam = Peminjaman::find($id);
-        $nim = $pinjam->anggota_id;
-        $pinjam->status = 'perpanjang';
-        $pinjam->perpanjang = 1;
-        $pinjam->save();
+        $pinjam = $this->service->perpanjang(Peminjaman::findOrFail($id));
 
-        return redirect()->to('/petugas/transaksi/'.$nim.'/edit')->with('success', 'Perpanjang Peminjaman Berhasil!');
+        return redirect()->to('/petugas/transaksi/'.$pinjam->anggota_id.'/edit')->with('success', 'Perpanjang Peminjaman Berhasil!');
     }
 
     public function kembali($id)
     {
-        $pinjam = Peminjaman::find($id);
+        $pinjam = Peminjaman::findOrFail($id);
 
         return view('petugas.peminjaman.modalKembali', compact('pinjam'));
     }
