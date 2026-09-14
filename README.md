@@ -88,15 +88,15 @@ Rekap peminjaman per bulan atau rentang tanggal bebas, cetak PDF (DomPDF) atau e
 | | Fitur | Keterangan |
 |:--:|---|---|
 | 📊 | **Dashboard statistik** | Tren peminjaman 12 bulan, buku terpopuler, daftar keterlambatan dengan estimasi denda |
-| 🧑‍💼 | **CRUD Admin** | Kelola akun administrator + pencarian data |
-| 🧑‍🏫 | **CRUD Petugas** | Kelola akun petugas perpustakaan + pencarian data |
-| 🎓 | **CRUD Anggota** | Kelola data anggota (NIM, jurusan, kontak, alamat) |
+| 🧑‍💼 | **CRUD Admin** | Kelola akun administrator — semua daftar admin punya pencarian server-side + paginasi |
+| 🧑‍🏫 | **CRUD Petugas** | Kelola akun petugas perpustakaan (cari nama/email/username) |
+| 🎓 | **CRUD Anggota** | Kelola data anggota (cari nama/NIM/email/jurusan, termasuk arsip) |
 | 🏷️ | **CRUD Kategori** | Pengelompokan koleksi buku |
-| 📚 | **CRUD Buku** | Judul, penulis, penerbit, stok, dan sampul buku (disimpan di Storage disk) |
+| 📚 | **CRUD Buku** | Judul, penulis, penerbit, stok, sampul (Storage disk); cari judul/penulis/penerbit + filter kategori |
 | 🗄️ | **Arsip & pulihkan** | Buku/anggota yang dihapus masuk arsip (soft delete), riwayat tetap utuh, bisa dipulihkan |
 | ⭐ | **Moderasi ulasan** | Melihat rating & ulasan tiap buku, menghapus ulasan yang tidak pantas |
 | 🔖 | **Label QR & kartu anggota** | Cetak label buku (60×40 mm) dan kartu anggota (ukuran kartu) ber-QR lewat DomPDF |
-| 🔁 | **CRUD Peminjaman** | Kontrol penuh atas seluruh transaksi peminjaman |
+| 🔁 | **CRUD Peminjaman** | Kontrol penuh atas seluruh transaksi — cari nama/judul, filter status, paginasi |
 | 🧾 | **Cetak & export laporan** | Laporan per bulan atau rentang tanggal bebas — PDF dan Excel (.xlsx) |
 
 ### 🧑‍🏫 Petugas
@@ -577,6 +577,7 @@ vendor/bin/pint --dirty          # rapikan format file yang berubah
 | `QrCodeTest` | Format & parsing kode `BK-`/`AG-`, PDF label & kartu, anggota hanya bisa mencetak kartunya sendiri, input scan di loket |
 | `NotifikasiTest` | Pengajuan/booking baru ke petugas & admin, disetujui/dikembalikan ke anggota, endpoint lonceng, buka & tandai dibaca, isolasi antar user |
 | `KedaluwarsaPengajuanTest` | Pengajuan basi dibatalkan + notifikasi, batas tepat hari ini masih aman, booking berikutnya naik, `--dry-run`, config N, tampilan batas ambil |
+| `PencarianAdminTest` | Baris di luar halaman 1 tetap terlihat (regresi), cari anggota/buku/admin/petugas/peminjaman/arsip, filter kategori & status |
 
 ---
 
@@ -619,7 +620,7 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 - [x] ⏳ **Kedaluwarsa pengajuan** — diperluas ke semua pengajuan `konfirmasi` (bukan hanya hasil booking): command `perpus:kedaluwarsa-pengajuan` harian membatalkan yang tidak diambil > `masa_ambil_pengajuan` hari (default 3), memberi tahu anggota (`PengajuanKedaluwarsa`, email + in-app), lalu memproses antrean booking buku itu. Tidak butuh kolom baru karena `tgl_pinjam` = tanggal masuk antrean; batas ambil tampil di halaman konfirmasi petugas & riwayat anggota
 - [x] 🔔 **Notifikasi in-app** — kelas dasar `NotifikasiPerpustakaan` (`via` = database, + mail bila `$lewatEmail`) sehingga semua notifikasi otomatis punya versi lonceng; notifikasi baru `PengajuanDisetujui`, `BukuDikembalikan`, `PengajuanBaru` (petugas & admin); lonceng memakai komponen `navbar-notification` bawaan AdminLTE yang mem-poll `/notifikasi/ringkas`
 - [x] 🌓 **Preferensi dark mode per akun** — kolom `users.dark_mode`; dua listener pada event AdminLTE (`DarkModeWasToggled` → simpan ke akun, `ReadingDarkModePreference` → muat ke session saat login) sehingga tidak ada JS/route custom; akun yang belum pernah memilih (`null`) tetap mengikuti default
-- [ ] 🔍 **Pencarian server-side di halaman admin/petugas** memakai scope `Buku::cari()` yang sama, menggantikan pencarian DataTables sisi klien
+- [x] 🔍 **Pencarian server-side + paginasi di semua daftar admin/petugas** — komponen `<x-form-cari>`, trait `CariLewatUser` (admin/petugas/anggota), scope `Peminjaman::cari()/status()`, `Buku::cari()` + filter kategori, arsip & daftar transaksi petugas ikut; rute lama `/cari` dihapus. Sekaligus memperbaiki bug: `paginate(10)` tanpa `links()` membuat baris ke-11 dst. tidak pernah terlihat (seeder 20 anggota → 10 tersembunyi)
 - [x] 📅 **Jatuh tempo dihitung dari tanggal konfirmasi** — `konfirmasi()` mengganti `tgl_pinjam` dengan hari konfirmasi sebelum menghitung jatuh tempo; tanggal pengajuan tetap di `created_at`. Selama status `booking`/`konfirmasi`, `tgl_pinjam` berarti tanggal masuk antrean
 - [ ] 🖼️ **Perbarui screenshot** README dengan tampilan katalog kartu, dashboard statistik, dan dark mode
 

@@ -24,6 +24,15 @@
     @endif
     @include('partials.errors')
 
+    <x-form-cari :action="$prefix.'/buku'" :q="$q" placeholder="Cari judul, penulis, atau penerbit" :data-terfilter="$kategoriDipilih ? '1' : null">
+        <select name="kategori" class="form-control mr-2 mb-2" onchange="this.form.submit()">
+            <option value="">Semua kategori</option>
+            @foreach ($kategori as $k)
+            <option value="{{ $k->id }}" @selected($k->id === $kategoriDipilih)>{{ $k->nama }}</option>
+            @endforeach
+        </select>
+    </x-form-cari>
+
     <table class="table table-bordered" id="example">
         <thead>
             <tr>
@@ -80,6 +89,8 @@
         </tbody>
     </table>
 
+    <div class="d-flex justify-content-center">{{ $paginate->links() }}</div>
+
     <div class="modal fade" id="smallModal" tabindex="-1" role="dialog" aria-labelledby="smallModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
@@ -131,9 +142,9 @@
     <script>
         $(function () {
           $('#example').DataTable({
-            "paging": true,
+            "paging": false,
             "lengthChange": false,
-            "searching": true,
+            "searching": false,
             "ordering": true,
             "info": false,
             "autoWidth": false,

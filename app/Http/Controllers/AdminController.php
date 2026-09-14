@@ -16,11 +16,21 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
-    public function index()
-    {
-        $paginate = Admin::with('user')->orderBy('id', 'desc')->paginate(10);
+    /** Baris per halaman untuk semua daftar admin/petugas. */
+    public const PER_HALAMAN = 15;
 
-        return view('admin.adminAdmin.index', compact('paginate'));
+    /**
+     * Daftar admin dengan pencarian server-side (?q=) dan paginasi.
+     */
+    public function index(Request $request)
+    {
+        $paginate = Admin::with('user')
+            ->cari($request->query('q'))
+            ->orderBy('id', 'desc')
+            ->paginate(self::PER_HALAMAN)
+            ->withQueryString();
+
+        return view('admin.adminAdmin.index', ['paginate' => $paginate, 'q' => (string) $request->query('q')]);
     }
 
     public function create()
@@ -105,19 +115,6 @@ class AdminController extends Controller
         $admin = Admin::findOrFail($id);
 
         return view('admin.adminAdmin.delete', compact('admin'));
-    }
-
-    public function search(Request $request)
-    {
-        $paginate = Admin::with('user')
-            ->when($request->keyword, fn ($query, $keyword) => $query->whereHas('user', fn ($user) => $user
-                ->where('name', 'like', "%{$keyword}%")
-                ->orWhere('email', 'like', "%{$keyword}%")))
-            ->orderBy('id', 'desc')
-            ->paginate(10);
-        $paginate->appends($request->only('keyword'));
-
-        return view('admin.adminAdmin.index', compact('paginate'));
     }
 
     public function home(StatistikService $statistik)

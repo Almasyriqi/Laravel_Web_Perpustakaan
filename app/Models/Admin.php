@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CariLewatUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Admin extends Model
 {
-    use HasFactory;
+    use CariLewatUser, HasFactory;
 
     protected $table = 'admin';
 

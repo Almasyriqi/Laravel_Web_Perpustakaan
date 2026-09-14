@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CariLewatUser;
 use App\Services\PeminjamanService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Anggota extends Model
 {
-    use HasFactory, SoftDeletes;
+    use CariLewatUser, HasFactory, SoftDeletes;
 
     protected $table = 'anggota';
 
@@ -71,5 +72,15 @@ class Anggota extends Model
     public function ulasanUntuk(Buku $buku): ?Ulasan
     {
         return $this->ulasan()->where('buku_id', $buku->id)->first();
+    }
+
+    /**
+     * Selain nama/email/username di users, pencarian anggota juga mencocokkan NIM dan jurusan.
+     *
+     * @return list<string>
+     */
+    protected function kolomCariSendiri(): array
+    {
+        return ['nim', 'jurusan'];
     }
 }

@@ -75,6 +75,30 @@ class Peminjaman extends Model
     }
 
     /**
+     * Pencarian daftar peminjaman: nama anggota atau judul buku.
+     */
+    public function scopeCari(Builder $query, ?string $kata): Builder
+    {
+        $kata = trim((string) $kata);
+
+        if ($kata === '') {
+            return $query;
+        }
+
+        return $query->where(fn (Builder $q) => $q
+            ->whereHas('anggota.user', fn (Builder $user) => $user->where('name', 'like', "%{$kata}%"))
+            ->orWhereHas('buku', fn (Builder $buku) => $buku->where('judul', 'like', "%{$kata}%")));
+    }
+
+    public function scopeStatus(Builder $query, ?string $status): Builder
+    {
+        return $query->when(
+            in_array($status, PeminjamanService::SEMUA_STATUS, true),
+            fn (Builder $q) => $q->where('status', $status),
+        );
+    }
+
+    /**
      * Versi query dari terlambat() — dipanggil Peminjaman::lewatTempo(): masih di tangan anggota dan jatuh tempo sudah lewat.
      */
     public function scopeLewatTempo(Builder $query): Builder

@@ -22,6 +22,8 @@
 </div>
 @endif
 
+<x-form-cari action="/petugas/transaksi" :q="$q" placeholder="Cari nama atau NIM anggota" />
+
 {{-- Scan kartu anggota (AG-nim) langsung membuka halaman pengembalian anggota tersebut --}}
 <div class="form-inline mb-3">
     <label for="scan" class="mr-2"><i class="fas fa-qrcode"></i> Scan kartu anggota</label>
@@ -54,6 +56,8 @@
         @endforeach
     </tbody>
 </table>
+
+<div class="d-flex justify-content-center">{{ $pinjam->links() }}</div>
 @endsection
 
 @section('js')
@@ -74,9 +78,9 @@
 
     $(function () {
           $('#example').DataTable({
-            "paging": true,
+            "paging": false,
             "lengthChange": false,
-            "searching": true,
+            "searching": false,
             "ordering": true,
             "info": false,
             "autoWidth": false,

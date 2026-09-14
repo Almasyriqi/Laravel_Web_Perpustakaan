@@ -61,18 +61,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/anggota/arsip', [AnggotaController::class, 'arsip']);
             Route::put('/anggota/{id}/pulihkan', [AnggotaController::class, 'pulihkan']);
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
-            Route::get('/anggota/cari', [AnggotaController::class, 'search']);
             Route::get('/anggota/{nim}/kartu', [CetakController::class, 'kartuAnggota']);
             Route::resource('/anggota', AnggotaController::class);
 
             // CRUD Admin
             Route::get('/admin/delete/{id}', [AdminController::class, 'delete']);
-            Route::get('/admin/cari', [AdminController::class, 'search']);
             Route::resource('/admin', AdminController::class);
 
             // CRUD Petugas
             Route::get('/petugas/delete/{id}', [PetugasController::class, 'delete']);
-            Route::get('/petugas/cari', [PetugasController::class, 'search']);
             Route::resource('/petugas', PetugasController::class);
 
             // CRUD Kategori
@@ -109,7 +106,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/anggota/arsip', [AnggotaController::class, 'arsip']);
             Route::put('/anggota/{id}/pulihkan', [AnggotaController::class, 'pulihkan']);
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
-            Route::get('/anggota/cari', [AnggotaController::class, 'search']);
             Route::get('/anggota/{nim}/kartu', [CetakController::class, 'kartuAnggota']);
             Route::resource('/anggota', AnggotaController::class);
 

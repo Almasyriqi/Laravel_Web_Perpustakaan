@@ -17,6 +17,9 @@
     </div>
 </div>
 
+@php $prefixCari = Auth::user()->isAdmin() ? '/admin' : '/petugas'; @endphp
+<x-form-cari :action="$prefixCari.'/buku/arsip'" :q="$q" placeholder="Cari judul, penulis, atau penerbit" />
+
 @if ($message = Session::get('success'))
 <div class="alert alert-success"><p>{{ $message }}</p></div>
 @endif
@@ -56,12 +59,14 @@
         @endforelse
     </tbody>
 </table>
+
+<div class="d-flex justify-content-center">{{ $paginate->links() }}</div>
 @endsection
 
 @section('js')
 <script>
 $(function () {
-    $('#example').DataTable({ "paging": true, "lengthChange": false, "searching": true, "ordering": true, "info": false, "autoWidth": false, "responsive": true });
+    $('#example').DataTable({ "paging": false, "lengthChange": false, "searching": false, "ordering": true, "info": false, "autoWidth": false, "responsive": true });
 });
 </script>
 @stop
