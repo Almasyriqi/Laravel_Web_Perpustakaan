@@ -178,6 +178,12 @@ class PeminjamanService
 
     /**
      * Petugas menyetujui pengajuan: stok berkurang, status menjadi dipinjam.
+     *
+     * Selama status booking/konfirmasi, tgl_pinjam berarti "tanggal masuk
+     * antrean" (diisi saat ajukan/booking/promosi). Saat dikonfirmasi, tanggal
+     * itu diganti hari ini supaya masa pinjam dihitung sejak buku benar-benar
+     * diserahkan, bukan sejak anggota mengajukan. Tanggal pengajuan tetap
+     * tersimpan di created_at.
      */
     public function konfirmasi(Peminjaman $peminjaman): Peminjaman
     {
@@ -193,6 +199,7 @@ class PeminjamanService
             $buku->decrement('stok', $peminjaman->jumlah);
 
             $peminjaman->status = self::STATUS_DIPINJAM;
+            $peminjaman->tgl_pinjam = now()->toDateString();
             $peminjaman->tgl_harus_kembali = $this->jatuhTempo($peminjaman->tgl_pinjam, false);
             $peminjaman->save();
 

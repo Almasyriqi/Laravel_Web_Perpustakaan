@@ -25,7 +25,7 @@
             <th>NIM</th>
             <th>Nama</th>
             <th>Judul Buku</th>
-            <th>Tanggal Pinjam</th>
+            <th>Diajukan</th>
             <th width="220px">Action</th>
         </tr>
     </thead>

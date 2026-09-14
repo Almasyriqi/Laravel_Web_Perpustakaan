@@ -248,7 +248,7 @@ flowchart LR
     K -->|📧 stok kembali, otomatis| B
     K -->|❌ dibatalkan| X([Peminjaman dihapus])
     B -->|❌ dibatalkan anggota| X
-    B -->|✅ dikonfirmasi petugas| C[status: dipinjam<br/>stok berkurang<br/>jatuh tempo +7 hari]
+    B -->|✅ dikonfirmasi petugas| C[status: dipinjam<br/>stok berkurang<br/>tgl pinjam = hari konfirmasi<br/>jatuh tempo +7 hari]
     C -->|⏳ perpanjang 1x| D[status: perpanjang<br/>jatuh tempo +14 hari]
     C --> E([📥 Pengembalian])
     D --> E
@@ -261,7 +261,7 @@ flowchart LR
 
 | Aturan | Ketentuan |
 |---|---|
-| ⏱️ Masa pinjam | **7 hari** |
+| ⏱️ Masa pinjam | **7 hari**, dihitung sejak petugas mengonfirmasi (bukan sejak anggota mengajukan) |
 | 🔁 Perpanjangan | **maksimal 1×** — total menjadi 14 hari |
 | 💸 Denda keterlambatan | **Rp 2.000 / hari** untuk setiap judul buku |
 | 🤝 Pembayaran denda | Dibayarkan langsung ke petugas saat pengembalian |
@@ -603,7 +603,7 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 - [ ] 🔔 **Notifikasi in-app** (database channel) melengkapi email: lonceng di navbar untuk pengingat, buku tersedia, dan konfirmasi
 - [ ] 🌓 **Preferensi dark mode per akun** (kolom di `users`) menggantikan session, supaya tersimpan lintas perangkat
 - [ ] 🔍 **Pencarian server-side di halaman admin/petugas** memakai scope `Buku::cari()` yang sama, menggantikan pencarian DataTables sisi klien
-- [ ] 📅 **Jatuh tempo dihitung dari tanggal konfirmasi**, bukan tanggal pengajuan — saat ini `konfirmasi()` memakai `tgl_pinjam` saat anggota mengajukan, sehingga pengajuan yang lama disetujui memotong masa pinjam
+- [x] 📅 **Jatuh tempo dihitung dari tanggal konfirmasi** — `konfirmasi()` mengganti `tgl_pinjam` dengan hari konfirmasi sebelum menghitung jatuh tempo; tanggal pengajuan tetap di `created_at`. Selama status `booking`/`konfirmasi`, `tgl_pinjam` berarti tanggal masuk antrean
 - [ ] 🖼️ **Perbarui screenshot** README dengan tampilan katalog kartu, dashboard statistik, dan dark mode
 
 ---
