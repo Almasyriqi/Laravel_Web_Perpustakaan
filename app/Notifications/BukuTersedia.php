@@ -3,27 +3,37 @@
 namespace App\Notifications;
 
 use App\Models\Peminjaman;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
 /**
  * Buku yang di-booking sudah tersedia; booking sudah dinaikkan menjadi
  * pengajuan konfirmasi, anggota tinggal datang ke loket.
  */
-class BukuTersedia extends Notification implements ShouldQueue
+class BukuTersedia extends NotifikasiPerpustakaan
 {
-    use Queueable;
+    protected bool $lewatEmail = true;
 
     public function __construct(public readonly Peminjaman $peminjaman) {}
 
-    /**
-     * @return list<string>
-     */
-    public function via(object $notifiable): array
+    public function judul(): string
     {
-        return ['mail'];
+        return 'Buku booking sudah tersedia';
+    }
+
+    public function pesan(): string
+    {
+        return "\"{$this->peminjaman->buku->judul}\" tersedia kembali. Pengajuan Anda masuk antrean konfirmasi — "
+            .'silakan ambil ke petugas'.$this->batasAmbil().'.';
+    }
+
+    public function ikon(): string
+    {
+        return 'fas fa-bookmark';
+    }
+
+    public function warna(): string
+    {
+        return 'success';
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -34,8 +44,18 @@ class BukuTersedia extends Notification implements ShouldQueue
             ->subject("Buku \"{$judul}\" yang Anda booking sudah tersedia")
             ->greeting("Halo {$notifiable->name},")
             ->line("Kabar baik: buku \"{$judul}\" yang Anda booking kini tersedia kembali.")
-            ->line('Booking Anda otomatis masuk antrean konfirmasi. Silakan datang ke petugas perpustakaan untuk mengambil buku; stok akan dikurangi saat petugas mengonfirmasi.')
+            ->line('Booking Anda otomatis masuk antrean konfirmasi. Silakan datang ke petugas perpustakaan'.$this->batasAmbil().' untuk mengambil buku; stok akan dikurangi saat petugas mengonfirmasi.')
             ->line('Bila tidak jadi meminjam, batalkan pengajuan lewat halaman peminjaman agar anggota lain bisa mendapat giliran.')
             ->action('Lihat Peminjaman Saya', url('/anggota/pinjam'));
+    }
+
+    /**
+     * " paling lambat dd-mm-yyyy" bila batas pengambilan diatur (lihat Peminjaman::batasAmbil()).
+     */
+    private function batasAmbil(): string
+    {
+        $batas = method_exists($this->peminjaman, 'batasAmbil') ? $this->peminjaman->batasAmbil() : null;
+
+        return $batas ? ' paling lambat '.$batas->format('d-m-Y') : '';
     }
 }

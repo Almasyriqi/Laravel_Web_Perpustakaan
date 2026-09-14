@@ -27,4 +27,8 @@ return [
     // Email pengingat dikirim N hari sebelum jatuh tempo (command perpus:kirim-pengingat)
     'pengingat_hari_sebelum' => (int) env('PERPUS_PENGINGAT_HARI_SEBELUM', 1),
 
+    // Pengajuan berstatus konfirmasi yang tidak diambil ke loket dalam N hari dibatalkan otomatis
+    // (command perpus:kedaluwarsa-pengajuan); berlaku juga untuk hasil promosi booking
+    'masa_ambil_pengajuan' => (int) env('PERPUS_MASA_AMBIL_PENGAJUAN', 3),
+
 ];

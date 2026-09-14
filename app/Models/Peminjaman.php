@@ -75,6 +75,30 @@ class Peminjaman extends Model
     }
 
     /**
+     * Pencarian daftar peminjaman: nama anggota atau judul buku.
+     */
+    public function scopeCari(Builder $query, ?string $kata): Builder
+    {
+        $kata = trim((string) $kata);
+
+        if ($kata === '') {
+            return $query;
+        }
+
+        return $query->where(fn (Builder $q) => $q
+            ->whereHas('anggota.user', fn (Builder $user) => $user->where('name', 'like', "%{$kata}%"))
+            ->orWhereHas('buku', fn (Builder $buku) => $buku->where('judul', 'like', "%{$kata}%")));
+    }
+
+    public function scopeStatus(Builder $query, ?string $status): Builder
+    {
+        return $query->when(
+            in_array($status, PeminjamanService::SEMUA_STATUS, true),
+            fn (Builder $q) => $q->where('status', $status),
+        );
+    }
+
+    /**
      * Versi query dari terlambat() — dipanggil Peminjaman::lewatTempo(): masih di tangan anggota dan jatuh tempo sudah lewat.
      */
     public function scopeLewatTempo(Builder $query): Builder
@@ -82,6 +106,34 @@ class Peminjaman extends Model
         return $query
             ->whereIn('status', PeminjamanService::STATUS_MENAHAN_STOK)
             ->where('tgl_harus_kembali', '<', now()->toDateString());
+    }
+
+    /**
+     * Batas anggota mengambil buku ke loket untuk pengajuan berstatus konfirmasi:
+     * tgl_pinjam (tanggal masuk antrean) + masa_ambil_pengajuan. Null untuk status lain.
+     */
+    public function batasAmbil(): ?Carbon
+    {
+        if ($this->status !== PeminjamanService::STATUS_KONFIRMASI) {
+            return null;
+        }
+
+        return Carbon::parse($this->tgl_pinjam)->startOfDay()->addDays(self::masaAmbil());
+    }
+
+    /**
+     * Pengajuan konfirmasi yang batas ambilnya sudah lewat (hari ini > batas).
+     */
+    public function scopeKedaluwarsa(Builder $query): Builder
+    {
+        return $query
+            ->where('status', PeminjamanService::STATUS_KONFIRMASI)
+            ->where('tgl_pinjam', '<', now()->subDays(self::masaAmbil())->toDateString());
+    }
+
+    public static function masaAmbil(): int
+    {
+        return max(1, (int) config('perpustakaan.masa_ambil_pengajuan', 3));
     }
 
     /**

@@ -178,3 +178,10 @@ a:focus {
 .pilih-bintang label:hover ~ label {
     color: #ffc107;
 }
+
+/* Judul kartu katalog: bukan .card-title AdminLTE (yang float:left untuk header) */
+.kartu-buku-judul {
+    font-size: 1.05rem;
+    font-weight: 600;
+    float: none;
+}

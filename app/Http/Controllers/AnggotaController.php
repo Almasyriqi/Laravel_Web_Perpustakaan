@@ -14,11 +14,18 @@ use Illuminate\Validation\ValidationException;
 
 class AnggotaController extends Controller
 {
-    public function index()
+    /**
+     * Daftar anggota dengan pencarian server-side (?q=: nama, email, username, NIM, jurusan) dan paginasi.
+     */
+    public function index(Request $request)
     {
-        $paginate = Anggota::with('user')->orderBy('nim', 'desc')->paginate(10);
+        $paginate = Anggota::with('user')
+            ->cari($request->query('q'))
+            ->orderBy('nim', 'desc')
+            ->paginate(AdminController::PER_HALAMAN)
+            ->withQueryString();
 
-        return view('admin.anggotaAdmin.index', compact('paginate'));
+        return view('admin.anggotaAdmin.index', ['paginate' => $paginate, 'q' => (string) $request->query('q')]);
     }
 
     public function create()
@@ -118,11 +125,15 @@ class AnggotaController extends Controller
         return redirect()->to($this->prefix().'/anggota')->with('success', 'Anggota dipindahkan ke arsip');
     }
 
-    public function arsip()
+    public function arsip(Request $request)
     {
-        $paginate = Anggota::onlyTrashed()->with('user')->latest('deleted_at')->get();
+        $paginate = Anggota::onlyTrashed()->with('user')
+            ->cari($request->query('q'))
+            ->latest('deleted_at')
+            ->paginate(AdminController::PER_HALAMAN)
+            ->withQueryString();
 
-        return view('admin.anggotaAdmin.arsip', compact('paginate'));
+        return view('admin.anggotaAdmin.arsip', ['paginate' => $paginate, 'q' => (string) $request->query('q')]);
     }
 
     public function pulihkan($id)
@@ -142,21 +153,6 @@ class AnggotaController extends Controller
         $anggota = Anggota::findOrFail($id);
 
         return view('admin.anggotaAdmin.delete', compact('anggota'));
-    }
-
-    public function search(Request $request)
-    {
-        $paginate = Anggota::with('user')
-            ->when($request->keyword, fn ($query, $keyword) => $query->where(fn ($q) => $q
-                ->where('jurusan', 'like', "%{$keyword}%")
-                ->orWhereHas('user', fn ($user) => $user
-                    ->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('email', 'like', "%{$keyword}%"))))
-            ->orderBy('nim', 'desc')
-            ->paginate(10);
-        $paginate->appends($request->only('keyword'));
-
-        return view('admin.anggotaAdmin.index', compact('paginate'));
     }
 
     public function home()

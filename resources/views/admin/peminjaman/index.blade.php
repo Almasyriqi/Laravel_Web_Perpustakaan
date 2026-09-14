@@ -16,6 +16,15 @@
     </div>
 </div>
 
+<x-form-cari action="/admin/peminjaman" :q="$q" placeholder="Cari nama anggota atau judul buku" :data-terfilter="$statusDipilih !== '' ? '1' : null">
+    <select name="status" class="form-control mr-2 mb-2" onchange="this.form.submit()">
+        <option value="">Semua status</option>
+        @foreach ($semuaStatus as $s)
+        <option value="{{ $s }}" @selected($s === $statusDipilih)>{{ $s }}</option>
+        @endforeach
+    </select>
+</x-form-cari>
+
 @if ($message = Session::get('success'))
 <div class="alert alert-success">
     <p>{{ $message }}</p>
@@ -59,6 +68,8 @@
         @endforeach
     </tbody>
 </table>
+
+<div class="d-flex justify-content-center">{{ $pinjam->links() }}</div>
 
 <div class="modal fade" id="smallModal" tabindex="-1" role="dialog" aria-labelledby="smallModalLabel"
     aria-hidden="true">
@@ -111,9 +122,9 @@
 <script>
     $(function () {
           $('#example').DataTable({
-            "paging": true,
+            "paging": false,
             "lengthChange": false,
-            "searching": true,
+            "searching": false,
             "ordering": true,
             "info": false,
             "autoWidth": false,

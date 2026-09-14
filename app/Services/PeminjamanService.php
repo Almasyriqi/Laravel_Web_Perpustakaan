@@ -2,14 +2,22 @@
 
 namespace App\Services;
 
+use App\Enums\Role;
 use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Peminjaman;
+use App\Models\User;
+use App\Notifications\BukuDikembalikan;
 use App\Notifications\BukuTersedia;
+use App\Notifications\NotifikasiPerpustakaan;
+use App\Notifications\PengajuanBaru;
+use App\Notifications\PengajuanDisetujui;
+use App\Notifications\PengajuanKedaluwarsa;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -90,7 +98,7 @@ class PeminjamanService
             $buku = $this->kunciBuku($buku->id);
             $this->pastikanStokCukup($buku, $jumlah);
 
-            return Peminjaman::create([
+            $peminjaman = Peminjaman::create([
                 'anggota_id' => $anggota->nim,
                 'buku_id' => $buku->id,
                 'jumlah' => $jumlah,
@@ -99,6 +107,10 @@ class PeminjamanService
                 'perpanjang' => 0,
                 'denda' => 0,
             ]);
+
+            $this->beritahuPetugas($peminjaman);
+
+            return $peminjaman;
         });
     }
 
@@ -130,7 +142,7 @@ class PeminjamanService
                 ]);
             }
 
-            return Peminjaman::create([
+            $booking = Peminjaman::create([
                 'anggota_id' => $anggota->nim,
                 'buku_id' => $buku->id,
                 'jumlah' => 1,
@@ -139,6 +151,10 @@ class PeminjamanService
                 'perpanjang' => 0,
                 'denda' => 0,
             ]);
+
+            $this->beritahuPetugas($booking);
+
+            return $booking;
         });
     }
 
@@ -178,6 +194,12 @@ class PeminjamanService
 
     /**
      * Petugas menyetujui pengajuan: stok berkurang, status menjadi dipinjam.
+     *
+     * Selama status booking/konfirmasi, tgl_pinjam berarti "tanggal masuk
+     * antrean" (diisi saat ajukan/booking/promosi). Saat dikonfirmasi, tanggal
+     * itu diganti hari ini supaya masa pinjam dihitung sejak buku benar-benar
+     * diserahkan, bukan sejak anggota mengajukan. Tanggal pengajuan tetap
+     * tersimpan di created_at.
      */
     public function konfirmasi(Peminjaman $peminjaman): Peminjaman
     {
@@ -193,8 +215,11 @@ class PeminjamanService
             $buku->decrement('stok', $peminjaman->jumlah);
 
             $peminjaman->status = self::STATUS_DIPINJAM;
+            $peminjaman->tgl_pinjam = now()->toDateString();
             $peminjaman->tgl_harus_kembali = $this->jatuhTempo($peminjaman->tgl_pinjam, false);
             $peminjaman->save();
+
+            $this->beritahuAnggota($peminjaman, new PengajuanDisetujui($peminjaman));
 
             return $peminjaman;
         });
@@ -245,6 +270,7 @@ class PeminjamanService
             $peminjaman->denda = $this->hitungDendaDariJatuhTempo($peminjaman->tgl_harus_kembali, $tglKembali);
             $peminjaman->save();
 
+            $this->beritahuAnggota($peminjaman, new BukuDikembalikan($peminjaman));
             $this->prosesAntreanBooking($buku);
 
             return $peminjaman;
@@ -263,6 +289,39 @@ class PeminjamanService
         }
 
         $peminjaman->delete();
+    }
+
+    /**
+     * Membatalkan pengajuan konfirmasi yang lewat batas ambil (lihat
+     * Peminjaman::batasAmbil()) — termasuk hasil promosi booking. Stok tidak
+     * berubah, tetapi antrean booking buku itu diproses lagi supaya giliran
+     * berpindah ke anggota berikutnya. Dijalankan command perpus:kedaluwarsa-pengajuan.
+     *
+     * @return int jumlah pengajuan yang (akan) dibatalkan
+     */
+    public function kedaluwarsakan(bool $dryRun = false): int
+    {
+        $jumlah = 0;
+
+        foreach (Peminjaman::kedaluwarsa()->with(['anggota.user', 'buku'])->lazyById(100) as $pengajuan) {
+            $jumlah++;
+
+            if ($dryRun) {
+                continue;
+            }
+
+            DB::transaction(function () use ($pengajuan) {
+                $buku = $this->kunciBuku($pengajuan->buku_id);
+                $notifikasi = new PengajuanKedaluwarsa($pengajuan); // salin data sebelum barisnya dihapus
+
+                $pengajuan->delete();
+
+                $this->beritahuAnggota($pengajuan, $notifikasi);
+                $this->prosesAntreanBooking($buku);
+            });
+        }
+
+        return $jumlah;
     }
 
     /**
@@ -374,7 +433,7 @@ class PeminjamanService
             $booking->tgl_pinjam = now()->toDateString();
             $booking->save();
 
-            $booking->anggota?->user?->notify((new BukuTersedia($booking))->afterCommit());
+            $this->beritahuAnggota($booking, new BukuTersedia($booking));
         }
 
         return $antrean;
@@ -429,6 +488,24 @@ class PeminjamanService
     public function menahanStok(string $status): bool
     {
         return in_array($status, self::STATUS_MENAHAN_STOK, true);
+    }
+
+    /**
+     * Notifikasi ke pemilik peminjaman; ditunda sampai transaksi DB commit.
+     */
+    private function beritahuAnggota(Peminjaman $peminjaman, NotifikasiPerpustakaan $notifikasi): void
+    {
+        $peminjaman->anggota?->user?->notify($notifikasi->afterCommit());
+    }
+
+    /**
+     * Pengajuan/booking baru diumumkan ke semua petugas dan admin (in-app saja).
+     */
+    private function beritahuPetugas(Peminjaman $peminjaman): void
+    {
+        $penerima = User::whereIn('role', [Role::Petugas->value, Role::Admin->value])->get();
+
+        Notification::send($penerima, (new PengajuanBaru($peminjaman))->afterCommit());
     }
 
     private function kunciBuku(int $bukuId): Buku

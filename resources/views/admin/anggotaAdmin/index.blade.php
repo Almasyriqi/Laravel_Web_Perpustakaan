@@ -8,21 +8,6 @@
         <div class="pull-left mt-2">
             <h2>Data Anggota Perpustakaan</h2>
         </div>
-        <div class="float-left my-4">
-            @if (Auth::user()->isAdmin())
-            <form action="/admin/anggota/cari/" method="GET">
-                @else
-                <form action="/petugas/anggota/cari/" method="GET">
-                    @endif
-
-                    <div class="input-group">
-                        <input type="text" name="keyword" class="form-control" placeholder="Search users...">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Search
-                        </button>
-                    </div>
-                </form>
-        </div>
         <div class="float-right my-2">
             @php $prefix = Auth::user()->isAdmin() ? '/admin' : '/petugas'; @endphp
             <a class="btn btn-success" href="{{ $prefix }}/anggota/create"><i class="fas fa-arrow-circle-down"></i> Input anggota</a>
@@ -31,6 +16,9 @@
         </div>
     </div>
 </div>
+
+@php $prefixCari = Auth::user()->isAdmin() ? '/admin' : '/petugas'; @endphp
+<x-form-cari :action="$prefixCari.'/anggota'" :q="$q" placeholder="Cari nama, NIM, email, atau jurusan" />
 
 @if ($message = Session::get('success'))
 <div class="alert alert-success">
@@ -90,6 +78,8 @@
         @endforeach
     </tbody>
 </table>
+
+<div class="d-flex justify-content-center">{{ $paginate->links() }}</div>
 <div class="row">
     <div class="col-md-12">
         <nav aria-label="Page navigation example" class="page">

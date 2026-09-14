@@ -15,11 +15,18 @@ use Illuminate\Support\Facades\Hash;
 
 class PetugasController extends Controller
 {
-    public function index()
+    /**
+     * Daftar petugas dengan pencarian server-side (?q=) dan paginasi.
+     */
+    public function index(Request $request)
     {
-        $paginate = Petugas::with('user')->orderBy('id', 'desc')->paginate(10);
+        $paginate = Petugas::with('user')
+            ->cari($request->query('q'))
+            ->orderBy('id', 'desc')
+            ->paginate(AdminController::PER_HALAMAN)
+            ->withQueryString();
 
-        return view('admin.petugasAdmin.index', compact('paginate'));
+        return view('admin.petugasAdmin.index', ['paginate' => $paginate, 'q' => (string) $request->query('q')]);
     }
 
     public function create()
@@ -106,19 +113,6 @@ class PetugasController extends Controller
         $petugas = Petugas::findOrFail($id);
 
         return view('admin.petugasAdmin.delete', compact('petugas'));
-    }
-
-    public function search(Request $request)
-    {
-        $paginate = Petugas::with('user')
-            ->when($request->keyword, fn ($query, $keyword) => $query->whereHas('user', fn ($user) => $user
-                ->where('name', 'like', "%{$keyword}%")
-                ->orWhere('email', 'like', "%{$keyword}%")))
-            ->orderBy('id', 'desc')
-            ->paginate(10);
-        $paginate->appends($request->only('keyword'));
-
-        return view('admin.petugasAdmin.index', compact('paginate'));
     }
 
     public function home(StatistikService $statistik)

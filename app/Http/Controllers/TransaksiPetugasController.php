@@ -7,22 +7,28 @@ use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Peminjaman;
 use App\Services\PeminjamanService;
+use Illuminate\Http\Request;
 
 class TransaksiPetugasController extends Controller
 {
     public function __construct(private readonly PeminjamanService $service) {}
 
-    public function index()
+    /**
+     * Satu baris per anggota yang punya transaksi aktif, yang terbaru di atas;
+     * bisa dicari (?q= nama/NIM) dan dipaginasi.
+     */
+    public function index(Request $request)
     {
-        // Satu baris per anggota yang punya transaksi aktif, yang terbaru di atas
-        $aktif = fn ($q) => $q->where('status', '!=', PeminjamanService::STATUS_KONFIRMASI);
+        $aktif = fn ($q) => $q->whereNotIn('status', PeminjamanService::STATUS_MENUNGGU);
         $pinjam = Anggota::with('user')
             ->whereHas('peminjaman', $aktif)
+            ->cari($request->query('q'))
             ->withMax(['peminjaman as last_id' => $aktif], 'id')
             ->orderByDesc('last_id')
-            ->get();
+            ->paginate(AdminController::PER_HALAMAN)
+            ->withQueryString();
 
-        return view('petugas.peminjaman.index', compact('pinjam'));
+        return view('petugas.peminjaman.index', ['pinjam' => $pinjam, 'q' => (string) $request->query('q')]);
     }
 
     public function create()

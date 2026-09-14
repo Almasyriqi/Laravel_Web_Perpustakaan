@@ -13,3 +13,8 @@ Artisan::command('inspire', function () {
 Schedule::command('perpus:kirim-pengingat')
     ->dailyAt('07:00')
     ->withoutOverlapping();
+
+// Pengajuan konfirmasi yang tidak diambil dalam masa_ambil_pengajuan hari dibatalkan otomatis.
+Schedule::command('perpus:kedaluwarsa-pengajuan')
+    ->dailyAt('07:05')
+    ->withoutOverlapping();

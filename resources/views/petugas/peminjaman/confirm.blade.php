@@ -25,7 +25,8 @@
             <th>NIM</th>
             <th>Nama</th>
             <th>Judul Buku</th>
-            <th>Tanggal Pinjam</th>
+            <th>Diajukan</th>
+            <th>Ambil sebelum</th>
             <th width="220px">Action</th>
         </tr>
     </thead>
@@ -36,6 +37,12 @@
             <td>{{ $peminjaman->anggota->user->name }}</td>
             <td>{{ $peminjaman->buku->judul }}</td>
             <td>{{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam))}}</td>
+            <td>
+                @php $batas = $peminjaman->batasAmbil(); @endphp
+                <span class="{{ $batas && $batas->isToday() ? 'badge badge-danger' : '' }}" title="Dibatalkan otomatis bila lewat">
+                    {{ $batas?->format('d-m-Y') }}{{ $batas && $batas->isToday() ? ' (hari ini)' : '' }}
+                </span>
+            </td>
             <td>
                 <a class="btn btn-warning" href="" data-toggle="modal" id="Button" title="Konfirmasi Peminjaman"
                     data-target="#defaultModal" data-attr="/petugas/transaksi/confirm/{{  $peminjaman->id }}">

@@ -48,7 +48,14 @@
         <tr>
             <td>{{ $peminjaman->buku->judul }}</td>
             <td>{{$peminjaman->jumlah}}</td>
-            <td>{{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam)) }}</td>
+            <td>
+                {{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam)) }}
+                @if ($peminjaman->status === 'konfirmasi')
+                    <small class="text-muted d-block">diajukan — ambil sebelum <b>{{ $peminjaman->batasAmbil()?->format('d-m-Y') }}</b></small>
+                @elseif ($peminjaman->status === 'booking')
+                    <small class="text-muted d-block">masuk antrean booking</small>
+                @endif
+            </td>
             <td>
                 @if ($peminjaman->tgl_harus_kembali)
                     {{ date('d-m-Y', strtotime($peminjaman->tgl_harus_kembali)) }}

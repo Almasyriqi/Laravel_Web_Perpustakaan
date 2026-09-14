@@ -7,16 +7,30 @@ use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Peminjaman;
 use App\Services\PeminjamanService;
+use Illuminate\Http\Request;
 
 class PeminjamanController extends Controller
 {
     public function __construct(private readonly PeminjamanService $service) {}
 
-    public function index()
+    /**
+     * Semua transaksi dengan pencarian (?q= nama anggota / judul buku), filter ?status=, dan paginasi.
+     */
+    public function index(Request $request)
     {
-        $pinjam = Peminjaman::with(['anggota.user', 'buku'])->latest('id')->get();
+        $pinjam = Peminjaman::with(['anggota.user', 'buku'])
+            ->cari($request->query('q'))
+            ->status($request->query('status'))
+            ->latest('id')
+            ->paginate(AdminController::PER_HALAMAN)
+            ->withQueryString();
 
-        return view('admin.peminjaman.index', compact('pinjam'));
+        return view('admin.peminjaman.index', [
+            'pinjam' => $pinjam,
+            'q' => (string) $request->query('q'),
+            'statusDipilih' => (string) $request->query('status'),
+            'semuaStatus' => PeminjamanService::SEMUA_STATUS,
+        ]);
     }
 
     public function create()

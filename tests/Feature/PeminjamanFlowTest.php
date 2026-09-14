@@ -74,6 +74,22 @@ class PeminjamanFlowTest extends TestCase
         $this->assertSame(3, $this->buku->fresh()->stok);
     }
 
+    public function test_jatuh_tempo_dihitung_dari_tanggal_konfirmasi_bukan_pengajuan(): void
+    {
+        $pinjam = $this->pengajuan(jumlah: 1); // diajukan 01-09
+
+        $this->travelTo('2026-09-04 09:00:00');
+
+        $this->actingAs($this->petugas->user)
+            ->put('/petugas/transaksi/konfirmasi/'.$pinjam->id)
+            ->assertRedirect('/petugas/transaksi/konfirmasi');
+
+        $pinjam->refresh();
+        $this->assertSame('2026-09-04', $pinjam->tgl_pinjam, 'tgl_pinjam menjadi tanggal konfirmasi');
+        $this->assertSame('2026-09-11', $pinjam->tgl_harus_kembali, 'masa pinjam penuh 7 hari sejak konfirmasi');
+        $this->assertSame('2026-09-01', $pinjam->created_at->toDateString(), 'tanggal pengajuan tetap di created_at');
+    }
+
     public function test_konfirmasi_ditolak_bila_stok_sudah_habis(): void
     {
         $pinjam = $this->pengajuan(jumlah: 2);

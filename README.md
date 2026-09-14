@@ -80,22 +80,23 @@ Rekap peminjaman per bulan atau rentang tanggal bebas, cetak PDF (DomPDF) atau e
 | 👤 | **Profil & ganti password** | Setiap pengguna dapat memperbarui datanya sendiri |
 | 🔔 | **Notifikasi interaktif** | Alert & konfirmasi menggunakan SweetAlert |
 | 📧 | **Email pengingat** | Anggota dikirimi email H-1 sebelum jatuh tempo dan saat terlambat (scheduler harian + queue) |
-| 🌓 | **Dark mode & mobile** | Tombol dark mode di navbar (preferensi tersimpan di session), tabel melipat kolom di layar sempit |
+| 🔔 | **Notifikasi in-app** | Lonceng di navbar (polling 60 dtk) + halaman `/notifikasi`: anggota menerima pengingat, buku tersedia, disetujui, dikembalikan & denda; petugas/admin menerima pengajuan & booking baru |
+| 🌓 | **Dark mode & mobile** | Tombol dark mode di navbar — preferensi tersimpan per akun (`users.dark_mode`), berlaku lintas perangkat; tabel melipat kolom di layar sempit |
 
 ### 👑 Admin
 
 | | Fitur | Keterangan |
 |:--:|---|---|
 | 📊 | **Dashboard statistik** | Tren peminjaman 12 bulan, buku terpopuler, daftar keterlambatan dengan estimasi denda |
-| 🧑‍💼 | **CRUD Admin** | Kelola akun administrator + pencarian data |
-| 🧑‍🏫 | **CRUD Petugas** | Kelola akun petugas perpustakaan + pencarian data |
-| 🎓 | **CRUD Anggota** | Kelola data anggota (NIM, jurusan, kontak, alamat) |
+| 🧑‍💼 | **CRUD Admin** | Kelola akun administrator — semua daftar admin punya pencarian server-side + paginasi |
+| 🧑‍🏫 | **CRUD Petugas** | Kelola akun petugas perpustakaan (cari nama/email/username) |
+| 🎓 | **CRUD Anggota** | Kelola data anggota (cari nama/NIM/email/jurusan, termasuk arsip) |
 | 🏷️ | **CRUD Kategori** | Pengelompokan koleksi buku |
-| 📚 | **CRUD Buku** | Judul, penulis, penerbit, stok, dan sampul buku (disimpan di Storage disk) |
+| 📚 | **CRUD Buku** | Judul, penulis, penerbit, stok, sampul (Storage disk); cari judul/penulis/penerbit + filter kategori |
 | 🗄️ | **Arsip & pulihkan** | Buku/anggota yang dihapus masuk arsip (soft delete), riwayat tetap utuh, bisa dipulihkan |
 | ⭐ | **Moderasi ulasan** | Melihat rating & ulasan tiap buku, menghapus ulasan yang tidak pantas |
 | 🔖 | **Label QR & kartu anggota** | Cetak label buku (60×40 mm) dan kartu anggota (ukuran kartu) ber-QR lewat DomPDF |
-| 🔁 | **CRUD Peminjaman** | Kontrol penuh atas seluruh transaksi peminjaman |
+| 🔁 | **CRUD Peminjaman** | Kontrol penuh atas seluruh transaksi — cari nama/judul, filter status, paginasi |
 | 🧾 | **Cetak & export laporan** | Laporan per bulan atau rentang tanggal bebas — PDF dan Excel (.xlsx) |
 
 ### 🧑‍🏫 Petugas
@@ -160,6 +161,7 @@ erDiagram
     BUKU ||--o{ PEMINJAMAN : "dipinjam pada"
     ANGGOTA ||--o{ ULASAN : "menulis"
     BUKU ||--o{ ULASAN : "diulas"
+    USERS ||--o{ NOTIFICATIONS : "menerima"
 
     USERS {
         bigint id PK
@@ -168,6 +170,7 @@ erDiagram
         string email UK
         string password
         string role "admin, petugas, anggota"
+        boolean dark_mode "null = default"
         timestamp email_verified_at
         timestamp deleted_at
     }
@@ -235,6 +238,14 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
+    NOTIFICATIONS {
+        uuid id PK
+        string type "kelas notifikasi"
+        bigint notifiable_id FK
+        json data "judul, pesan, url, ikon, warna"
+        timestamp read_at
+        timestamp created_at
+    }
 ```
 
 ---
@@ -248,7 +259,7 @@ flowchart LR
     K -->|📧 stok kembali, otomatis| B
     K -->|❌ dibatalkan| X([Peminjaman dihapus])
     B -->|❌ dibatalkan anggota| X
-    B -->|✅ dikonfirmasi petugas| C[status: dipinjam<br/>stok berkurang<br/>jatuh tempo +7 hari]
+    B -->|✅ dikonfirmasi petugas| C[status: dipinjam<br/>stok berkurang<br/>tgl pinjam = hari konfirmasi<br/>jatuh tempo +7 hari]
     C -->|⏳ perpanjang 1x| D[status: perpanjang<br/>jatuh tempo +14 hari]
     C --> E([📥 Pengembalian])
     D --> E
@@ -261,15 +272,16 @@ flowchart LR
 
 | Aturan | Ketentuan |
 |---|---|
-| ⏱️ Masa pinjam | **7 hari** |
+| ⏱️ Masa pinjam | **7 hari**, dihitung sejak petugas mengonfirmasi (bukan sejak anggota mengajukan) |
 | 🔁 Perpanjangan | **maksimal 1×** — total menjadi 14 hari |
 | 💸 Denda keterlambatan | **Rp 2.000 / hari** untuk setiap judul buku |
 | 🤝 Pembayaran denda | Dibayarkan langsung ke petugas saat pengembalian |
 | 🧾 Konfirmasi | Pengajuan pinjam dari anggota harus dikonfirmasi petugas |
+| ⏳ Batas pengambilan | Pengajuan `konfirmasi` (termasuk hasil promosi booking) harus diambil ke petugas dalam **3 hari**; lewat dari itu dibatalkan otomatis dan giliran berpindah ke booking berikutnya |
 | 🔖 Booking | Hanya saat stok habis, 1 eksemplar per booking, satu booking aktif per buku per anggota; naik otomatis ke `konfirmasi` sebanyak stok yang kembali |
 | ⭐ Ulasan | Satu ulasan (rating 1–5) per anggota per buku, hanya setelah pernah mengembalikan buku itu |
 
-> ⚙️ Masa pinjam, batas perpanjangan, dan tarif denda dibaca dari [`config/perpustakaan.php`](config/perpustakaan.php) dan bisa ditimpa lewat `.env` (`PERPUS_MASA_PINJAM`, `PERPUS_MASA_PERPANJANG`, `PERPUS_MAKS_PERPANJANG`, `PERPUS_DENDA_PER_HARI`, `PERPUS_PENGINGAT_HARI_SEBELUM`). Dashboard anggota menampilkan nilai yang sama.
+> ⚙️ Masa pinjam, batas perpanjangan, dan tarif denda dibaca dari [`config/perpustakaan.php`](config/perpustakaan.php) dan bisa ditimpa lewat `.env` (`PERPUS_MASA_PINJAM`, `PERPUS_MASA_PERPANJANG`, `PERPUS_MAKS_PERPANJANG`, `PERPUS_DENDA_PER_HARI`, `PERPUS_PENGINGAT_HARI_SEBELUM`, `PERPUS_MASA_AMBIL_PENGAJUAN`). Dashboard anggota menampilkan nilai yang sama.
 
 ---
 
@@ -401,9 +413,9 @@ Buka browser ke **<http://127.0.0.1:8000>** — selamat mencoba! 😉
 
 ---
 
-## ⏰ Penjadwalan & Queue (email pengingat)
+## ⏰ Penjadwalan & Queue (email pengingat & kedaluwarsa)
 
-Setiap pagi pukul **07:00** command `perpus:kirim-pengingat` mengirim dua jenis email ke anggota (dijadwalkan di [`routes/console.php`](routes/console.php)):
+Dua command dijadwalkan harian di [`routes/console.php`](routes/console.php). Pukul **07:00** `perpus:kirim-pengingat` mengirim dua jenis email (+ notifikasi in-app) ke anggota:
 
 | Email | Kapan | Isi |
 |---|---|---|
@@ -412,9 +424,12 @@ Setiap pagi pukul **07:00** command `perpus:kirim-pengingat` mengirim dua jenis 
 
 Setiap peminjaman hanya dikirimi **sekali** per jenis email (penanda kolom `pengingat_dikirim_at` / `teguran_dikirim_at`), jadi command aman dijalankan berulang.
 
+Pukul **07:05** `perpus:kedaluwarsa-pengajuan` membatalkan pengajuan `konfirmasi` yang tidak diambil lebih dari `PERPUS_MASA_AMBIL_PENGAJUAN` hari (default 3) — anggota diberi tahu lewat email + in-app, dan booking berikutnya untuk buku itu otomatis naik.
+
 ```bash
 php artisan perpus:kirim-pengingat --dry-run   # lihat berapa email yang akan dikirim
 php artisan perpus:kirim-pengingat             # kirim sekarang (email ke storage/logs/laravel.log bila MAIL_MAILER=log)
+php artisan perpus:kedaluwarsa-pengajuan --dry-run # pengajuan yang akan dibatalkan
 php artisan schedule:list                      # cek jadwal
 php artisan schedule:work                      # jalankan scheduler di development
 ```
@@ -426,6 +441,8 @@ Di server, tambahkan satu entri cron: `* * * * * cd /path/ke/aplikasi && php art
 ---
 
 ## 🖼️ Screenshot Aplikasi
+
+> Diambil otomatis (Playwright + Chrome, 1366×768) dari data demo seeder; skrip sengaja tidak dimasukkan ke repo agar tetap bebas Node.js.
 
 <details open>
 <summary><b>🌐 Halaman Umum</b></summary>
@@ -442,6 +459,11 @@ Di server, tambahkan satu entri cron: `* * * * * cd /path/ke/aplikasi && php art
 | <img src="screenshot/register.PNG" width="430"> | <img src="screenshot/verifRegis.PNG" width="430"> |
 | Pendaftaran anggota baru | Wajib verifikasi sebelum dapat mengakses dashboard |
 
+| Notifikasi In-App | Dark Mode |
+|:--:|:--:|
+| <img src="screenshot/notifikasi.PNG" width="430"> | <img src="screenshot/darkMode.PNG" width="430"> |
+| Lonceng navbar: pengajuan/booking baru untuk petugas, pengingat & status untuk anggota | Preferensi tersimpan per akun |
+
 </details>
 
 <details>
@@ -449,29 +471,38 @@ Di server, tambahkan satu entri cron: `* * * * * cd /path/ke/aplikasi && php art
 
 <br>
 
-| Home Admin | Profil |
+| Home Admin | Statistik Peminjaman |
 |:--:|:--:|
-| <img src="screenshot/homeAdmin.PNG" width="430"> | <img src="screenshot/profileAdmin.PNG" width="430"> |
+| <img src="screenshot/homeAdmin.PNG" width="430"> | <img src="screenshot/statistikAdmin.PNG" width="430"> |
+| Ringkasan status, tren 12 bulan, buku terpopuler | Daftar keterlambatan dengan estimasi denda |
 
-| Ganti Password | Data Admin |
+| Profil | Ganti Password |
 |:--:|:--:|
-| <img src="screenshot/pwAdmin.PNG" width="430"> | <img src="screenshot/crudAdmin.PNG" width="430"> |
+| <img src="screenshot/profileAdmin.PNG" width="430"> | <img src="screenshot/pwAdmin.PNG" width="430"> |
 
-| Data Petugas | Data Anggota |
+| Data Admin | Data Petugas |
 |:--:|:--:|
-| <img src="screenshot/crudPetugas.PNG" width="430"> | <img src="screenshot/crudAnggota.PNG" width="430"> |
+| <img src="screenshot/crudAdmin.PNG" width="430"> | <img src="screenshot/crudPetugas.PNG" width="430"> |
 
-| Kategori Buku | Data Buku |
+| Data Anggota | Kategori Buku |
 |:--:|:--:|
-| <img src="screenshot/crudKategori.PNG" width="430"> | <img src="screenshot/crudBuku.PNG" width="430"> |
+| <img src="screenshot/crudAnggota.PNG" width="430"> | <img src="screenshot/crudKategori.PNG" width="430"> |
+| Pencarian server-side + paginasi | |
 
-| Detail Buku | Data Peminjaman |
+| Data Buku | Detail Buku |
 |:--:|:--:|
-| <img src="screenshot/crudBuku1.PNG" width="430"> | <img src="screenshot/crudPeminjaman.PNG" width="430"> |
+| <img src="screenshot/crudBuku.PNG" width="430"> | <img src="screenshot/crudBuku1.PNG" width="430"> |
+| Cari judul/penulis/penerbit, filter kategori | Rating, ulasan, dan kode QR buku |
 
-| Cetak Laporan Bulanan | |
-|:--:|:--|
-| <img src="screenshot/laporanAdmin.PNG" width="430"> | Laporan peminjaman difilter per bulan, lalu dicetak sebagai PDF |
+| Label QR Buku | Data Peminjaman |
+|:--:|:--:|
+| <img src="screenshot/qrBuku.PNG" width="430"> | <img src="screenshot/crudPeminjaman.PNG" width="430"> |
+| Pratinjau QR + tombol cetak label (PDF 60×40 mm) | Cari nama/judul, filter status |
+
+| Laporan Bulanan | Laporan Rentang Tanggal |
+|:--:|:--:|
+| <img src="screenshot/laporanAdmin.PNG" width="430"> | <img src="screenshot/laporanRentang.PNG" width="430"> |
+| Cetak PDF atau export Excel | Rentang tanggal bebas |
 
 </details>
 
@@ -488,19 +519,23 @@ Di server, tambahkan satu entri cron: `* * * * * cd /path/ke/aplikasi && php art
 |:--:|:--:|
 | <img src="screenshot/pwPetugas.PNG" width="430"> | <img src="screenshot/crudAnggotaP.PNG" width="430"> |
 
-| Kategori Buku | Data Buku |
+| Kartu Anggota (QR) | Kategori Buku |
 |:--:|:--:|
-| <img src="screenshot/crudKategoriP.PNG" width="430"> | <img src="screenshot/crudBukuP.PNG" width="430"> |
+| <img src="screenshot/qrAnggota.PNG" width="430"> | <img src="screenshot/crudKategoriP.PNG" width="430"> |
+| Detail anggota dengan QR + cetak kartu (PDF ukuran kartu) | |
 
-| Detail Buku | Transaksi Peminjaman |
+| Data Buku | Detail Buku |
 |:--:|:--:|
-| <img src="screenshot/crudBukuP1.PNG" width="430"> | <img src="screenshot/peminjamanPetugas.PNG" width="430"> |
-| | Petugas dapat memperpanjang & menerima pengembalian buku |
+| <img src="screenshot/crudBukuP.PNG" width="430"> | <img src="screenshot/crudBukuP1.PNG" width="430"> |
 
-| Konfirmasi Peminjaman | Cetak Laporan |
+| Transaksi Peminjaman | Konfirmasi Peminjaman |
 |:--:|:--:|
-| <img src="screenshot/konfPetugas.PNG" width="430"> | <img src="screenshot/laporanPetugas.PNG" width="430"> |
-| Menyetujui pengajuan pinjam dari anggota | Rekap peminjaman bulanan dalam PDF |
+| <img src="screenshot/peminjamanPetugas.PNG" width="430"> | <img src="screenshot/konfPetugas.PNG" width="430"> |
+| Input scan kartu anggota membuka halaman pengembalian | Batas ambil pengajuan + antrean booking |
+
+| Cetak Laporan | |
+|:--:|:--|
+| <img src="screenshot/laporanPetugas.PNG" width="430"> | Rekap bulanan / rentang tanggal, PDF & Excel |
 
 </details>
 
@@ -512,19 +547,26 @@ Di server, tambahkan satu entri cron: `* * * * * cd /path/ke/aplikasi && php art
 | Home Anggota | Profil |
 |:--:|:--:|
 | <img src="screenshot/homeAnggota.PNG" width="430"> | <img src="screenshot/profileAnggota.PNG" width="430"> |
-| Berisi kalender dan aturan peminjaman | Anggota dapat memperbarui datanya sendiri |
+| Kalender dan aturan peminjaman | Perbarui data sendiri + unduh kartu anggota |
 
 | Ganti Password | Katalog Buku |
 |:--:|:--:|
 | <img src="screenshot/pwAnggota.PNG" width="430"> | <img src="screenshot/bukuAnggota1.PNG" width="430"> |
+| | Grid kartu, pencarian, filter kategori & ketersediaan |
 
-| Detail Buku | Form Peminjaman |
+| Detail Buku | Rating & Ulasan |
 |:--:|:--:|
-| <img src="screenshot/bukuAnggota2.PNG" width="430"> | <img src="screenshot/pinjamAnggota.PNG" width="430"> |
+| <img src="screenshot/bukuAnggota2.PNG" width="430"> | <img src="screenshot/detailUlasan.PNG" width="430"> |
+| | Tulis/ubah ulasan setelah pernah mengembalikan buku |
+
+| Form Peminjaman | Booking Buku Habis |
+|:--:|:--:|
+| <img src="screenshot/pinjamAnggota.PNG" width="430"> | <img src="screenshot/bookingAnggota.PNG" width="430"> |
+| | Saat stok 0, tombol Pinjam berganti Booking |
 
 | Riwayat Peminjaman | |
 |:--:|:--|
-| <img src="screenshot/hasilPinjamAnggota.PNG" width="430"> | Peminjaman dapat dibatalkan selama status masih `konfirmasi` |
+| <img src="screenshot/hasilPinjamAnggota.PNG" width="430"> | Batas ambil pengajuan, badge *Terlambat*, batalkan selama `booking`/`konfirmasi` |
 
 </details>
 
@@ -544,7 +586,7 @@ vendor/bin/pint --dirty          # rapikan format file yang berubah
 
 | Suite | Cakupan |
 |---|---|
-| `SmokeTest` | Halaman utama tiap role dapat dirender, middleware role menolak akses silang, toggle dark mode bertahan antar halaman |
+| `SmokeTest` | Halaman utama tiap role dapat dirender, middleware role menolak akses silang, toggle dark mode bertahan antar halaman & tersimpan per akun |
 | `AuthTest` | Login via username/email, logout `POST`, verifikasi email, registrasi |
 | `PeminjamanFlowTest` | Ajukan → konfirmasi → perpanjang → kembali, stok, denda, pembatalan, edit admin |
 | `LaporanTest` | Filter bulan + tahun dan rentang tanggal bebas, validasi periode, keluaran PDF & Excel |
@@ -560,12 +602,15 @@ vendor/bin/pint --dirty          # rapikan format file yang berubah
 | `UlasanTest` | Syarat pernah mengembalikan, validasi rating, satu ulasan per buku, rata-rata di katalog, moderasi admin/petugas |
 | `BookingTest` | Booking hanya saat stok 0, tanpa duplikat, promosi otomatis sebanyak stok + email, konfirmasi & pembatalan, edit admin |
 | `QrCodeTest` | Format & parsing kode `BK-`/`AG-`, PDF label & kartu, anggota hanya bisa mencetak kartunya sendiri, input scan di loket |
+| `NotifikasiTest` | Pengajuan/booking baru ke petugas & admin, disetujui/dikembalikan ke anggota, endpoint lonceng, buka & tandai dibaca, isolasi antar user |
+| `KedaluwarsaPengajuanTest` | Pengajuan basi dibatalkan + notifikasi, batas tepat hari ini masih aman, booking berikutnya naik, `--dry-run`, config N, tampilan batas ambil |
+| `PencarianAdminTest` | Baris di luar halaman 1 tetap terlihat (regresi), cari anggota/buku/admin/petugas/peminjaman/arsip, filter kategori & status |
 
 ---
 
 ## 🗺️ Roadmap & Saran Pengembangan
 
-Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ada di bagian paling bawah.
+Seluruh item roadmap di bawah — termasuk "Ide berikutnya" — sudah selesai dalam empat gelombang PR.
 
 ### 🔴 Prioritas Tinggi — keamanan & fondasi
 
@@ -574,7 +619,7 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 - [x] **Filter laporan per bulan dan tahun** (`whereMonth` + `whereYear`, pemilih tahun di halaman laporan)
 - [x] **Mutasi stok dalam DB transaction + `lockForUpdate`** lewat `App\Services\PeminjamanService` — sekaligus memperbaiki stok yang bergeser saat admin mengedit dan anggota yang bisa membatalkan peminjaman orang lain
 - [x] **Validasi lewat Form Request** — rule `unique:users` kini benar-benar dieksekusi, edit meng-*ignore* data sendiri
-- [x] **Automated test PHPUnit** — kini 132 test (auth, akses per role, alur pinjam → konfirmasi → perpanjang → kembali → denda, laporan, validasi, arsip, sampul, katalog, statistik, pengingat, ulasan, booking, QR); jalankan dengan `php artisan test`
+- [x] **Automated test PHPUnit** — kini 155 test (auth, akses per role, alur pinjam → konfirmasi → perpanjang → kembali → denda, laporan, validasi, arsip, sampul, katalog, statistik, pengingat, ulasan, booking, QR, notifikasi in-app, kedaluwarsa, pencarian admin); jalankan dengan `php artisan test`
 
 ### 🟡 Prioritas Menengah — kualitas kode
 
@@ -588,7 +633,7 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 ### 🟢 Nice to Have — fitur baru
 
 - [x] 🔍 **Pencarian & filter katalog** anggota — scope `Buku::cari()/dariKategori()/tersedia()`, `KatalogRequest`, grid kartu 12 per halaman dengan paginasi Bootstrap 4 yang mempertahankan query string
-- [x] 📧 **Notifikasi email jatuh tempo** — command `perpus:kirim-pengingat` (H-1 + teguran terlambat, sekali per peminjaman lewat kolom penanda) dijadwalkan harian di `routes/console.php`; notifikasi `ShouldQueue`, tabel `jobs` disediakan untuk `QUEUE_CONNECTION=database`; lihat bagian [Penjadwalan & Queue](#-penjadwalan--queue-email-pengingat)
+- [x] 📧 **Notifikasi email jatuh tempo** — command `perpus:kirim-pengingat` (H-1 + teguran terlambat, sekali per peminjaman lewat kolom penanda) dijadwalkan harian di `routes/console.php`; notifikasi `ShouldQueue`, tabel `jobs` disediakan untuk `QUEUE_CONNECTION=database`; lihat bagian [Penjadwalan & Queue](#-penjadwalan--queue-email-pengingat--kedaluwarsa)
 - [x] 📊 **Dashboard statistik** admin & petugas — `StatistikService`: ringkasan (sedang dipinjam, menunggu konfirmasi, terlambat, denda bulan ini), bar chart tren 12 bulan (Chart.js), 5 buku terpopuler, daftar keterlambatan dengan estimasi denda; agregasi per bulan di PHP agar jalan di MySQL & SQLite
 - [x] 📑 **Export laporan ke Excel** (`maatwebsite/excel` 4 — resmi mendukung Laravel 13) + **rentang tanggal bebas** (`/laporan/rentang?dari=&sampai=`, maks. 366 hari) — `PeriodeLaporan` dipakai bersama oleh HTML, PDF, dan Excel; filter memakai `whereBetween` sehingga index `tgl_pinjam` terpakai
 - [x] 🔖 **QR code** buku & kartu anggota — `chillerlan/php-qrcode` (framework-agnostic, tanpa ekstensi khusus); isi QR teks polos `BK-{id}` / `AG-{nim}` sehingga scanner USB keyboard-wedge maupun kamera HP cukup "mengetik" kode ke input loket (form transaksi mengisi select otomatis, daftar transaksi membuka halaman pengembalian); label 60×40 mm & kartu 85,6×54 mm dicetak lewat DomPDF. Barcode 1D sengaja tidak dibuat: satu library cukup dan QR terbaca kamera HP
@@ -597,14 +642,14 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 - [x] 🤖 **CI GitHub Actions** — [`.github/workflows/ci.yml`](.github/workflows/ci.yml) menjalankan `pint --test` + `php artisan test` di setiap push & PR (PHP 8.3, SQLite in-memory); seluruh kode diformat Pint sekali sebagai prasyarat
 - [x] 🧹 **Bersihkan Laravel Mix** — `package.json`, `webpack.mix.js`, `resources/js|sass`, dan bundel `public/js/app.js` (3 MB) / `public/css/app.css` dihapus; semua asset berasal dari bundel AdminLTE + CDN sehingga instalasi tidak lagi butuh Node.js
 
-### 🔵 Ide berikutnya
+### 🔵 Ide berikutnya — selesai
 
-- [ ] ⏳ **Kedaluwarsa booking** — pengajuan hasil promosi booking yang tidak diambil dalam N hari dibatalkan otomatis oleh scheduler, agar antrean berikutnya mendapat giliran
-- [ ] 🔔 **Notifikasi in-app** (database channel) melengkapi email: lonceng di navbar untuk pengingat, buku tersedia, dan konfirmasi
-- [ ] 🌓 **Preferensi dark mode per akun** (kolom di `users`) menggantikan session, supaya tersimpan lintas perangkat
-- [ ] 🔍 **Pencarian server-side di halaman admin/petugas** memakai scope `Buku::cari()` yang sama, menggantikan pencarian DataTables sisi klien
-- [ ] 📅 **Jatuh tempo dihitung dari tanggal konfirmasi**, bukan tanggal pengajuan — saat ini `konfirmasi()` memakai `tgl_pinjam` saat anggota mengajukan, sehingga pengajuan yang lama disetujui memotong masa pinjam
-- [ ] 🖼️ **Perbarui screenshot** README dengan tampilan katalog kartu, dashboard statistik, dan dark mode
+- [x] ⏳ **Kedaluwarsa pengajuan** — diperluas ke semua pengajuan `konfirmasi` (bukan hanya hasil booking): command `perpus:kedaluwarsa-pengajuan` harian membatalkan yang tidak diambil > `masa_ambil_pengajuan` hari (default 3), memberi tahu anggota (`PengajuanKedaluwarsa`, email + in-app), lalu memproses antrean booking buku itu. Tidak butuh kolom baru karena `tgl_pinjam` = tanggal masuk antrean; batas ambil tampil di halaman konfirmasi petugas & riwayat anggota
+- [x] 🔔 **Notifikasi in-app** — kelas dasar `NotifikasiPerpustakaan` (`via` = database, + mail bila `$lewatEmail`) sehingga semua notifikasi otomatis punya versi lonceng; notifikasi baru `PengajuanDisetujui`, `BukuDikembalikan`, `PengajuanBaru` (petugas & admin); lonceng memakai komponen `navbar-notification` bawaan AdminLTE yang mem-poll `/notifikasi/ringkas`
+- [x] 🌓 **Preferensi dark mode per akun** — kolom `users.dark_mode`; dua listener pada event AdminLTE (`DarkModeWasToggled` → simpan ke akun, `ReadingDarkModePreference` → muat ke session saat login) sehingga tidak ada JS/route custom; akun yang belum pernah memilih (`null`) tetap mengikuti default
+- [x] 🔍 **Pencarian server-side + paginasi di semua daftar admin/petugas** — komponen `<x-form-cari>`, trait `CariLewatUser` (admin/petugas/anggota), scope `Peminjaman::cari()/status()`, `Buku::cari()` + filter kategori, arsip & daftar transaksi petugas ikut; rute lama `/cari` dihapus. Sekaligus memperbaiki bug: `paginate(10)` tanpa `links()` membuat baris ke-11 dst. tidak pernah terlihat (seeder 20 anggota → 10 tersembunyi)
+- [x] 📅 **Jatuh tempo dihitung dari tanggal konfirmasi** — `konfirmasi()` mengganti `tgl_pinjam` dengan hari konfirmasi sebelum menghitung jatuh tempo; tanggal pengajuan tetap di `created_at`. Selama status `booking`/`konfirmasi`, `tgl_pinjam` berarti tanggal masuk antrean
+- [x] 🖼️ **Screenshot README diperbarui** — 40 tangkapan layar (32 nama lama + katalog kartu, ulasan, booking, statistik, notifikasi, dark mode, QR buku/anggota, laporan rentang) diambil otomatis dengan Playwright + Chrome dari data demo; skrip di luar repo, ukuran total turun dari 8,9 MB ke ±5 MB
 
 ---
 

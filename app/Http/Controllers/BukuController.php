@@ -6,6 +6,7 @@ use App\Http\Requests\BukuRequest;
 use App\Models\Buku;
 use App\Models\Kategori;
 use App\Support\KodeQr;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -14,11 +15,24 @@ use Illuminate\Validation\ValidationException;
  */
 class BukuController extends Controller
 {
-    public function index()
+    /**
+     * Daftar buku dengan pencarian server-side (?q= judul/penulis/penerbit, ?kategori=) dan paginasi.
+     */
+    public function index(Request $request)
     {
-        $paginate = Buku::with('kategori')->get();
+        $paginate = Buku::with('kategori')
+            ->cari($request->query('q'))
+            ->dariKategori($request->integer('kategori') ?: null)
+            ->orderBy('judul')
+            ->paginate(AdminController::PER_HALAMAN)
+            ->withQueryString();
 
-        return view('admin.bukuAdmin.index', compact('paginate'));
+        return view('admin.bukuAdmin.index', [
+            'paginate' => $paginate,
+            'kategori' => Kategori::orderBy('nama')->get(),
+            'q' => (string) $request->query('q'),
+            'kategoriDipilih' => $request->integer('kategori'),
+        ]);
     }
 
     public function create()
@@ -116,11 +130,15 @@ class BukuController extends Controller
         return view('admin.bukuAdmin.delete', compact('buku'));
     }
 
-    public function arsip()
+    public function arsip(Request $request)
     {
-        $paginate = Buku::onlyTrashed()->with('kategori')->latest('deleted_at')->get();
+        $paginate = Buku::onlyTrashed()->with('kategori')
+            ->cari($request->query('q'))
+            ->latest('deleted_at')
+            ->paginate(AdminController::PER_HALAMAN)
+            ->withQueryString();
 
-        return view('admin.bukuAdmin.arsip', compact('paginate'));
+        return view('admin.bukuAdmin.arsip', ['paginate' => $paginate, 'q' => (string) $request->query('q')]);
     }
 
     public function pulihkan($id)

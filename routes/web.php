@@ -9,6 +9,7 @@ use App\Http\Controllers\CetakController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PeminjamanAnggotaController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PetugasController;
@@ -46,6 +47,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('/profile', UserController::class);
 
+    // Notifikasi in-app (lonceng navbar) — semua role
+    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::get('/notifikasi/ringkas', [NotifikasiController::class, 'ringkas'])->name('notifikasi.ringkas');
+    Route::get('/notifikasi/{id}/buka', [NotifikasiController::class, 'buka'])->name('notifikasi.buka');
+    Route::post('/notifikasi/baca-semua', [NotifikasiController::class, 'bacaSemua'])->name('notifikasi.baca_semua');
+
     Route::middleware('role:admin')->group(function () {
         Route::prefix('admin')->group(function () {
             Route::get('/', [AdminController::class, 'home']);
@@ -54,18 +61,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/anggota/arsip', [AnggotaController::class, 'arsip']);
             Route::put('/anggota/{id}/pulihkan', [AnggotaController::class, 'pulihkan']);
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
-            Route::get('/anggota/cari', [AnggotaController::class, 'search']);
             Route::get('/anggota/{nim}/kartu', [CetakController::class, 'kartuAnggota']);
             Route::resource('/anggota', AnggotaController::class);
 
             // CRUD Admin
             Route::get('/admin/delete/{id}', [AdminController::class, 'delete']);
-            Route::get('/admin/cari', [AdminController::class, 'search']);
             Route::resource('/admin', AdminController::class);
 
             // CRUD Petugas
             Route::get('/petugas/delete/{id}', [PetugasController::class, 'delete']);
-            Route::get('/petugas/cari', [PetugasController::class, 'search']);
             Route::resource('/petugas', PetugasController::class);
 
             // CRUD Kategori
@@ -102,7 +106,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/anggota/arsip', [AnggotaController::class, 'arsip']);
             Route::put('/anggota/{id}/pulihkan', [AnggotaController::class, 'pulihkan']);
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
-            Route::get('/anggota/cari', [AnggotaController::class, 'search']);
             Route::get('/anggota/{nim}/kartu', [CetakController::class, 'kartuAnggota']);
             Route::resource('/anggota', AnggotaController::class);
 
