@@ -314,6 +314,10 @@ return [
             'topnav_right' => false,
         ],
         [
+            'type' => 'darkmode-widget',
+            'topnav_right' => true,
+        ],
+        [
             'type' => 'fullscreen-widget',
             'topnav_right' => true,
         ],
@@ -494,6 +498,22 @@ return [
                     'type' => 'css',
                     'asset' => true,
                     'location' => '//cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css',
+                ],
+                // Ekstensi Responsive: melipat kolom di layar sempit (opsi "responsive: true" di tiap tabel)
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '//cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '//cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap4.min.js',
+                ],
+                [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => '//cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap4.min.css',
                 ],
             ],
         ],

@@ -87,3 +87,67 @@ a:focus {
     justify-content: center;
     color: #adb5bd;
 }
+
+/* Tampilan mobile: tombol aksi di tabel lebih ringkas dan boleh turun baris */
+.table td .btn {
+    margin-bottom: 0.25rem;
+}
+
+@media (max-width: 767.98px) {
+    .table td .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .card-sejajar {
+        height: auto;
+    }
+
+    .back {
+        font-size: 24px;
+    }
+}
+
+/* Dark mode (widget AdminLTE di navbar) — pelengkap untuk elemen custom */
+.dark-mode .kartu-buku-sampul {
+    background: #3f474e;
+}
+
+.dark-mode .kartu-buku-kosong {
+    color: #6c757d;
+}
+
+.dark-mode .back {
+    border-color: #dee2e6;
+    color: #dee2e6;
+}
+
+.dark-mode .page-link {
+    background-color: #343a40;
+    border-color: #6c757d;
+    color: #dee2e6;
+}
+
+.dark-mode .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+.dark-mode .page-item.disabled .page-link {
+    background-color: #3f474e;
+    color: #6c757d;
+}
+
+.dark-mode .page-link:hover {
+    background-color: #454d55;
+}
+
+.dark-mode .table-bordered td,
+.dark-mode .table-bordered th {
+    border-color: #6c757d;
+}
+
+.dark-mode .text-muted {
+    color: #adb5bd !important;
+}

@@ -24,4 +24,7 @@ return [
     // Denda keterlambatan per hari untuk tiap judul buku (rupiah)
     'denda_per_hari' => (int) env('PERPUS_DENDA_PER_HARI', 2000),
 
+    // Email pengingat dikirim N hari sebelum jatuh tempo (command perpus:kirim-pengingat)
+    'pengingat_hari_sebelum' => (int) env('PERPUS_PENGINGAT_HARI_SEBELUM', 1),
+
 ];
