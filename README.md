@@ -14,7 +14,7 @@ Mulai dari kelola koleksi buku, transaksi peminjaman & pengembalian, perhitungan
 [![MySQL](https://img.shields.io/badge/MySQL-MariaDB-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
 [![AdminLTE](https://img.shields.io/badge/AdminLTE-3.16-00A65A?style=for-the-badge&logo=adminlte&logoColor=white)](https://adminlte.io)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-4.6-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com)
-[![Tests](https://img.shields.io/badge/Tests-PHPUnit_12-6DB33F?style=for-the-badge&logo=php&logoColor=white)](#-testing)
+[![CI](https://img.shields.io/github/actions/workflow/status/Almasyriqi/Laravel_Web_Perpustakaan/ci.yml?branch=master&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/Almasyriqi/Laravel_Web_Perpustakaan/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-MIT-22272e?style=for-the-badge)](https://github.com/laravel/laravel/blob/master/LICENSE)
 
 <br>
@@ -126,7 +126,7 @@ Rekap peminjaman per bulan, siap cetak lewat DomPDF
 | **Bahasa** | PHP | `^8.3` |
 | **Database** | MySQL / MariaDB | — |
 | **UI Panel** | [AdminLTE 3](https://github.com/jeroennoten/Laravel-AdminLTE) — `jeroennoten/laravel-adminlte` | `3.16` |
-| **Frontend** | Bootstrap, jQuery, SASS, Laravel Mix (Webpack) | `4.6` / `3.6` |
+| **Frontend** | Bootstrap, jQuery — bundel AdminLTE (`public/vendor`) + plugin CDN, tanpa build step | `4.6` / `3.6` |
 | **Autentikasi** | [Laravel UI](https://github.com/laravel/ui) — scaffolding + email verification | `4.6` |
 | **Cetak PDF** | [DomPDF](https://github.com/barryvdh/laravel-dompdf) — `barryvdh/laravel-dompdf` | `3.1` |
 | **Notifikasi** | [SweetAlert](https://github.com/realrashid/sweet-alert) — `realrashid/sweet-alert` | `7.3` |
@@ -248,7 +248,6 @@ flowchart LR
 - **PHP** `>= 8.3` (proyek ini dikembangkan di atas [Laragon](https://laragon.org))
 - **Composer** `2.x`
 - **MySQL / MariaDB**
-- **Node.js & NPM** *(opsional — hanya jika ingin build ulang asset)*
 - *(opsional)* Akun SMTP untuk mengirim email verifikasi sungguhan — secara default email ditulis ke `storage/logs/laravel.log`
 
 ### 🚀 Langkah-langkah
@@ -264,7 +263,6 @@ cd Laravel_Web_Perpustakaan
 
 ```bash
 composer install
-npm install        # opsional
 ```
 
 **3️⃣ Siapkan file environment**
@@ -486,6 +484,8 @@ php artisan test --filter=Peminjaman   # hanya alur peminjaman
 vendor/bin/pint --dirty          # rapikan format file yang berubah
 ```
 
+> 🤖 Setiap push dan pull request otomatis menjalankan `vendor/bin/pint --test` + `php artisan test` lewat GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+
 | Suite | Cakupan |
 |---|---|
 | `SmokeTest` | Halaman utama tiap role dapat dirender, middleware role menolak akses silang |
@@ -532,8 +532,8 @@ Beberapa hal yang layak dikerjakan berikutnya, diurutkan berdasarkan prioritas.
 - [ ] 🔖 **Barcode / QR code** buku dan kartu anggota untuk mempercepat transaksi loket
 - [ ] ⭐ **Rating & ulasan buku** serta fitur *booking* buku yang stoknya sedang habis
 - [ ] 🌓 **Dark mode** dan penyempurnaan tampilan mobile
-- [ ] 🤖 **CI/CD GitHub Actions** — menjalankan Laravel Pint + test otomatis di setiap push
-- [ ] 🧹 **Bersihkan Laravel Mix** — asset tidak pernah dikompilasi (CSS/JS statis di `public/`); hapus `package.json`/`webpack.mix.js` atau ganti ke Vite
+- [x] 🤖 **CI GitHub Actions** — [`.github/workflows/ci.yml`](.github/workflows/ci.yml) menjalankan `pint --test` + `php artisan test` di setiap push & PR (PHP 8.3, SQLite in-memory); seluruh kode diformat Pint sekali sebagai prasyarat
+- [x] 🧹 **Bersihkan Laravel Mix** — `package.json`, `webpack.mix.js`, `resources/js|sass`, dan bundel `public/js/app.js` (3 MB) / `public/css/app.css` dihapus; semua asset berasal dari bundel AdminLTE + CDN sehingga instalasi tidak lagi butuh Node.js
 
 ---
 

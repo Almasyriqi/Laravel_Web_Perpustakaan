@@ -15,10 +15,10 @@ class CreatePetugasTable extends Migration
     {
         Schema::create('petugas', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable(); 
-            $table->foreign('user_id')->references('id')->on('users'); 
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users');
             $table->date('tgl_lahir');
-            $table->string("no_hp");
+            $table->string('no_hp');
             $table->text('alamat');
             $table->timestamps();
         });

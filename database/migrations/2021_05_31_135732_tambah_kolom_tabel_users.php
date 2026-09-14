@@ -13,9 +13,9 @@ class TambahKolomTabelUsers extends Migration
      */
     public function up()
     {
-        schema::table('users', function(Blueprint $table) {
-            $table->string('username',20)->after('id')->nullable()->unique();
-            $table->string('role',20)->nullable()->after('password');
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('username', 20)->after('id')->nullable()->unique();
+            $table->string('role', 20)->nullable()->after('password');
         });
     }
 
@@ -26,9 +26,9 @@ class TambahKolomTabelUsers extends Migration
      */
     public function down()
     {
-        schema::table('users', function(Blueprint $table){
+        Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('username');
             $table->dropColumn('role');
-        }); 
+        });
     }
 }

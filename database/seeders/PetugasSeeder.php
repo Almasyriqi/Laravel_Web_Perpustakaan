@@ -18,7 +18,7 @@ class PetugasSeeder extends Seeder
             'user_id' => 3,
             'tgl_lahir' => '1989-04-11',
             'no_hp' => '082213587056',
-            'alamat' => 'Jl. Bunga Mawar no.20'
+            'alamat' => 'Jl. Bunga Mawar no.20',
         ]);
     }
 }

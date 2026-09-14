@@ -9,13 +9,14 @@ class Petugas extends Model
 {
     use HasFactory;
 
-    protected $table = "petugas";
+    protected $table = 'petugas';
+
     protected $fillable = [
         'id',
         'user_id',
         'tgl_lahir',
         'no_hp',
-        'alamat'
+        'alamat',
     ];
 
     public function user()
