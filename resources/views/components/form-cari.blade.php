@@ -6,7 +6,7 @@
 
 <form method="get" action="{{ $action }}" class="form-inline mb-3" role="search">
     <div class="input-group mr-2 mb-2">
-        <input type="search" name="q" class="form-control" value="{{ $q }}" placeholder="{{ $placeholder }}" maxlength="100">
+        <input type="search" name="q" class="form-control" value="{{ $q }}" placeholder="{{ $placeholder }}" maxlength="100" style="min-width: 280px">
         <div class="input-group-append">
             <button type="submit" class="btn btn-primary" title="Cari"><i class="fas fa-search"></i></button>
         </div>

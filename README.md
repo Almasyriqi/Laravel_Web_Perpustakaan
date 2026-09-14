@@ -442,6 +442,8 @@ Di server, tambahkan satu entri cron: `* * * * * cd /path/ke/aplikasi && php art
 
 ## 🖼️ Screenshot Aplikasi
 
+> Diambil otomatis (Playwright + Chrome, 1366×768) dari data demo seeder; skrip sengaja tidak dimasukkan ke repo agar tetap bebas Node.js.
+
 <details open>
 <summary><b>🌐 Halaman Umum</b></summary>
 
@@ -457,6 +459,11 @@ Di server, tambahkan satu entri cron: `* * * * * cd /path/ke/aplikasi && php art
 | <img src="screenshot/register.PNG" width="430"> | <img src="screenshot/verifRegis.PNG" width="430"> |
 | Pendaftaran anggota baru | Wajib verifikasi sebelum dapat mengakses dashboard |
 
+| Notifikasi In-App | Dark Mode |
+|:--:|:--:|
+| <img src="screenshot/notifikasi.PNG" width="430"> | <img src="screenshot/darkMode.PNG" width="430"> |
+| Lonceng navbar: pengajuan/booking baru untuk petugas, pengingat & status untuk anggota | Preferensi tersimpan per akun |
+
 </details>
 
 <details>
@@ -464,29 +471,38 @@ Di server, tambahkan satu entri cron: `* * * * * cd /path/ke/aplikasi && php art
 
 <br>
 
-| Home Admin | Profil |
+| Home Admin | Statistik Peminjaman |
 |:--:|:--:|
-| <img src="screenshot/homeAdmin.PNG" width="430"> | <img src="screenshot/profileAdmin.PNG" width="430"> |
+| <img src="screenshot/homeAdmin.PNG" width="430"> | <img src="screenshot/statistikAdmin.PNG" width="430"> |
+| Ringkasan status, tren 12 bulan, buku terpopuler | Daftar keterlambatan dengan estimasi denda |
 
-| Ganti Password | Data Admin |
+| Profil | Ganti Password |
 |:--:|:--:|
-| <img src="screenshot/pwAdmin.PNG" width="430"> | <img src="screenshot/crudAdmin.PNG" width="430"> |
+| <img src="screenshot/profileAdmin.PNG" width="430"> | <img src="screenshot/pwAdmin.PNG" width="430"> |
 
-| Data Petugas | Data Anggota |
+| Data Admin | Data Petugas |
 |:--:|:--:|
-| <img src="screenshot/crudPetugas.PNG" width="430"> | <img src="screenshot/crudAnggota.PNG" width="430"> |
+| <img src="screenshot/crudAdmin.PNG" width="430"> | <img src="screenshot/crudPetugas.PNG" width="430"> |
 
-| Kategori Buku | Data Buku |
+| Data Anggota | Kategori Buku |
 |:--:|:--:|
-| <img src="screenshot/crudKategori.PNG" width="430"> | <img src="screenshot/crudBuku.PNG" width="430"> |
+| <img src="screenshot/crudAnggota.PNG" width="430"> | <img src="screenshot/crudKategori.PNG" width="430"> |
+| Pencarian server-side + paginasi | |
 
-| Detail Buku | Data Peminjaman |
+| Data Buku | Detail Buku |
 |:--:|:--:|
-| <img src="screenshot/crudBuku1.PNG" width="430"> | <img src="screenshot/crudPeminjaman.PNG" width="430"> |
+| <img src="screenshot/crudBuku.PNG" width="430"> | <img src="screenshot/crudBuku1.PNG" width="430"> |
+| Cari judul/penulis/penerbit, filter kategori | Rating, ulasan, dan kode QR buku |
 
-| Cetak Laporan Bulanan | |
-|:--:|:--|
-| <img src="screenshot/laporanAdmin.PNG" width="430"> | Laporan peminjaman difilter per bulan, lalu dicetak sebagai PDF |
+| Label QR Buku | Data Peminjaman |
+|:--:|:--:|
+| <img src="screenshot/qrBuku.PNG" width="430"> | <img src="screenshot/crudPeminjaman.PNG" width="430"> |
+| Pratinjau QR + tombol cetak label (PDF 60×40 mm) | Cari nama/judul, filter status |
+
+| Laporan Bulanan | Laporan Rentang Tanggal |
+|:--:|:--:|
+| <img src="screenshot/laporanAdmin.PNG" width="430"> | <img src="screenshot/laporanRentang.PNG" width="430"> |
+| Cetak PDF atau export Excel | Rentang tanggal bebas |
 
 </details>
 
@@ -503,19 +519,23 @@ Di server, tambahkan satu entri cron: `* * * * * cd /path/ke/aplikasi && php art
 |:--:|:--:|
 | <img src="screenshot/pwPetugas.PNG" width="430"> | <img src="screenshot/crudAnggotaP.PNG" width="430"> |
 
-| Kategori Buku | Data Buku |
+| Kartu Anggota (QR) | Kategori Buku |
 |:--:|:--:|
-| <img src="screenshot/crudKategoriP.PNG" width="430"> | <img src="screenshot/crudBukuP.PNG" width="430"> |
+| <img src="screenshot/qrAnggota.PNG" width="430"> | <img src="screenshot/crudKategoriP.PNG" width="430"> |
+| Detail anggota dengan QR + cetak kartu (PDF ukuran kartu) | |
 
-| Detail Buku | Transaksi Peminjaman |
+| Data Buku | Detail Buku |
 |:--:|:--:|
-| <img src="screenshot/crudBukuP1.PNG" width="430"> | <img src="screenshot/peminjamanPetugas.PNG" width="430"> |
-| | Petugas dapat memperpanjang & menerima pengembalian buku |
+| <img src="screenshot/crudBukuP.PNG" width="430"> | <img src="screenshot/crudBukuP1.PNG" width="430"> |
 
-| Konfirmasi Peminjaman | Cetak Laporan |
+| Transaksi Peminjaman | Konfirmasi Peminjaman |
 |:--:|:--:|
-| <img src="screenshot/konfPetugas.PNG" width="430"> | <img src="screenshot/laporanPetugas.PNG" width="430"> |
-| Menyetujui pengajuan pinjam dari anggota | Rekap peminjaman bulanan dalam PDF |
+| <img src="screenshot/peminjamanPetugas.PNG" width="430"> | <img src="screenshot/konfPetugas.PNG" width="430"> |
+| Input scan kartu anggota membuka halaman pengembalian | Batas ambil pengajuan + antrean booking |
+
+| Cetak Laporan | |
+|:--:|:--|
+| <img src="screenshot/laporanPetugas.PNG" width="430"> | Rekap bulanan / rentang tanggal, PDF & Excel |
 
 </details>
 
@@ -527,19 +547,26 @@ Di server, tambahkan satu entri cron: `* * * * * cd /path/ke/aplikasi && php art
 | Home Anggota | Profil |
 |:--:|:--:|
 | <img src="screenshot/homeAnggota.PNG" width="430"> | <img src="screenshot/profileAnggota.PNG" width="430"> |
-| Berisi kalender dan aturan peminjaman | Anggota dapat memperbarui datanya sendiri |
+| Kalender dan aturan peminjaman | Perbarui data sendiri + unduh kartu anggota |
 
 | Ganti Password | Katalog Buku |
 |:--:|:--:|
 | <img src="screenshot/pwAnggota.PNG" width="430"> | <img src="screenshot/bukuAnggota1.PNG" width="430"> |
+| | Grid kartu, pencarian, filter kategori & ketersediaan |
 
-| Detail Buku | Form Peminjaman |
+| Detail Buku | Rating & Ulasan |
 |:--:|:--:|
-| <img src="screenshot/bukuAnggota2.PNG" width="430"> | <img src="screenshot/pinjamAnggota.PNG" width="430"> |
+| <img src="screenshot/bukuAnggota2.PNG" width="430"> | <img src="screenshot/detailUlasan.PNG" width="430"> |
+| | Tulis/ubah ulasan setelah pernah mengembalikan buku |
+
+| Form Peminjaman | Booking Buku Habis |
+|:--:|:--:|
+| <img src="screenshot/pinjamAnggota.PNG" width="430"> | <img src="screenshot/bookingAnggota.PNG" width="430"> |
+| | Saat stok 0, tombol Pinjam berganti Booking |
 
 | Riwayat Peminjaman | |
 |:--:|:--|
-| <img src="screenshot/hasilPinjamAnggota.PNG" width="430"> | Peminjaman dapat dibatalkan selama status masih `konfirmasi` |
+| <img src="screenshot/hasilPinjamAnggota.PNG" width="430"> | Batas ambil pengajuan, badge *Terlambat*, batalkan selama `booking`/`konfirmasi` |
 
 </details>
 
@@ -622,7 +649,7 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 - [x] 🌓 **Preferensi dark mode per akun** — kolom `users.dark_mode`; dua listener pada event AdminLTE (`DarkModeWasToggled` → simpan ke akun, `ReadingDarkModePreference` → muat ke session saat login) sehingga tidak ada JS/route custom; akun yang belum pernah memilih (`null`) tetap mengikuti default
 - [x] 🔍 **Pencarian server-side + paginasi di semua daftar admin/petugas** — komponen `<x-form-cari>`, trait `CariLewatUser` (admin/petugas/anggota), scope `Peminjaman::cari()/status()`, `Buku::cari()` + filter kategori, arsip & daftar transaksi petugas ikut; rute lama `/cari` dihapus. Sekaligus memperbaiki bug: `paginate(10)` tanpa `links()` membuat baris ke-11 dst. tidak pernah terlihat (seeder 20 anggota → 10 tersembunyi)
 - [x] 📅 **Jatuh tempo dihitung dari tanggal konfirmasi** — `konfirmasi()` mengganti `tgl_pinjam` dengan hari konfirmasi sebelum menghitung jatuh tempo; tanggal pengajuan tetap di `created_at`. Selama status `booking`/`konfirmasi`, `tgl_pinjam` berarti tanggal masuk antrean
-- [ ] 🖼️ **Perbarui screenshot** README dengan tampilan katalog kartu, dashboard statistik, dan dark mode
+- [x] 🖼️ **Screenshot README diperbarui** — 40 tangkapan layar (32 nama lama + katalog kartu, ulasan, booking, statistik, notifikasi, dark mode, QR buku/anggota, laporan rentang) diambil otomatis dengan Playwright + Chrome dari data demo; skrip di luar repo, ukuran total turun dari 8,9 MB ke ±5 MB
 
 ---
 

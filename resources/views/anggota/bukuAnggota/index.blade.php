@@ -80,7 +80,7 @@
                 @else
                 <span class="badge badge-danger mb-1">Stok habis</span>
                 @endif
-                <h5 class="card-title mb-1 text-truncate" title="{{ $item->judul }}">{{ $item->judul }}</h5>
+                <h5 class="kartu-buku-judul mb-1 text-truncate" title="{{ $item->judul }}">{{ $item->judul }}</h5>
                 <div class="mb-1">@include('partials.bintang', ['rating' => $item->ulasan_avg_rating, 'jumlah' => $item->ulasan_count])</div>
                 <p class="card-text text-muted small mb-0 text-truncate" title="{{ $item->penulis }}">
                     <i class="fas fa-pen-nib"></i> {{ $item->penulis }}

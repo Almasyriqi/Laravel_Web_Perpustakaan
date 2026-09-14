@@ -39,7 +39,7 @@
             <td>{{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam))}}</td>
             <td>
                 @php $batas = $peminjaman->batasAmbil(); @endphp
-                <span class="badge badge-{{ $batas && $batas->isToday() ? 'danger' : 'light' }}" title="Dibatalkan otomatis bila lewat">
+                <span class="{{ $batas && $batas->isToday() ? 'badge badge-danger' : '' }}" title="Dibatalkan otomatis bila lewat">
                     {{ $batas?->format('d-m-Y') }}{{ $batas && $batas->isToday() ? ' (hari ini)' : '' }}
                 </span>
             </td>

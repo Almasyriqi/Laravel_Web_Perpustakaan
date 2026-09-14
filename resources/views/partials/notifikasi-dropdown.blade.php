@@ -4,11 +4,10 @@
 </span>
 @foreach ($terbaru as $n)
 <div class="dropdown-divider"></div>
-<a href="/notifikasi/{{ $n->id }}/buka" class="dropdown-item {{ $n->read_at ? 'text-muted' : 'font-weight-bold' }}">
+<a href="/notifikasi/{{ $n->id }}/buka" class="dropdown-item d-flex align-items-center {{ $n->read_at ? 'text-muted' : 'font-weight-bold' }}"
+    title="{{ $n->data['pesan'] ?? '' }}">
     <i class="{{ $n->data['ikon'] ?? 'fas fa-bell' }} text-{{ $n->data['warna'] ?? 'info' }} mr-2"></i>
-    <span class="text-truncate d-inline-block align-middle" style="max-width: 240px" title="{{ $n->data['pesan'] ?? '' }}">
-        {{ $n->data['judul'] ?? 'Notifikasi' }}
-    </span>
-    <span class="float-right text-muted text-sm">{{ $n->created_at->diffForHumans(short: true) }}</span>
+    <span class="flex-fill text-truncate">{{ $n->data['judul'] ?? 'Notifikasi' }}</span>
+    <small class="text-muted ml-2 text-nowrap font-weight-normal">{{ $n->created_at->diffForHumans(short: true) }}</small>
 </a>
 @endforeach
