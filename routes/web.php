@@ -79,7 +79,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/peminjaman/delete/{id}', [PeminjamanController::class, 'delete']);
             Route::resource('/peminjaman', PeminjamanController::class);
 
-            // Laporan
+            // Laporan (rute rentang bebas didaftarkan sebelum {bulan} agar tidak tertangkap wildcard)
+            Route::get('/laporan/rentang', [LaporanController::class, 'show'])->name('admin.laporan.rentang');
+            Route::get('/laporan/rentang/pdf', [LaporanController::class, 'cetak_pdf'])->name('admin.cetak_pdf.rentang');
+            Route::get('/laporan/rentang/excel', [LaporanController::class, 'excel'])->name('admin.excel.rentang');
+            Route::get('/laporan/excel/{bulan}', [LaporanController::class, 'excel'])->name('admin.excel');
             Route::get('/laporan/cetak_pdf/{bulan}', [LaporanController::class, 'cetak_pdf'])->name('admin.cetak_pdf');
             Route::get('/laporan/{bulan}', [LaporanController::class, 'show'])->name('admin.laporan');
         });
@@ -116,7 +120,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/transaksi/kembali/{id}', [TransaksiPetugasController::class, 'kembali']);
             Route::resource('/transaksi', TransaksiPetugasController::class);
 
-            // Laporan
+            // Laporan (lihat catatan di grup admin)
+            Route::get('/laporan/rentang', [LaporanController::class, 'show'])->name('petugas.laporan.rentang');
+            Route::get('/laporan/rentang/pdf', [LaporanController::class, 'cetak_pdf'])->name('petugas.cetak_pdf.rentang');
+            Route::get('/laporan/rentang/excel', [LaporanController::class, 'excel'])->name('petugas.excel.rentang');
+            Route::get('/laporan/excel/{bulan}', [LaporanController::class, 'excel'])->name('petugas.excel');
             Route::get('/laporan/cetak_pdf/{bulan}', [LaporanController::class, 'cetak_pdf'])->name('petugas.cetak_pdf');
             Route::get('/laporan/{bulan}', [LaporanController::class, 'show'])->name('petugas.laporan');
         });
@@ -125,7 +133,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:anggota')->group(function () {
         Route::prefix('anggota')->group(function () {
             Route::get('/', [AnggotaController::class, 'home']);
-            Route::resource('/buku', BukuAnggotaController::class);
+            Route::resource('/buku', BukuAnggotaController::class)->only(['index', 'show']);
 
             Route::get('/pinjam/delete/{id}', [PeminjamanAnggotaController::class, 'delete']);
             Route::get('/pinjam/perpanjang/{id}', [PeminjamanAnggotaController::class, 'modalPerpanjang']);

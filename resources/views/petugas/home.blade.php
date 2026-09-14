@@ -64,9 +64,12 @@
         </div>
     </div>
 
+    {{-- Statistik peminjaman: ringkasan, tren 12 bulan, buku terpopuler, keterlambatan --}}
+    @include('partials.statistik', ['prefix' => 'petugas'])
+
     <div class="row">
         <div class="col-lg-7">
-            <div class="card card-primary">
+            <div class="card card-primary card-sejajar">
                 <div class="card-header">
                     <h3 class="card-title">Aturan Peminjaman</h3>
 

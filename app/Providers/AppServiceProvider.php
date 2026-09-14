@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Enums\Role;
 use App\Models\User;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -23,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Tampilan AdminLTE memakai Bootstrap 4; view paginator bawaan Laravel adalah Tailwind
+        Paginator::useBootstrapFour();
+
         // Gate per role, dipakai oleh menu AdminLTE lewat key 'can' di config/adminlte.php
         Gate::define('admin-only', fn (User $user) => $user->hasRole(Role::Admin));
         Gate::define('petugas-only', fn (User $user) => $user->hasRole(Role::Petugas));

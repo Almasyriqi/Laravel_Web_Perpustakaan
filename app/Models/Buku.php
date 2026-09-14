@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\PeminjamanService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -43,6 +44,36 @@ class Buku extends Model
     public function peminjaman(): HasMany
     {
         return $this->hasMany(Peminjaman::class);
+    }
+
+    /**
+     * Pencarian kata kunci pada judul, penulis, atau penerbit (dipakai katalog anggota).
+     */
+    public function scopeCari(Builder $query, ?string $kata): Builder
+    {
+        $kata = trim((string) $kata);
+
+        if ($kata === '') {
+            return $query;
+        }
+
+        return $query->where(fn (Builder $q) => $q
+            ->where('judul', 'like', "%{$kata}%")
+            ->orWhere('penulis', 'like', "%{$kata}%")
+            ->orWhere('penerbit', 'like', "%{$kata}%"));
+    }
+
+    public function scopeDariKategori(Builder $query, int|string|null $kategoriId): Builder
+    {
+        return $query->when($kategoriId, fn (Builder $q) => $q->where('kategori_id', $kategoriId));
+    }
+
+    /**
+     * Hanya buku yang stoknya masih ada.
+     */
+    public function scopeTersedia(Builder $query): Builder
+    {
+        return $query->where('stok', '>', 0);
     }
 
     /**
