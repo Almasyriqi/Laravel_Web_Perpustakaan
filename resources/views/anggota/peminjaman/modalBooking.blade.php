@@ -4,7 +4,7 @@
         <h5 class="text-center">Booking buku "{{ $buku->judul }}"?</h5>
         <p class="text-muted small text-center mb-0">
             Stok sedang habis. Anda masuk antrean dan akan dikirimi email begitu buku tersedia;
-            booking otomatis menjadi pengajuan peminjaman (1 eksemplar).
+            booking otomatis menjadi pengajuan peminjaman (1 eksemplar) yang harus diambil dalam {{ config('perpustakaan.masa_ambil_pengajuan') }} hari.
         </p>
     </div>
     <div class="modal-footer">

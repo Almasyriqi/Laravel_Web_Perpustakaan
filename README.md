@@ -276,10 +276,11 @@ flowchart LR
 | 💸 Denda keterlambatan | **Rp 2.000 / hari** untuk setiap judul buku |
 | 🤝 Pembayaran denda | Dibayarkan langsung ke petugas saat pengembalian |
 | 🧾 Konfirmasi | Pengajuan pinjam dari anggota harus dikonfirmasi petugas |
+| ⏳ Batas pengambilan | Pengajuan `konfirmasi` (termasuk hasil promosi booking) harus diambil ke petugas dalam **3 hari**; lewat dari itu dibatalkan otomatis dan giliran berpindah ke booking berikutnya |
 | 🔖 Booking | Hanya saat stok habis, 1 eksemplar per booking, satu booking aktif per buku per anggota; naik otomatis ke `konfirmasi` sebanyak stok yang kembali |
 | ⭐ Ulasan | Satu ulasan (rating 1–5) per anggota per buku, hanya setelah pernah mengembalikan buku itu |
 
-> ⚙️ Masa pinjam, batas perpanjangan, dan tarif denda dibaca dari [`config/perpustakaan.php`](config/perpustakaan.php) dan bisa ditimpa lewat `.env` (`PERPUS_MASA_PINJAM`, `PERPUS_MASA_PERPANJANG`, `PERPUS_MAKS_PERPANJANG`, `PERPUS_DENDA_PER_HARI`, `PERPUS_PENGINGAT_HARI_SEBELUM`). Dashboard anggota menampilkan nilai yang sama.
+> ⚙️ Masa pinjam, batas perpanjangan, dan tarif denda dibaca dari [`config/perpustakaan.php`](config/perpustakaan.php) dan bisa ditimpa lewat `.env` (`PERPUS_MASA_PINJAM`, `PERPUS_MASA_PERPANJANG`, `PERPUS_MAKS_PERPANJANG`, `PERPUS_DENDA_PER_HARI`, `PERPUS_PENGINGAT_HARI_SEBELUM`, `PERPUS_MASA_AMBIL_PENGAJUAN`). Dashboard anggota menampilkan nilai yang sama.
 
 ---
 
@@ -411,9 +412,9 @@ Buka browser ke **<http://127.0.0.1:8000>** — selamat mencoba! 😉
 
 ---
 
-## ⏰ Penjadwalan & Queue (email pengingat)
+## ⏰ Penjadwalan & Queue (email pengingat & kedaluwarsa)
 
-Setiap pagi pukul **07:00** command `perpus:kirim-pengingat` mengirim dua jenis email ke anggota (dijadwalkan di [`routes/console.php`](routes/console.php)):
+Dua command dijadwalkan harian di [`routes/console.php`](routes/console.php). Pukul **07:00** `perpus:kirim-pengingat` mengirim dua jenis email (+ notifikasi in-app) ke anggota:
 
 | Email | Kapan | Isi |
 |---|---|---|
@@ -422,9 +423,12 @@ Setiap pagi pukul **07:00** command `perpus:kirim-pengingat` mengirim dua jenis 
 
 Setiap peminjaman hanya dikirimi **sekali** per jenis email (penanda kolom `pengingat_dikirim_at` / `teguran_dikirim_at`), jadi command aman dijalankan berulang.
 
+Pukul **07:05** `perpus:kedaluwarsa-pengajuan` membatalkan pengajuan `konfirmasi` yang tidak diambil lebih dari `PERPUS_MASA_AMBIL_PENGAJUAN` hari (default 3) — anggota diberi tahu lewat email + in-app, dan booking berikutnya untuk buku itu otomatis naik.
+
 ```bash
 php artisan perpus:kirim-pengingat --dry-run   # lihat berapa email yang akan dikirim
 php artisan perpus:kirim-pengingat             # kirim sekarang (email ke storage/logs/laravel.log bila MAIL_MAILER=log)
+php artisan perpus:kedaluwarsa-pengajuan --dry-run # pengajuan yang akan dibatalkan
 php artisan schedule:list                      # cek jadwal
 php artisan schedule:work                      # jalankan scheduler di development
 ```
@@ -571,6 +575,7 @@ vendor/bin/pint --dirty          # rapikan format file yang berubah
 | `BookingTest` | Booking hanya saat stok 0, tanpa duplikat, promosi otomatis sebanyak stok + email, konfirmasi & pembatalan, edit admin |
 | `QrCodeTest` | Format & parsing kode `BK-`/`AG-`, PDF label & kartu, anggota hanya bisa mencetak kartunya sendiri, input scan di loket |
 | `NotifikasiTest` | Pengajuan/booking baru ke petugas & admin, disetujui/dikembalikan ke anggota, endpoint lonceng, buka & tandai dibaca, isolasi antar user |
+| `KedaluwarsaPengajuanTest` | Pengajuan basi dibatalkan + notifikasi, batas tepat hari ini masih aman, booking berikutnya naik, `--dry-run`, config N, tampilan batas ambil |
 
 ---
 
@@ -610,7 +615,7 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 
 ### 🔵 Ide berikutnya
 
-- [ ] ⏳ **Kedaluwarsa booking** — pengajuan hasil promosi booking yang tidak diambil dalam N hari dibatalkan otomatis oleh scheduler, agar antrean berikutnya mendapat giliran
+- [x] ⏳ **Kedaluwarsa pengajuan** — diperluas ke semua pengajuan `konfirmasi` (bukan hanya hasil booking): command `perpus:kedaluwarsa-pengajuan` harian membatalkan yang tidak diambil > `masa_ambil_pengajuan` hari (default 3), memberi tahu anggota (`PengajuanKedaluwarsa`, email + in-app), lalu memproses antrean booking buku itu. Tidak butuh kolom baru karena `tgl_pinjam` = tanggal masuk antrean; batas ambil tampil di halaman konfirmasi petugas & riwayat anggota
 - [x] 🔔 **Notifikasi in-app** — kelas dasar `NotifikasiPerpustakaan` (`via` = database, + mail bila `$lewatEmail`) sehingga semua notifikasi otomatis punya versi lonceng; notifikasi baru `PengajuanDisetujui`, `BukuDikembalikan`, `PengajuanBaru` (petugas & admin); lonceng memakai komponen `navbar-notification` bawaan AdminLTE yang mem-poll `/notifikasi/ringkas`
 - [ ] 🌓 **Preferensi dark mode per akun** (kolom di `users`) menggantikan session, supaya tersimpan lintas perangkat
 - [ ] 🔍 **Pencarian server-side di halaman admin/petugas** memakai scope `Buku::cari()` yang sama, menggantikan pencarian DataTables sisi klien

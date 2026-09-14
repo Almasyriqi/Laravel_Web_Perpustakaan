@@ -85,6 +85,34 @@ class Peminjaman extends Model
     }
 
     /**
+     * Batas anggota mengambil buku ke loket untuk pengajuan berstatus konfirmasi:
+     * tgl_pinjam (tanggal masuk antrean) + masa_ambil_pengajuan. Null untuk status lain.
+     */
+    public function batasAmbil(): ?Carbon
+    {
+        if ($this->status !== PeminjamanService::STATUS_KONFIRMASI) {
+            return null;
+        }
+
+        return Carbon::parse($this->tgl_pinjam)->startOfDay()->addDays(self::masaAmbil());
+    }
+
+    /**
+     * Pengajuan konfirmasi yang batas ambilnya sudah lewat (hari ini > batas).
+     */
+    public function scopeKedaluwarsa(Builder $query): Builder
+    {
+        return $query
+            ->where('status', PeminjamanService::STATUS_KONFIRMASI)
+            ->where('tgl_pinjam', '<', now()->subDays(self::masaAmbil())->toDateString());
+    }
+
+    public static function masaAmbil(): int
+    {
+        return max(1, (int) config('perpustakaan.masa_ambil_pengajuan', 3));
+    }
+
+    /**
      * Berapa hari sudah lewat jatuh tempo (0 bila belum terlambat).
      */
     public function hariTerlambat(): int

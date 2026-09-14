@@ -50,8 +50,10 @@
             <td>{{$peminjaman->jumlah}}</td>
             <td>
                 {{ date('d-m-Y', strtotime($peminjaman->tgl_pinjam)) }}
-                @if (in_array($peminjaman->status, ['booking', 'konfirmasi'], true))
-                    <small class="text-muted d-block">diajukan, belum dipinjam</small>
+                @if ($peminjaman->status === 'konfirmasi')
+                    <small class="text-muted d-block">diajukan — ambil sebelum <b>{{ $peminjaman->batasAmbil()?->format('d-m-Y') }}</b></small>
+                @elseif ($peminjaman->status === 'booking')
+                    <small class="text-muted d-block">masuk antrean booking</small>
                 @endif
             </td>
             <td>

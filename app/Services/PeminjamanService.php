@@ -12,6 +12,7 @@ use App\Notifications\BukuTersedia;
 use App\Notifications\NotifikasiPerpustakaan;
 use App\Notifications\PengajuanBaru;
 use App\Notifications\PengajuanDisetujui;
+use App\Notifications\PengajuanKedaluwarsa;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -288,6 +289,39 @@ class PeminjamanService
         }
 
         $peminjaman->delete();
+    }
+
+    /**
+     * Membatalkan pengajuan konfirmasi yang lewat batas ambil (lihat
+     * Peminjaman::batasAmbil()) — termasuk hasil promosi booking. Stok tidak
+     * berubah, tetapi antrean booking buku itu diproses lagi supaya giliran
+     * berpindah ke anggota berikutnya. Dijalankan command perpus:kedaluwarsa-pengajuan.
+     *
+     * @return int jumlah pengajuan yang (akan) dibatalkan
+     */
+    public function kedaluwarsakan(bool $dryRun = false): int
+    {
+        $jumlah = 0;
+
+        foreach (Peminjaman::kedaluwarsa()->with(['anggota.user', 'buku'])->lazyById(100) as $pengajuan) {
+            $jumlah++;
+
+            if ($dryRun) {
+                continue;
+            }
+
+            DB::transaction(function () use ($pengajuan) {
+                $buku = $this->kunciBuku($pengajuan->buku_id);
+                $notifikasi = new PengajuanKedaluwarsa($pengajuan); // salin data sebelum barisnya dihapus
+
+                $pengajuan->delete();
+
+                $this->beritahuAnggota($pengajuan, $notifikasi);
+                $this->prosesAntreanBooking($buku);
+            });
+        }
+
+        return $jumlah;
     }
 
     /**

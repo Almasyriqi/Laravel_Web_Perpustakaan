@@ -89,7 +89,7 @@
                             <li>Waktu Peminjaman maksimal 7 hari</li>
                             <li>Peminjaman dapat diperpanjang maksimal 1 kali (total lama pinjam 14 hari)</li>
                             <li>Jika mengembalikan lebih dari waktu yang ditentukan akan dikenakan denda setiap judul Rp 2.000 / hari</li>
-                            <li>Jika telah memilih buku dan klik pinjam, silahkan ke petugas untuk melakukan konfirmasi</li>
+                            <li>Jika telah memilih buku dan klik pinjam, silahkan ke petugas untuk melakukan konfirmasi paling lambat {{ config('perpustakaan.masa_ambil_pengajuan') }} hari — lewat dari itu pengajuan dibatalkan otomatis</li>
                             <li>Jika terlambat mengembalikan buku dan mendapat denda, wajib langsung bayar denda ke petugas saat mengembalikan buku</li>
                         </ol>
                       </div>

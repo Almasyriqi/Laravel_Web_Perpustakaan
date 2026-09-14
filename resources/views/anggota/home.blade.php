@@ -33,7 +33,7 @@
                             <li>Waktu Peminjaman maksimal {{ config('perpustakaan.masa_pinjam') }} hari</li>
                             <li>Peminjaman dapat diperpanjang maksimal {{ config('perpustakaan.maks_perpanjang') }} kali (total lama pinjam {{ config('perpustakaan.masa_perpanjang') }} hari)</li>
                             <li>Jika mengembalikan lebih dari waktu yang ditentukan akan dikenakan denda setiap judul @currency(config('perpustakaan.denda_per_hari')) / hari</li>
-                            <li>Jika telah memilih buku dan klik pinjam, silahkan ke petugas untuk melakukan konfirmasi</li>
+                            <li>Jika telah memilih buku dan klik pinjam, silahkan ke petugas untuk melakukan konfirmasi paling lambat {{ config('perpustakaan.masa_ambil_pengajuan') }} hari — lewat dari itu pengajuan dibatalkan otomatis</li>
                             <li>Jika terlambat mengembalikan buku dan mendapat denda, wajib langsung bayar denda ke petugas saat mengembalikan buku</li>
                         </ol>
                       </div>
