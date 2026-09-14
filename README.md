@@ -81,7 +81,7 @@ Rekap peminjaman per bulan atau rentang tanggal bebas, cetak PDF (DomPDF) atau e
 | 🔔 | **Notifikasi interaktif** | Alert & konfirmasi menggunakan SweetAlert |
 | 📧 | **Email pengingat** | Anggota dikirimi email H-1 sebelum jatuh tempo dan saat terlambat (scheduler harian + queue) |
 | 🔔 | **Notifikasi in-app** | Lonceng di navbar (polling 60 dtk) + halaman `/notifikasi`: anggota menerima pengingat, buku tersedia, disetujui, dikembalikan & denda; petugas/admin menerima pengajuan & booking baru |
-| 🌓 | **Dark mode & mobile** | Tombol dark mode di navbar (preferensi tersimpan di session), tabel melipat kolom di layar sempit |
+| 🌓 | **Dark mode & mobile** | Tombol dark mode di navbar — preferensi tersimpan per akun (`users.dark_mode`), berlaku lintas perangkat; tabel melipat kolom di layar sempit |
 
 ### 👑 Admin
 
@@ -170,6 +170,7 @@ erDiagram
         string email UK
         string password
         string role "admin, petugas, anggota"
+        boolean dark_mode "null = default"
         timestamp email_verified_at
         timestamp deleted_at
     }
@@ -558,7 +559,7 @@ vendor/bin/pint --dirty          # rapikan format file yang berubah
 
 | Suite | Cakupan |
 |---|---|
-| `SmokeTest` | Halaman utama tiap role dapat dirender, middleware role menolak akses silang, toggle dark mode bertahan antar halaman |
+| `SmokeTest` | Halaman utama tiap role dapat dirender, middleware role menolak akses silang, toggle dark mode bertahan antar halaman & tersimpan per akun |
 | `AuthTest` | Login via username/email, logout `POST`, verifikasi email, registrasi |
 | `PeminjamanFlowTest` | Ajukan → konfirmasi → perpanjang → kembali, stok, denda, pembatalan, edit admin |
 | `LaporanTest` | Filter bulan + tahun dan rentang tanggal bebas, validasi periode, keluaran PDF & Excel |
@@ -604,7 +605,7 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 ### 🟢 Nice to Have — fitur baru
 
 - [x] 🔍 **Pencarian & filter katalog** anggota — scope `Buku::cari()/dariKategori()/tersedia()`, `KatalogRequest`, grid kartu 12 per halaman dengan paginasi Bootstrap 4 yang mempertahankan query string
-- [x] 📧 **Notifikasi email jatuh tempo** — command `perpus:kirim-pengingat` (H-1 + teguran terlambat, sekali per peminjaman lewat kolom penanda) dijadwalkan harian di `routes/console.php`; notifikasi `ShouldQueue`, tabel `jobs` disediakan untuk `QUEUE_CONNECTION=database`; lihat bagian [Penjadwalan & Queue](#-penjadwalan--queue-email-pengingat)
+- [x] 📧 **Notifikasi email jatuh tempo** — command `perpus:kirim-pengingat` (H-1 + teguran terlambat, sekali per peminjaman lewat kolom penanda) dijadwalkan harian di `routes/console.php`; notifikasi `ShouldQueue`, tabel `jobs` disediakan untuk `QUEUE_CONNECTION=database`; lihat bagian [Penjadwalan & Queue](#-penjadwalan--queue-email-pengingat--kedaluwarsa)
 - [x] 📊 **Dashboard statistik** admin & petugas — `StatistikService`: ringkasan (sedang dipinjam, menunggu konfirmasi, terlambat, denda bulan ini), bar chart tren 12 bulan (Chart.js), 5 buku terpopuler, daftar keterlambatan dengan estimasi denda; agregasi per bulan di PHP agar jalan di MySQL & SQLite
 - [x] 📑 **Export laporan ke Excel** (`maatwebsite/excel` 4 — resmi mendukung Laravel 13) + **rentang tanggal bebas** (`/laporan/rentang?dari=&sampai=`, maks. 366 hari) — `PeriodeLaporan` dipakai bersama oleh HTML, PDF, dan Excel; filter memakai `whereBetween` sehingga index `tgl_pinjam` terpakai
 - [x] 🔖 **QR code** buku & kartu anggota — `chillerlan/php-qrcode` (framework-agnostic, tanpa ekstensi khusus); isi QR teks polos `BK-{id}` / `AG-{nim}` sehingga scanner USB keyboard-wedge maupun kamera HP cukup "mengetik" kode ke input loket (form transaksi mengisi select otomatis, daftar transaksi membuka halaman pengembalian); label 60×40 mm & kartu 85,6×54 mm dicetak lewat DomPDF. Barcode 1D sengaja tidak dibuat: satu library cukup dan QR terbaca kamera HP
@@ -617,7 +618,7 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 
 - [x] ⏳ **Kedaluwarsa pengajuan** — diperluas ke semua pengajuan `konfirmasi` (bukan hanya hasil booking): command `perpus:kedaluwarsa-pengajuan` harian membatalkan yang tidak diambil > `masa_ambil_pengajuan` hari (default 3), memberi tahu anggota (`PengajuanKedaluwarsa`, email + in-app), lalu memproses antrean booking buku itu. Tidak butuh kolom baru karena `tgl_pinjam` = tanggal masuk antrean; batas ambil tampil di halaman konfirmasi petugas & riwayat anggota
 - [x] 🔔 **Notifikasi in-app** — kelas dasar `NotifikasiPerpustakaan` (`via` = database, + mail bila `$lewatEmail`) sehingga semua notifikasi otomatis punya versi lonceng; notifikasi baru `PengajuanDisetujui`, `BukuDikembalikan`, `PengajuanBaru` (petugas & admin); lonceng memakai komponen `navbar-notification` bawaan AdminLTE yang mem-poll `/notifikasi/ringkas`
-- [ ] 🌓 **Preferensi dark mode per akun** (kolom di `users`) menggantikan session, supaya tersimpan lintas perangkat
+- [x] 🌓 **Preferensi dark mode per akun** — kolom `users.dark_mode`; dua listener pada event AdminLTE (`DarkModeWasToggled` → simpan ke akun, `ReadingDarkModePreference` → muat ke session saat login) sehingga tidak ada JS/route custom; akun yang belum pernah memilih (`null`) tetap mengikuti default
 - [ ] 🔍 **Pencarian server-side di halaman admin/petugas** memakai scope `Buku::cari()` yang sama, menggantikan pencarian DataTables sisi klien
 - [x] 📅 **Jatuh tempo dihitung dari tanggal konfirmasi** — `konfirmasi()` mengganti `tgl_pinjam` dengan hari konfirmasi sebelum menghitung jatuh tempo; tanggal pengajuan tetap di `created_at`. Selama status `booking`/`konfirmasi`, `tgl_pinjam` berarti tanggal masuk antrean
 - [ ] 🖼️ **Perbarui screenshot** README dengan tampilan katalog kartu, dashboard statistik, dan dark mode

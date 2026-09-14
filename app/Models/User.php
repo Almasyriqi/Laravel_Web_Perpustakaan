@@ -23,6 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'role',
+        'dark_mode',
     ];
 
     /**
@@ -41,6 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'role' => Role::class,
+            'dark_mode' => 'boolean',
         ];
     }
 

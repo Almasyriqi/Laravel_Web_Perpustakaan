@@ -113,6 +113,35 @@ class SmokeTest extends TestCase
         $this->assertDoesNotMatchRegularExpression($bodyGelap, $this->actingAs($admin)->get('/admin')->getContent());
     }
 
+    public function test_preferensi_dark_mode_tersimpan_per_akun(): void
+    {
+        $admin = Admin::factory()->create()->user;
+        $petugas = Petugas::factory()->create()->user;
+        $bodyGelap = '/<body[^>]*class="[^"]*\bdark-mode\b/';
+
+        $this->assertNull($admin->dark_mode);
+
+        $this->actingAs($admin)->post('/adminlte/darkmode/toggle')->assertOk();
+        $this->assertTrue($admin->fresh()->dark_mode);
+
+        // Session baru (perangkat/login lain): preferensi dimuat dari akun
+        $this->flushSession();
+        $this->assertMatchesRegularExpression($bodyGelap, $this->actingAs($admin)->get('/admin')->assertOk()->getContent());
+
+        // Akun lain tidak ikut gelap
+        $this->flushSession();
+        $this->assertDoesNotMatchRegularExpression($bodyGelap, $this->actingAs($petugas)->get('/petugas')->assertOk()->getContent());
+        $this->assertNull($petugas->fresh()->dark_mode);
+
+        // Matikan lagi → tersimpan false dan session baru pun terang
+        $this->flushSession();
+        $this->actingAs($admin)->get('/admin');
+        $this->actingAs($admin)->post('/adminlte/darkmode/toggle')->assertOk();
+        $this->assertFalse($admin->fresh()->dark_mode);
+        $this->flushSession();
+        $this->assertDoesNotMatchRegularExpression($bodyGelap, $this->actingAs($admin)->get('/admin')->getContent());
+    }
+
     public function test_laporan_pdf_menghasilkan_dokumen_pdf(): void
     {
         $admin = Admin::factory()->create();
