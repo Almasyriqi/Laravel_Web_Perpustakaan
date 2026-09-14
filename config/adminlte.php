@@ -313,6 +313,20 @@ return [
             'text' => 'search',
             'topnav_right' => false,
         ],
+        // Lonceng notifikasi in-app: badge & dropdown dipoll dari /notifikasi/ringkas
+        [
+            'type' => 'navbar-notification',
+            'id' => 'lonceng',
+            'icon' => 'fas fa-bell',
+            'url' => '/notifikasi',
+            'topnav_right' => true,
+            'dropdown_mode' => true,
+            'dropdown_flabel' => 'Lihat semua notifikasi',
+            'update_cfg' => [
+                'url' => '/notifikasi/ringkas',
+                'period' => 60,
+            ],
+        ],
         [
             'type' => 'darkmode-widget',
             'topnav_right' => true,

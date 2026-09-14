@@ -9,6 +9,7 @@ use App\Http\Controllers\CetakController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PeminjamanAnggotaController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PetugasController;
@@ -45,6 +46,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('password', [PasswordController::class, 'update'])->name('user.password.update');
 
     Route::resource('/profile', UserController::class);
+
+    // Notifikasi in-app (lonceng navbar) — semua role
+    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::get('/notifikasi/ringkas', [NotifikasiController::class, 'ringkas'])->name('notifikasi.ringkas');
+    Route::get('/notifikasi/{id}/buka', [NotifikasiController::class, 'buka'])->name('notifikasi.buka');
+    Route::post('/notifikasi/baca-semua', [NotifikasiController::class, 'bacaSemua'])->name('notifikasi.baca_semua');
 
     Route::middleware('role:admin')->group(function () {
         Route::prefix('admin')->group(function () {

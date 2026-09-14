@@ -2,14 +2,21 @@
 
 namespace App\Services;
 
+use App\Enums\Role;
 use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Peminjaman;
+use App\Models\User;
+use App\Notifications\BukuDikembalikan;
 use App\Notifications\BukuTersedia;
+use App\Notifications\NotifikasiPerpustakaan;
+use App\Notifications\PengajuanBaru;
+use App\Notifications\PengajuanDisetujui;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -90,7 +97,7 @@ class PeminjamanService
             $buku = $this->kunciBuku($buku->id);
             $this->pastikanStokCukup($buku, $jumlah);
 
-            return Peminjaman::create([
+            $peminjaman = Peminjaman::create([
                 'anggota_id' => $anggota->nim,
                 'buku_id' => $buku->id,
                 'jumlah' => $jumlah,
@@ -99,6 +106,10 @@ class PeminjamanService
                 'perpanjang' => 0,
                 'denda' => 0,
             ]);
+
+            $this->beritahuPetugas($peminjaman);
+
+            return $peminjaman;
         });
     }
 
@@ -130,7 +141,7 @@ class PeminjamanService
                 ]);
             }
 
-            return Peminjaman::create([
+            $booking = Peminjaman::create([
                 'anggota_id' => $anggota->nim,
                 'buku_id' => $buku->id,
                 'jumlah' => 1,
@@ -139,6 +150,10 @@ class PeminjamanService
                 'perpanjang' => 0,
                 'denda' => 0,
             ]);
+
+            $this->beritahuPetugas($booking);
+
+            return $booking;
         });
     }
 
@@ -203,6 +218,8 @@ class PeminjamanService
             $peminjaman->tgl_harus_kembali = $this->jatuhTempo($peminjaman->tgl_pinjam, false);
             $peminjaman->save();
 
+            $this->beritahuAnggota($peminjaman, new PengajuanDisetujui($peminjaman));
+
             return $peminjaman;
         });
     }
@@ -252,6 +269,7 @@ class PeminjamanService
             $peminjaman->denda = $this->hitungDendaDariJatuhTempo($peminjaman->tgl_harus_kembali, $tglKembali);
             $peminjaman->save();
 
+            $this->beritahuAnggota($peminjaman, new BukuDikembalikan($peminjaman));
             $this->prosesAntreanBooking($buku);
 
             return $peminjaman;
@@ -381,7 +399,7 @@ class PeminjamanService
             $booking->tgl_pinjam = now()->toDateString();
             $booking->save();
 
-            $booking->anggota?->user?->notify((new BukuTersedia($booking))->afterCommit());
+            $this->beritahuAnggota($booking, new BukuTersedia($booking));
         }
 
         return $antrean;
@@ -436,6 +454,24 @@ class PeminjamanService
     public function menahanStok(string $status): bool
     {
         return in_array($status, self::STATUS_MENAHAN_STOK, true);
+    }
+
+    /**
+     * Notifikasi ke pemilik peminjaman; ditunda sampai transaksi DB commit.
+     */
+    private function beritahuAnggota(Peminjaman $peminjaman, NotifikasiPerpustakaan $notifikasi): void
+    {
+        $peminjaman->anggota?->user?->notify($notifikasi->afterCommit());
+    }
+
+    /**
+     * Pengajuan/booking baru diumumkan ke semua petugas dan admin (in-app saja).
+     */
+    private function beritahuPetugas(Peminjaman $peminjaman): void
+    {
+        $penerima = User::whereIn('role', [Role::Petugas->value, Role::Admin->value])->get();
+
+        Notification::send($penerima, (new PengajuanBaru($peminjaman))->afterCommit());
     }
 
     private function kunciBuku(int $bukuId): Buku

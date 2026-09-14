@@ -80,6 +80,7 @@ Rekap peminjaman per bulan atau rentang tanggal bebas, cetak PDF (DomPDF) atau e
 | 👤 | **Profil & ganti password** | Setiap pengguna dapat memperbarui datanya sendiri |
 | 🔔 | **Notifikasi interaktif** | Alert & konfirmasi menggunakan SweetAlert |
 | 📧 | **Email pengingat** | Anggota dikirimi email H-1 sebelum jatuh tempo dan saat terlambat (scheduler harian + queue) |
+| 🔔 | **Notifikasi in-app** | Lonceng di navbar (polling 60 dtk) + halaman `/notifikasi`: anggota menerima pengingat, buku tersedia, disetujui, dikembalikan & denda; petugas/admin menerima pengajuan & booking baru |
 | 🌓 | **Dark mode & mobile** | Tombol dark mode di navbar (preferensi tersimpan di session), tabel melipat kolom di layar sempit |
 
 ### 👑 Admin
@@ -160,6 +161,7 @@ erDiagram
     BUKU ||--o{ PEMINJAMAN : "dipinjam pada"
     ANGGOTA ||--o{ ULASAN : "menulis"
     BUKU ||--o{ ULASAN : "diulas"
+    USERS ||--o{ NOTIFICATIONS : "menerima"
 
     USERS {
         bigint id PK
@@ -234,6 +236,14 @@ erDiagram
         text komentar
         timestamp created_at
         timestamp updated_at
+    }
+    NOTIFICATIONS {
+        uuid id PK
+        string type "kelas notifikasi"
+        bigint notifiable_id FK
+        json data "judul, pesan, url, ikon, warna"
+        timestamp read_at
+        timestamp created_at
     }
 ```
 
@@ -560,6 +570,7 @@ vendor/bin/pint --dirty          # rapikan format file yang berubah
 | `UlasanTest` | Syarat pernah mengembalikan, validasi rating, satu ulasan per buku, rata-rata di katalog, moderasi admin/petugas |
 | `BookingTest` | Booking hanya saat stok 0, tanpa duplikat, promosi otomatis sebanyak stok + email, konfirmasi & pembatalan, edit admin |
 | `QrCodeTest` | Format & parsing kode `BK-`/`AG-`, PDF label & kartu, anggota hanya bisa mencetak kartunya sendiri, input scan di loket |
+| `NotifikasiTest` | Pengajuan/booking baru ke petugas & admin, disetujui/dikembalikan ke anggota, endpoint lonceng, buka & tandai dibaca, isolasi antar user |
 
 ---
 
@@ -600,7 +611,7 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 ### 🔵 Ide berikutnya
 
 - [ ] ⏳ **Kedaluwarsa booking** — pengajuan hasil promosi booking yang tidak diambil dalam N hari dibatalkan otomatis oleh scheduler, agar antrean berikutnya mendapat giliran
-- [ ] 🔔 **Notifikasi in-app** (database channel) melengkapi email: lonceng di navbar untuk pengingat, buku tersedia, dan konfirmasi
+- [x] 🔔 **Notifikasi in-app** — kelas dasar `NotifikasiPerpustakaan` (`via` = database, + mail bila `$lewatEmail`) sehingga semua notifikasi otomatis punya versi lonceng; notifikasi baru `PengajuanDisetujui`, `BukuDikembalikan`, `PengajuanBaru` (petugas & admin); lonceng memakai komponen `navbar-notification` bawaan AdminLTE yang mem-poll `/notifikasi/ringkas`
 - [ ] 🌓 **Preferensi dark mode per akun** (kolom di `users`) menggantikan session, supaya tersimpan lintas perangkat
 - [ ] 🔍 **Pencarian server-side di halaman admin/petugas** memakai scope `Buku::cari()` yang sama, menggantikan pencarian DataTables sisi klien
 - [x] 📅 **Jatuh tempo dihitung dari tanggal konfirmasi** — `konfirmasi()` mengganti `tgl_pinjam` dengan hari konfirmasi sebelum menghitung jatuh tempo; tanggal pengajuan tetap di `created_at`. Selama status `booking`/`konfirmasi`, `tgl_pinjam` berarti tanggal masuk antrean
