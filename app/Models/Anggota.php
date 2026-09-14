@@ -51,4 +51,25 @@ class Anggota extends Model
     {
         return $this->peminjaman()->whereIn('status', PeminjamanService::STATUS_MENAHAN_STOK)->exists();
     }
+
+    public function ulasan(): HasMany
+    {
+        return $this->hasMany(Ulasan::class, 'anggota_id', 'nim');
+    }
+
+    /**
+     * Hanya anggota yang pernah meminjam dan mengembalikan buku itu yang boleh mengulasnya.
+     */
+    public function bolehMengulas(Buku $buku): bool
+    {
+        return $this->peminjaman()
+            ->where('buku_id', $buku->id)
+            ->where('status', PeminjamanService::STATUS_KEMBALI)
+            ->exists();
+    }
+
+    public function ulasanUntuk(Buku $buku): ?Ulasan
+    {
+        return $this->ulasan()->where('buku_id', $buku->id)->first();
+    }
 }

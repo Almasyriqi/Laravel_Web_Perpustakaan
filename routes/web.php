@@ -5,6 +5,7 @@ use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\BukuAnggotaController;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\CetakController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LaporanController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\PeminjamanAnggotaController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\TransaksiPetugasController;
+use App\Http\Controllers\UlasanController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/anggota/{id}/pulihkan', [AnggotaController::class, 'pulihkan']);
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
             Route::get('/anggota/cari', [AnggotaController::class, 'search']);
+            Route::get('/anggota/{nim}/kartu', [CetakController::class, 'kartuAnggota']);
             Route::resource('/anggota', AnggotaController::class);
 
             // CRUD Admin
@@ -73,6 +76,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/buku/arsip', [BukuController::class, 'arsip']);
             Route::put('/buku/{id}/pulihkan', [BukuController::class, 'pulihkan']);
             Route::get('/buku/delete/{id}', [BukuController::class, 'delete']);
+            Route::delete('/buku/{buku}/ulasan/{ulasan}', [UlasanController::class, 'moderasi']);
+            Route::get('/buku/{id}/label', [CetakController::class, 'labelBuku']);
             Route::resource('/buku', BukuController::class);
 
             // CRUD Peminjaman
@@ -98,6 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/anggota/{id}/pulihkan', [AnggotaController::class, 'pulihkan']);
             Route::get('/anggota/delete/{id}', [AnggotaController::class, 'delete']);
             Route::get('/anggota/cari', [AnggotaController::class, 'search']);
+            Route::get('/anggota/{nim}/kartu', [CetakController::class, 'kartuAnggota']);
             Route::resource('/anggota', AnggotaController::class);
 
             // CRUD Kategori
@@ -108,6 +114,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/buku/arsip', [BukuController::class, 'arsip']);
             Route::put('/buku/{id}/pulihkan', [BukuController::class, 'pulihkan']);
             Route::get('/buku/delete/{id}', [BukuController::class, 'delete']);
+            Route::delete('/buku/{buku}/ulasan/{ulasan}', [UlasanController::class, 'moderasi']);
+            Route::get('/buku/{id}/label', [CetakController::class, 'labelBuku']);
             Route::resource('/buku', BukuController::class);
 
             // Transaksi
@@ -133,13 +141,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:anggota')->group(function () {
         Route::prefix('anggota')->group(function () {
             Route::get('/', [AnggotaController::class, 'home']);
+            Route::get('/kartu', [CetakController::class, 'kartuSaya']);
             Route::resource('/buku', BukuAnggotaController::class)->only(['index', 'show']);
+
+            // Rating & ulasan buku
+            Route::post('/buku/{buku}/ulasan', [UlasanController::class, 'store']);
+            Route::delete('/buku/{buku}/ulasan', [UlasanController::class, 'destroy']);
 
             Route::get('/pinjam/delete/{id}', [PeminjamanAnggotaController::class, 'delete']);
             Route::get('/pinjam/perpanjang/{id}', [PeminjamanAnggotaController::class, 'modalPerpanjang']);
             Route::put('/perpanjang/{id}', [PeminjamanAnggotaController::class, 'perpanjang']);
             Route::get('/modal/pinjam/{id}', [PeminjamanAnggotaController::class, 'pinjam']);
             Route::post('/peminjaman/{id}', [PeminjamanAnggotaController::class, 'peminjaman']);
+            Route::get('/modal/booking/{id}', [PeminjamanAnggotaController::class, 'modalBooking']);
+            Route::post('/booking/{id}', [PeminjamanAnggotaController::class, 'booking']);
             Route::resource('/pinjam', PeminjamanAnggotaController::class);
         });
     });

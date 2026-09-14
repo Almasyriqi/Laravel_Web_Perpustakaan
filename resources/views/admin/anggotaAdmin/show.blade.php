@@ -23,13 +23,18 @@
                     <li class="list-group-item"><b>No_Handphone: </b>{{ $anggota->no_hp }}</li>
                     <li class="list-group-item"><b>Email: </b>{{ $anggota->user->email }}</li>
                     <li class="list-group-item"><b>Alamat: </b>{{ $anggota->alamat }}</li>
+                    <li class="list-group-item"><b>Kode QR: </b><code>{{ $kode }}</code><br>
+                        <img width="110" src="{{ $qr }}" alt="QR {{ $kode }}" class="mt-1">
+                    </li>
                 </ul>
             </div>
-            @if (Auth::user()->isAdmin())
-            <a class="btn btn-success mt-3" href="/admin/anggota">Kembali</a>
-            @else
-            <a class="btn btn-success mt-3" href="/petugas/anggota">Kembali</a>
-            @endif
+            @php $prefix = Auth::user()->isAdmin() ? 'admin' : 'petugas'; @endphp
+            <div class="card-footer d-flex flex-wrap">
+                <a class="btn btn-success m-1" href="/{{ $prefix }}/anggota"><i class="fas fa-undo"></i> Kembali</a>
+                <a class="btn btn-outline-primary m-1" href="/{{ $prefix }}/anggota/{{ $anggota->nim }}/kartu" target="_blank" title="Kartu anggota dengan QR (PDF ukuran kartu)">
+                    <i class="fas fa-id-card"></i> Cetak kartu anggota
+                </a>
+            </div>
 
         </div>
     </div>

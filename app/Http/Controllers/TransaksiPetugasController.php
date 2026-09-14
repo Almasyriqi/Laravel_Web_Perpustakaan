@@ -104,14 +104,20 @@ class TransaksiPetugasController extends Controller
         return view('petugas.peminjaman.delete', compact('pinjam'));
     }
 
+    /**
+     * Pengajuan yang menunggu persetujuan + antrean booking (menunggu stok).
+     */
     public function konfirmasiPeminjaman()
     {
-        $pinjam = Peminjaman::with(['anggota.user', 'buku'])
-            ->where('status', PeminjamanService::STATUS_KONFIRMASI)
+        $menunggu = Peminjaman::with(['anggota.user', 'buku'])
+            ->whereIn('status', PeminjamanService::STATUS_MENUNGGU)
             ->oldest('id')
             ->get();
 
-        return view('petugas.peminjaman.confirm', compact('pinjam'));
+        return view('petugas.peminjaman.confirm', [
+            'pinjam' => $menunggu->where('status', PeminjamanService::STATUS_KONFIRMASI),
+            'booking' => $menunggu->where('status', PeminjamanService::STATUS_BOOKING),
+        ]);
     }
 
     public function confirm($id)

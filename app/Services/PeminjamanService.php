@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Peminjaman;
+use App\Notifications\BukuTersedia;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -27,7 +29,11 @@ class PeminjamanService
 
     public const STATUS_KEMBALI = 'kembali';
 
+    /** Antrean saat stok habis; otomatis naik ke konfirmasi begitu ada stok kembali. */
+    public const STATUS_BOOKING = 'booking';
+
     public const SEMUA_STATUS = [
+        self::STATUS_BOOKING,
         self::STATUS_KONFIRMASI,
         self::STATUS_DIPINJAM,
         self::STATUS_PERPANJANG,
@@ -36,6 +42,9 @@ class PeminjamanService
 
     /** Status yang berarti buku sedang di tangan anggota (menahan stok). */
     public const STATUS_MENAHAN_STOK = [self::STATUS_DIPINJAM, self::STATUS_PERPANJANG];
+
+    /** Status sebelum buku diserahkan: belum menahan stok, belum punya jatuh tempo, boleh dibatalkan anggota. */
+    public const STATUS_MENUNGGU = [self::STATUS_BOOKING, self::STATUS_KONFIRMASI];
 
     /** Status yang sudah disetujui petugas (dihitung sebagai peminjaman nyata di statistik). */
     public const STATUS_TERKONFIRMASI = [self::STATUS_DIPINJAM, self::STATUS_PERPANJANG, self::STATUS_KEMBALI];
@@ -94,6 +103,46 @@ class PeminjamanService
     }
 
     /**
+     * Anggota memesan buku yang stoknya habis. Begitu ada eksemplar kembali,
+     * booking tertua otomatis naik menjadi pengajuan (konfirmasi) — lihat
+     * prosesAntreanBooking(). Satu anggota hanya boleh punya satu transaksi
+     * yang belum selesai per buku.
+     */
+    public function booking(Anggota $anggota, Buku $buku): Peminjaman
+    {
+        return DB::transaction(function () use ($anggota, $buku) {
+            $buku = $this->kunciBuku($buku->id);
+
+            if ($buku->stok > 0) {
+                throw ValidationException::withMessages([
+                    'booking' => "Stok buku \"{$buku->judul}\" masih tersedia, silakan ajukan peminjaman langsung.",
+                ]);
+            }
+
+            $sudahAda = Peminjaman::where('anggota_id', $anggota->nim)
+                ->where('buku_id', $buku->id)
+                ->where('status', '!=', self::STATUS_KEMBALI)
+                ->exists();
+
+            if ($sudahAda) {
+                throw ValidationException::withMessages([
+                    'booking' => 'Anda sudah memiliki booking atau peminjaman yang belum selesai untuk buku ini.',
+                ]);
+            }
+
+            return Peminjaman::create([
+                'anggota_id' => $anggota->nim,
+                'buku_id' => $buku->id,
+                'jumlah' => 1,
+                'tgl_pinjam' => now()->toDateString(),
+                'status' => self::STATUS_BOOKING,
+                'perpanjang' => 0,
+                'denda' => 0,
+            ]);
+        });
+    }
+
+    /**
      * Petugas/admin mencatat peminjaman langsung di loket.
      */
     public function pinjamLangsung(
@@ -119,7 +168,7 @@ class PeminjamanService
                 'buku_id' => $buku->id,
                 'jumlah' => $jumlah,
                 'tgl_pinjam' => $tglPinjam,
-                'tgl_harus_kembali' => $status === self::STATUS_KONFIRMASI ? null : $this->jatuhTempo($tglPinjam, $diperpanjang),
+                'tgl_harus_kembali' => $this->menunggu($status) ? null : $this->jatuhTempo($tglPinjam, $diperpanjang),
                 'status' => $status,
                 'perpanjang' => $diperpanjang ? 1 : 0,
                 'denda' => 0,
@@ -136,7 +185,7 @@ class PeminjamanService
             $peminjaman = $this->kunciPeminjaman($peminjaman);
 
             if ($peminjaman->status !== self::STATUS_KONFIRMASI) {
-                throw ValidationException::withMessages(['status' => 'Peminjaman ini sudah dikonfirmasi.']);
+                throw ValidationException::withMessages(['status' => 'Hanya pengajuan berstatus konfirmasi yang dapat disetujui.']);
             }
 
             $buku = $this->kunciBuku($peminjaman->buku_id);
@@ -186,7 +235,8 @@ class PeminjamanService
             $tglKembali ??= now();
             $lamaPinjam = $this->hitungLamaPinjam($peminjaman->tgl_pinjam, $tglKembali);
 
-            $this->kunciBuku($peminjaman->buku_id)->increment('stok', $peminjaman->jumlah);
+            $buku = $this->kunciBuku($peminjaman->buku_id);
+            $buku->increment('stok', $peminjaman->jumlah);
 
             $peminjaman->status = self::STATUS_KEMBALI;
             $peminjaman->tgl_kembali = $tglKembali->toDateString();
@@ -195,18 +245,20 @@ class PeminjamanService
             $peminjaman->denda = $this->hitungDendaDariJatuhTempo($peminjaman->tgl_harus_kembali, $tglKembali);
             $peminjaman->save();
 
+            $this->prosesAntreanBooking($buku);
+
             return $peminjaman;
         });
     }
 
     /**
-     * Membatalkan pengajuan yang belum dikonfirmasi (tidak menyentuh stok).
+     * Membatalkan booking / pengajuan yang belum dikonfirmasi (tidak menyentuh stok).
      */
     public function batalkan(Peminjaman $peminjaman): void
     {
-        if ($peminjaman->status !== self::STATUS_KONFIRMASI) {
+        if (! $this->menunggu($peminjaman->status)) {
             throw ValidationException::withMessages([
-                'status' => 'Hanya pengajuan berstatus konfirmasi yang dapat dibatalkan.',
+                'status' => 'Hanya booking atau pengajuan berstatus konfirmasi yang dapat dibatalkan.',
             ]);
         }
 
@@ -220,12 +272,18 @@ class PeminjamanService
     {
         DB::transaction(function () use ($peminjaman) {
             $peminjaman = $this->kunciPeminjaman($peminjaman);
+            $buku = $this->kunciBuku($peminjaman->buku_id);
+            $stokKembali = $this->menahanStok($peminjaman->status);
 
-            if ($this->menahanStok($peminjaman->status)) {
-                $this->kunciBuku($peminjaman->buku_id)->increment('stok', $peminjaman->jumlah);
+            if ($stokKembali) {
+                $buku->increment('stok', $peminjaman->jumlah);
             }
 
             $peminjaman->delete();
+
+            if ($stokKembali) {
+                $this->prosesAntreanBooking($buku);
+            }
         });
     }
 
@@ -260,7 +318,7 @@ class PeminjamanService
             $peminjaman->tgl_pinjam = $data['tgl_pinjam'];
             $peminjaman->status = $statusBaru;
             $peminjaman->perpanjang = (int) ($data['perpanjang'] ?? $peminjaman->perpanjang);
-            $peminjaman->tgl_harus_kembali = $statusBaru === self::STATUS_KONFIRMASI
+            $peminjaman->tgl_harus_kembali = $this->menunggu($statusBaru)
                 ? null
                 : $this->jatuhTempo($peminjaman->tgl_pinjam, (bool) $peminjaman->perpanjang);
 
@@ -278,8 +336,56 @@ class PeminjamanService
 
             $peminjaman->save();
 
+            // Transaksi yang baru saja diubah admin menjadi booking tidak ikut dipromosikan
+            if ($selisih < 0) {
+                $this->prosesAntreanBooking($buku, kecualiId: $peminjaman->id);
+            }
+
             return $peminjaman;
         });
+    }
+
+    /**
+     * Stok baru saja bertambah: booking tertua (sebanyak stok yang ada) dinaikkan
+     * menjadi pengajuan konfirmasi dengan tgl_pinjam hari ini, lalu anggota
+     * diberi tahu lewat email agar datang ke loket. Dipanggil di dalam transaksi
+     * dengan baris buku sudah terkunci.
+     *
+     * @return Collection<int, Peminjaman> booking yang dipromosikan
+     */
+    private function prosesAntreanBooking(Buku $buku, ?int $kecualiId = null): Collection
+    {
+        $stok = (int) $buku->fresh()->stok;
+
+        if ($stok <= 0) {
+            return new Collection;
+        }
+
+        $antrean = Peminjaman::with('anggota.user')
+            ->where('buku_id', $buku->id)
+            ->where('status', self::STATUS_BOOKING)
+            ->when($kecualiId, fn ($query) => $query->whereKeyNot($kecualiId))
+            ->oldest('id')
+            ->limit($stok)
+            ->get();
+
+        foreach ($antrean as $booking) {
+            $booking->status = self::STATUS_KONFIRMASI;
+            $booking->tgl_pinjam = now()->toDateString();
+            $booking->save();
+
+            $booking->anggota?->user?->notify((new BukuTersedia($booking))->afterCommit());
+        }
+
+        return $antrean;
+    }
+
+    /**
+     * Status yang belum menyentuh stok (booking / konfirmasi).
+     */
+    public function menunggu(string $status): bool
+    {
+        return in_array($status, self::STATUS_MENUNGGU, true);
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\KatalogRequest;
+use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Kategori;
 
@@ -20,6 +21,7 @@ class BukuAnggotaController extends Controller
         $filter = $request->validated();
 
         $buku = Buku::with('kategori')
+            ->denganRating()
             ->cari($filter['q'] ?? null)
             ->dariKategori($filter['kategori'] ?? null)
             ->when($request->boolean('tersedia'), fn ($query) => $query->tersedia())
@@ -38,10 +40,19 @@ class BukuAnggotaController extends Controller
         ]);
     }
 
+    /**
+     * Detail buku beserta rating, daftar ulasan, dan form ulasan bila anggota berhak.
+     */
     public function show($id)
     {
-        $buku = Buku::with('kategori')->findOrFail($id);
+        $buku = Buku::with('kategori')->denganRating()->findOrFail($id);
+        $anggota = Anggota::where('user_id', auth()->id())->firstOrFail();
 
-        return view('anggota.bukuAnggota.show', compact('buku'));
+        return view('anggota.bukuAnggota.show', [
+            'buku' => $buku,
+            'ulasan' => $buku->ulasan()->with('anggota.user')->latest('updated_at')->get(),
+            'bolehMengulas' => $anggota->bolehMengulas($buku),
+            'ulasanSaya' => $anggota->ulasanUntuk($buku),
+        ]);
     }
 }

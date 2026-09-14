@@ -66,6 +66,25 @@ class PeminjamanAnggotaController extends Controller
         return redirect()->to('/anggota/buku')->with('success', 'Berhasil Meminjam Buku');
     }
 
+    public function modalBooking($id)
+    {
+        $buku = Buku::findOrFail($id);
+
+        return view('anggota.peminjaman.modalBooking', compact('buku'));
+    }
+
+    /**
+     * Booking buku yang stoknya habis (antrean; naik ke konfirmasi saat stok kembali).
+     */
+    public function booking($id)
+    {
+        $buku = Buku::findOrFail($id);
+
+        $this->service->booking($this->anggotaSaatIni(), $buku);
+
+        return redirect()->to('/anggota/pinjam')->with('success', 'Booking berhasil. Anda akan dikirimi email saat buku tersedia.');
+    }
+
     public function modalPerpanjang($id)
     {
         $pinjam = $this->peminjamanMilikSaya($id);

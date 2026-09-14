@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AnggotaRequest;
 use App\Models\Anggota;
 use App\Models\User;
+use App\Support\KodeQr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -55,8 +56,13 @@ class AnggotaController extends Controller
     public function show($id)
     {
         $anggota = Anggota::with('user')->where('nim', $id)->firstOrFail();
+        $kode = KodeQr::anggota($anggota);
 
-        return view('admin.anggotaAdmin.show', compact('anggota'));
+        return view('admin.anggotaAdmin.show', [
+            'anggota' => $anggota,
+            'kode' => $kode,
+            'qr' => KodeQr::svg($kode, 4),
+        ]);
     }
 
     public function edit($id)

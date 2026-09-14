@@ -46,6 +46,19 @@ class Buku extends Model
         return $this->hasMany(Peminjaman::class);
     }
 
+    public function ulasan(): HasMany
+    {
+        return $this->hasMany(Ulasan::class);
+    }
+
+    /**
+     * Rata-rata rating & jumlah ulasan (kolom ulasan_avg_rating, ulasan_count) untuk katalog/detail.
+     */
+    public function scopeDenganRating(Builder $query): Builder
+    {
+        return $query->withAvg('ulasan', 'rating')->withCount('ulasan');
+    }
+
     /**
      * Pencarian kata kunci pada judul, penulis, atau penerbit (dipakai katalog anggota).
      */

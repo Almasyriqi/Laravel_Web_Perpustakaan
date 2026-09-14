@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BukuRequest;
 use App\Models\Buku;
 use App\Models\Kategori;
+use App\Support\KodeQr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -46,9 +47,16 @@ class BukuController extends Controller
 
     public function show($id)
     {
-        $buku = Buku::with('kategori')->findOrFail($id);
+        $buku = Buku::with('kategori')->denganRating()->findOrFail($id);
+        $ulasan = $buku->ulasan()->with('anggota.user')->latest('updated_at')->get();
+        $kode = KodeQr::buku($buku);
 
-        return view('admin.bukuAdmin.show', compact('buku'));
+        return view('admin.bukuAdmin.show', [
+            'buku' => $buku,
+            'ulasan' => $ulasan,
+            'kode' => $kode,
+            'qr' => KodeQr::svg($kode, 4),
+        ]);
     }
 
     public function edit($id)

@@ -22,6 +22,13 @@
 </div>
 @endif
 
+{{-- Scan kartu anggota (AG-nim) langsung membuka halaman pengembalian anggota tersebut --}}
+<div class="form-inline mb-3">
+    <label for="scan" class="mr-2"><i class="fas fa-qrcode"></i> Scan kartu anggota</label>
+    <input type="text" class="form-control mr-2" id="scan" autocomplete="off" placeholder="AG-… lalu Enter" style="min-width: 220px">
+    <small class="text-muted" id="scan-info"></small>
+</div>
+
 <table class="table table-bordered" id="example">
     <thead>
         <tr>
@@ -51,6 +58,20 @@
 
 @section('js')
 <script>
+    // Hasil scan kartu (AG-<nim>) -> halaman transaksi aktif anggota itu (perpanjang / pengembalian)
+    $('#scan').on('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+
+        var cocok = $(this).val().trim().toUpperCase().match(/^AG-(\d+)$/);
+        if (cocok) {
+            window.location.href = '/petugas/transaksi/' + cocok[1] + '/edit';
+        } else {
+            $('#scan-info').addClass('text-danger').text('Kode tidak dikenal, harus AG-<nim>.');
+            $(this).val('').focus();
+        }
+    });
+
     $(function () {
           $('#example').DataTable({
             "paging": true,
