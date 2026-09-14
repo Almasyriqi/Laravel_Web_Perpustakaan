@@ -610,7 +610,7 @@ vendor/bin/pint --dirty          # rapikan format file yang berubah
 
 ## 🗺️ Roadmap & Saran Pengembangan
 
-Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ada di bagian paling bawah.
+Seluruh item roadmap di bawah — termasuk "Ide berikutnya" — sudah selesai dalam empat gelombang PR.
 
 ### 🔴 Prioritas Tinggi — keamanan & fondasi
 
@@ -619,7 +619,7 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 - [x] **Filter laporan per bulan dan tahun** (`whereMonth` + `whereYear`, pemilih tahun di halaman laporan)
 - [x] **Mutasi stok dalam DB transaction + `lockForUpdate`** lewat `App\Services\PeminjamanService` — sekaligus memperbaiki stok yang bergeser saat admin mengedit dan anggota yang bisa membatalkan peminjaman orang lain
 - [x] **Validasi lewat Form Request** — rule `unique:users` kini benar-benar dieksekusi, edit meng-*ignore* data sendiri
-- [x] **Automated test PHPUnit** — kini 132 test (auth, akses per role, alur pinjam → konfirmasi → perpanjang → kembali → denda, laporan, validasi, arsip, sampul, katalog, statistik, pengingat, ulasan, booking, QR); jalankan dengan `php artisan test`
+- [x] **Automated test PHPUnit** — kini 155 test (auth, akses per role, alur pinjam → konfirmasi → perpanjang → kembali → denda, laporan, validasi, arsip, sampul, katalog, statistik, pengingat, ulasan, booking, QR, notifikasi in-app, kedaluwarsa, pencarian admin); jalankan dengan `php artisan test`
 
 ### 🟡 Prioritas Menengah — kualitas kode
 
@@ -642,7 +642,7 @@ Seluruh item roadmap di bawah sudah selesai (tiga gelombang PR). Ide lanjutan ad
 - [x] 🤖 **CI GitHub Actions** — [`.github/workflows/ci.yml`](.github/workflows/ci.yml) menjalankan `pint --test` + `php artisan test` di setiap push & PR (PHP 8.3, SQLite in-memory); seluruh kode diformat Pint sekali sebagai prasyarat
 - [x] 🧹 **Bersihkan Laravel Mix** — `package.json`, `webpack.mix.js`, `resources/js|sass`, dan bundel `public/js/app.js` (3 MB) / `public/css/app.css` dihapus; semua asset berasal dari bundel AdminLTE + CDN sehingga instalasi tidak lagi butuh Node.js
 
-### 🔵 Ide berikutnya
+### 🔵 Ide berikutnya — selesai
 
 - [x] ⏳ **Kedaluwarsa pengajuan** — diperluas ke semua pengajuan `konfirmasi` (bukan hanya hasil booking): command `perpus:kedaluwarsa-pengajuan` harian membatalkan yang tidak diambil > `masa_ambil_pengajuan` hari (default 3), memberi tahu anggota (`PengajuanKedaluwarsa`, email + in-app), lalu memproses antrean booking buku itu. Tidak butuh kolom baru karena `tgl_pinjam` = tanggal masuk antrean; batas ambil tampil di halaman konfirmasi petugas & riwayat anggota
 - [x] 🔔 **Notifikasi in-app** — kelas dasar `NotifikasiPerpustakaan` (`via` = database, + mail bila `$lewatEmail`) sehingga semua notifikasi otomatis punya versi lonceng; notifikasi baru `PengajuanDisetujui`, `BukuDikembalikan`, `PengajuanBaru` (petugas & admin); lonceng memakai komponen `navbar-notification` bawaan AdminLTE yang mem-poll `/notifikasi/ringkas`
